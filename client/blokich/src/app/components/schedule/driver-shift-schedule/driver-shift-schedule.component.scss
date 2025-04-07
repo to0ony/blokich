@@ -1,0 +1,19 @@
+.driver-shift-wrapper {
+  padding: 1rem;
+
+  .voznje-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  h4 {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .text-muted {
+    padding-top: 1rem;
+    font-style: italic;
+  }
+}

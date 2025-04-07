@@ -1,0 +1,22 @@
+<app-navbar [view]="view" (switchView)="setView($event)"></app-navbar>
+
+<div class="container mt-4">
+  <app-weekly-schedule
+    *ngIf="
+      view === 'raspored' &&
+      rasporedData &&
+      godina !== null &&
+      brojTjedna !== null
+    "
+    [data]="rasporedData"
+    [godina]="godina"
+    [brojTjedna]="brojTjedna"
+    [naredniTjedanDostupan]="naredniTjedanDostupan"
+    [tjedanAktivan]="tjedanAktivan"
+    (tjedanPromjena)="onWeekChange($event)"
+  />
+
+  <app-line-schedule *ngIf="view === 'vozaci'" />
+
+  <app-driver-shift-schedule *ngIf="view === 'smjena'" />
+</div>

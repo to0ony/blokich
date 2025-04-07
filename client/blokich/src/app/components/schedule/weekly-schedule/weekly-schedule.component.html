@@ -1,0 +1,73 @@
+<div class="raspored-wrapper">
+  <div class="form-panel">
+    <div
+      class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+    >
+      <div class="btn-group" role="group" aria-label="Tjedan izbor">
+        <input
+          type="radio"
+          class="btn-check"
+          name="tjedan"
+          id="trenutni"
+          autocomplete="off"
+          [checked]="tjedanAktivan === 'trenutni'"
+          (change)="changeWeek('trenutni')"
+        />
+        <label class="btn btn-outline-primary" for="trenutni"
+          >Trenutni tjedan</label
+        >
+
+        <input
+          type="radio"
+          class="btn-check"
+          name="tjedan"
+          id="naredni"
+          autocomplete="off"
+          [checked]="tjedanAktivan === 'naredni'"
+          (change)="changeWeek('naredni')"
+          [disabled]="!naredniTjedanDostupan"
+        />
+        <label class="btn btn-outline-primary" for="naredni"
+          >Naredni tjedan</label
+        >
+      </div>
+
+      <h6 class="mb-0" *ngIf="prikazaniTjedan">
+        Tjedan {{ prikazaniTjedan }} / {{ prikazanaGodina }}
+      </h6>
+    </div>
+  </div>
+
+  <div class="tjedni-raspored">
+    <ng-container *ngFor="let dan of rasporedZaPrikaz">
+      <ng-container *ngIf="!dan.isOff && dan.duties.length">
+        <div class="kartica-wrapper" *ngFor="let duty of dan.duties">
+          <app-on-duty-card
+            [dan]="dan.dan"
+            [datum]="dan.datum"
+            [vrijemePocetak]="duty.od"
+            [vrijemeKraj]="duty.do"
+            [brojSluzbe]="duty.br_sl"
+            [linija]="duty.linija"
+            [ukupSati]="duty.ukupni_sati"
+            [efekSati]="duty.efektivni_sati"
+            [drSmj]="duty.druga_smjena"
+            [nocniRad]="duty.nocni_rad"
+            [vr]="duty.varijanta"
+            [nastup]="duty.nastup_sluzbe"
+            [zavrsetak]="duty.zavrsna_sluzba"
+            [oznaka]="duty.odsustvo"
+          />
+        </div>
+      </ng-container>
+
+      <div class="kartica-wrapper" *ngIf="dan.isOff">
+        <app-off-duty-card
+          [dan]="dan.dan"
+          [datum]="dan.datum"
+          [oznaka]="dan.duties[0]?.odsustvo"
+        />
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<div class="line-duty-card" [class.highlight]="jePrijavljeni">
+  <div class="header">
+    <div class="ime">{{ vozac.ime_prezime }}</div>
+    <div class="broj">{{ vozac.sluz_broj }}</div>
+    <span class="badge bg-dark">{{vozac.br_sl}}</span>
+  </div>
+
+  <div class="details">
+    <div class="vrijeme">{{ vozac.od }} – {{ vozac.do }}</div>
+
+    <div class="info">
+      <span>Nastup:</span>
+      <span class="badge light">{{ vozac.nastup }}</span>
+      <span>➔</span>
+      <span>Završetak:</span>
+      <span class="badge light">{{ vozac.zavrsetak }}</span>
+    </div>
+
+    <div class="line-info" *ngIf="vozac['V.R']">
+      <span class="vr-label">Linija:</span>
+      <span class="badge bg-accent1">{{vozac.linija}}</span>
+      <span class="vr-label">V.R:</span>
+      <span class="badge bg-accent2">{{ vozac["V.R"] }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { OnDutyCardComponent } from '../../card/weekly-schedule-card/on-duty-card/on-duty-card.component';
+import { OffDutyCardComponent } from '../../card/weekly-schedule-card/off-duty-card/off-duty-card.component';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+
+dayjs.extend(isoWeek);
+
+interface RasporedDan {
+  dan: string;
+  datum: string;
+  duties: any[];
+  isOff: boolean;
+}
+
+@Component({
+  selector: 'app-weekly-schedule',
+  standalone: true,
+  imports: [CommonModule, OnDutyCardComponent, OffDutyCardComponent],
+  templateUrl: './weekly-schedule.component.html',
+  styleUrls: ['./weekly-schedule.component.scss'],
+})
+export class WeeklyScheduleComponent implements OnInit, OnChanges {
+  @Input() data!: any;
+  @Input() naredniTjedanDostupan: boolean = true;
+  @Output() tjedanPromjena = new EventEmitter<'trenutni' | 'naredni'>();
+  @Input() tjedanAktivan: 'trenutni' | 'naredni' = 'trenutni';
+
+  @Input() godina!: number;
+  @Input() brojTjedna!: number;
+
+  daniUTjednu = ['pon', 'uto', 'sri', 'cet', 'pet', 'sub', 'ned'];
+  rasporedZaPrikaz: RasporedDan[] = [];
+  prikazaniTjedan: number | null = null;
+  prikazanaGodina: number | null = null;
+
+  ngOnInit() {
+    this.dataDisplay();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['data']) {
+      this.dataDisplay();
+    }
+  }
+
+  changeWeek(tip: 'trenutni' | 'naredni') {
+    if (this.tjedanAktivan !== tip) {
+      this.tjedanPromjena.emit(tip);
+    }
+  }
+
+  dataDisplay() {
+    if (!this.data) return;
+
+    const { raspored } = this.data;
+
+    this.rasporedZaPrikaz = this.daniUTjednu.map((dan, index) => {
+      const duties = raspored[dan] || [];
+      const isOff = duties.length === 1 && duties[0].odsustvo;
+      const datum = this.dateSetter(this.godina, this.brojTjedna, index);
+      const nazivDana = this.dayNameFormatter(dan);
+
+      return {
+        dan: nazivDana,
+        datum,
+        duties,
+        isOff,
+      };
+    });
+
+    this.prikazaniTjedan = this.brojTjedna;
+    this.prikazanaGodina = this.godina;
+  }
+
+  dayNameFormatter(kratica: string): string {
+    const mapa = {
+      pon: 'Ponedjeljak',
+      uto: 'Utorak',
+      sri: 'Srijeda',
+      cet: 'Četvrtak',
+      pet: 'Petak',
+      sub: 'Subota',
+      ned: 'Nedjelja',
+    };
+    return mapa[kratica as keyof typeof mapa] || kratica;
+  }
+
+  dateSetter(godina: number, tjedan: number, danIndex: number): string {
+    return dayjs()
+      .year(godina)
+      .isoWeek(tjedan)
+      .startOf('isoWeek')
+      .add(danIndex, 'day')
+      .format('DD.MM.YYYY');
+  }
+}

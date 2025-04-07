@@ -1,0 +1,40 @@
+<div class="duty-card" [ngClass]="getDayClass()">
+
+  <div class="duty-header">
+    <div class="dan d-flex align-items-center gap-1">
+      {{ dan }}
+      <span class="badge bg-dark">{{ brojSluzbe }}</span>
+      <button
+        type="button"
+        class="btn p-0 border-0 bg-transparent"
+        *ngIf="!brojSluzbe.includes('P')"
+        [appPopover]="'<b>Ukup. sati: </b>' + ukupSati +
+              '<br><b>Efek. sati: </b>' + efekSati +
+              '<br><b>Dr. smj.: </b>' + drSmj +
+              '<br><b>Noćni rad: </b>' + nocniRad"
+
+        [popoverTitle]="'Detalji smjene'">
+        <lucide-icon [img]="ClockIcon" class="my-icon"></lucide-icon>
+      </button>
+    </div>
+    <div class="datum">{{ datum }}</div>
+  </div>
+
+
+  <div class="vrijeme">
+    {{ vrijemePocetak }} – {{ vrijemeKraj }}
+  </div>
+
+  <div class="info">
+    <span>Linija:</span>
+    <span class="badge bg-accent1">{{ linija }}</span>
+    <span class="vr-label">V.R:</span>
+    <span class="badge bg-accent2">{{ vr }}</span>
+  </div>
+
+  <div class="nastup">Nastup:
+    <div class="badge light">{{ nastup }}</div> →
+    <div class="badge light" > {{zavrsetak }}</div>
+  </div>
+
+</div>

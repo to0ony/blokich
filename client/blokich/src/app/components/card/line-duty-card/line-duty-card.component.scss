@@ -1,0 +1,107 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap");
+
+.line-duty-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-family: "Inter", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  transition: max-width 0.2s ease;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  &.highlight {
+    background-color: #e6f0ff; // blago plava
+    border-color: #80bfff;
+  }
+}z
+
+.header {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 16px;
+
+  .ime {
+    font-size: 18px;
+  }
+
+  .broj {
+    font-size: 14px;
+    color: #666;
+  }
+}
+
+.vrijeme {
+  font-size: 18px;
+  font-weight: 600;
+
+  @media (min-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.line-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.vr-label {
+  margin-right: 4px;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-block;
+  min-width: 24px;
+  text-align: center;
+}
+
+.badge.primary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.badge.light {
+  background-color: #e1efff;
+  color: #007bff;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  @media (min-width: 768px) {
+    border-left: 2px solid #ccc;
+    padding-left: 20px;
+    justify-content: center;
+  }
+}

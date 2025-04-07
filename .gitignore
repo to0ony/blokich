@@ -1,0 +1,76 @@
+# Node.js dependencies
+**/node_modules/
+
+# Build output
+**/dist/
+**/build/
+**/.angular/
+**/.turbo/
+**/.next/
+**/out/
+**/out-tsc/
+**/.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Coverage & testing
+/coverage
+/.nyc_output
+/testem.log
+
+# Temporary files
+/tmp
+/.temp
+.sass-cache/
+/connect.lock
+/libpeerconnection.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE/editor config
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history/
+
+# Environment variable files
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Angular/Nest-specific
+**/angular-compiler.db
+**/angular-compiler.db-lock
+
+# Uploads & data folders (lokalni fajlovi)
+data/
+uploads/
+
+# PDF dokumenti (izbjegni slučajan commit)
+**/*.pdf
+
+# OS-specific
+__MACOSX/

@@ -1,0 +1,53 @@
+@use "../../node_modules/bootstrap/scss/bootstrap" with (
+  $theme-colors: (
+    "light": #e6edf0,
+    "dark": #00050c,
+    "primary": #0484f1,
+    "secondary": #2179ff,
+    "info": #00a2f8,
+    "accent1": #2dd16e,
+    "accent2": #25955a,
+    "accent3": #a7bcb4,
+    "success": #00c771,
+    "warning": #eed400,
+    "danger": #ff231a,
+  )
+);
+
+.popover {
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 250px;
+  padding: 0.5rem;
+
+  .popover-header {
+    background-color: #d5d5d5;
+    color: #00050c;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-bottom: none;
+    border-radius: 0.75rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .popover-body {
+    font-size: 0.875rem;
+    color: #333;
+    padding: 0.5rem 1rem;
+    line-height: 1.4;
+
+    display: grid;
+    row-gap: 4px;
+
+    span.label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    span.value {
+      font-family: monospace;
+      color: #000;
+    }
+  }
+}
+

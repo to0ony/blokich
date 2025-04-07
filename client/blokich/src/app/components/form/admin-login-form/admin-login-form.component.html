@@ -1,0 +1,21 @@
+<div class="admin-login-form">
+  <h2>Blokich admin</h2>
+  <form (ngSubmit)="login()">
+    <input
+      [(ngModel)]="username"
+      name="username"
+      placeholder="Korisničko ime"
+      required
+    />
+    <input
+      [(ngModel)]="password"
+      name="password"
+      type="password"
+      placeholder="Lozinka"
+      required
+    />
+    <button type="submit">Prijava</button>
+  </form>
+
+  <p *ngIf="error" class="error">{{ error }}</p>
+</div>

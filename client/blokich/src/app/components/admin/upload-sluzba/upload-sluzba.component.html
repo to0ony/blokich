@@ -1,0 +1,54 @@
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Upload službe</h5>
+
+    <div class="mb-3">
+      <label for="pdfUpload" class="form-label">Odaberi PDF:</label>
+      <input
+        type="file"
+        class="form-control"
+        id="pdfUpload"
+        accept=".pdf"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <button class="btn btn-primary" [disabled]="loading" (click)="upload()">
+      {{ loading ? "Učitavanje..." : "Pošalji" }}
+    </button>
+
+    <div
+      class="mt-3"
+      *ngIf="uploadStatus"
+      [ngClass]="{
+        'text-success': uploadStatus.includes('Uspješno'),
+        'text-danger': uploadStatus.includes('greške')
+      }"
+    >
+      {{ uploadStatus }}
+    </div>
+
+    <div class="mt-4" *ngIf="lastUploadInfo">
+      <h6>Zadnji upload:</h6>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <strong>Datum unosa:</strong>
+          {{
+            lastUploadInfo.datum_unosa | date : "dd.MM.yyyy HH:mm" : undefined
+          }}
+        </li>
+        <li class="list-group-item">
+          <strong>Broj ubačenih:</strong> {{ lastUploadInfo.broj_ubacenih }}
+        </li>
+        <li class="list-group-item" *ngIf="lastUploadInfo.original_filename">
+          <strong>Originalna datoteka:</strong>
+          {{ lastUploadInfo.original_filename }}
+        </li>
+        <li class="list-group-item" *ngIf="lastUploadInfo.filename">
+          <strong>Generirani naziv (server):</strong>
+          {{ lastUploadInfo.filename }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

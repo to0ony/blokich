@@ -1,0 +1,92 @@
+<div class="line-schedule-wrapper">
+  <div class="form-panel">
+    <form
+      class="filters d-flex flex-column flex-md-row gap-3 align-items-md-end mb-0"
+    >
+      <!-- Odabir tjedna -->
+      <div class="form-group">
+        <label class="form-label">Tjedan</label>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            id="trenutni"
+            name="tjedan"
+            value="trenutni"
+            [(ngModel)]="odabraniTjedan"
+            ngModel
+          />
+          <label for="trenutni" class="form-check-label">Trenutni</label>
+        </div>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            id="naredni"
+            name="tjedan"
+            value="naredni"
+            [(ngModel)]="odabraniTjedan"
+          />
+          <label for="naredni" class="form-check-label">Naredni</label>
+        </div>
+      </div>
+
+      <!-- Odabir linije -->
+      <div class="form-group">
+        <label for="linija" class="form-label">Linija</label>
+        <input
+          type="text"
+          id="linija"
+          class="form-control"
+          [(ngModel)]="odabranaLinija"
+          name="linija"
+          placeholder="npr. 102"
+        />
+      </div>
+
+      <!-- Odabir dana -->
+      <div class="form-group">
+        <label for="dan" class="form-label">Dan</label>
+        <select
+          id="dan"
+          class="form-select"
+          [(ngModel)]="odabraniDan"
+          name="dan"
+        >
+          <option *ngFor="let d of dani" [value]="d.key">{{ d.label }}</option>
+        </select>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="fetchScheduleData()"
+        [disabled]="!odabranaLinija || !odabraniDan"
+      >
+        Prikaži
+      </button>
+    </form>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Učitavanje...</span>
+    </div>
+  </div>
+
+  <!-- Prikaz rasporeda -->
+  <div *ngIf="voze?.length">
+    <h5 class="heading">Raspored za liniju {{ linija }} – {{ dan }}</h5>
+
+    <div class="voznje-list">
+      <app-line-duty-card *ngFor="let vozac of voze" [vozac]="vozac" />
+    </div>
+  </div>
+
+  <div
+    *ngIf="isSearched && !isLoading && voze && !voze.length"
+    class="text-muted"
+  >
+    Nema dostupnih vožnji za odabranu kombinaciju.
+  </div>
+</div>
