@@ -27,6 +27,10 @@ Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
 
 ## Screenshots
 
-<img src="https://i.imgur.com/EqDBLKx.png" alt="drawing" width="200"/>
+<div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+  <img src="https://i.imgur.com/tLdjM2s.png" alt="screenshot 1" width="200" />
+  <img src="https://i.imgur.com/EqDBLKx.png" alt="screenshot 2" width="200" />
+  <img src="https://i.imgur.com/JF1le4n.png" alt="screenshot 3" width="200" />
+</div>
 
 Ovaj projekt je licenciran pod [MIT licencom](LICENSE).
