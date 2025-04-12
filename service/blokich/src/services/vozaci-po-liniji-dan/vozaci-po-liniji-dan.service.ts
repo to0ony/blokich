@@ -37,6 +37,8 @@ export class VozaciPoLinijiService {
       throw new NotFoundException('Disponent za traženi tjedan nije pronađen.');
     }
 
+    const verzijaSluzbe = disponent.verzija_sluzbe;
+
     const radnici: { sluz_broj: number; br_sl: string }[] = [];
     for (const r of disponent.radnici) {
       const br_sl = r[danKey];
@@ -63,6 +65,7 @@ export class VozaciPoLinijiService {
       const sluzbe = await this.sluzbaModel.find({
         linija,
         br_sl: { $regex: `^${r.br_sl}(P*)$`, $options: 'i' },
+        verzija: verzijaSluzbe
       });
 
       for (const sl of sluzbe) {
@@ -121,6 +124,7 @@ export class VozaciPoLinijiService {
     return {
       dan,
       linija,
+      verzija: verzijaSluzbe,
       voze: rezultat,
     };
   }
