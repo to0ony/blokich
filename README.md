@@ -25,10 +25,6 @@ Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
 - Potpuna implementacija admin dashboarda (UI)
 - Ručni unos promjena u disponent (iznenadna bolovanja, godišnji...)
 
-## Bugs
-
-- Vozači koji su zaposleni u aktualnoj godini ne mogu se prijaviti ( **_radim na ispravci_** )
-
 ## Screenshots
 
 <img src="https://i.imgur.com/EqDBLKx.png" alt="drawing" width="200"/>
