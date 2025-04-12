@@ -74,7 +74,6 @@ export class SluzbaUploadService {
             }));
 
             // Očisti kolekciju
-            await this.sluzbaModel.deleteMany({});
             await this.sluzbaModel.insertMany(withTimestamps);
 
             // Sprema info o uploadu
