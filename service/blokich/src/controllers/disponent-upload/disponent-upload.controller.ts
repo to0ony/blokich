@@ -50,7 +50,6 @@ export class DisponentUploadController {
       throw new BadRequestException('PDF datoteka nije poslana.');
     }
 
-    // Prosljeđuje servis za obradu PDF-a
     return this.disponentUploadService.processPdf(file);
   }
 
