@@ -8,27 +8,55 @@ import {
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
+import { UploadService } from '../../../services/upload.service';
+import { DisponentStatusComponent } from '../../status/disponent-status/disponent-status.component';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+
+dayjs.extend(isoWeek);
 
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DisponentStatusComponent],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.scss'],
 })
 export class LoginFormComponent implements OnInit {
   loginForm!: FormGroup;
   isLoading = false;
+  lastDisponentUpload: any;
+  isNextWeekAvailable: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private uploadService: UploadService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       sluzbeniBroj: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+    });
+
+    this.uploadService.fetchLastDisponentUpload().subscribe({
+      next: (res) => {
+        const data = res as { brojTjedna: number; godina: number };
+
+        this.lastDisponentUpload = data;
+
+        const aktualniTjedan = dayjs().isoWeek();
+        if (data.brojTjedna === aktualniTjedan + 1) {
+          this.isNextWeekAvailable = true;
+        }
+      },
+      error: (err) => {
+        console.error(
+          'Greška prilikom dohvacanja informacija o posljednjem disponentu:',
+          err,
+        );
+      },
     });
   }
 

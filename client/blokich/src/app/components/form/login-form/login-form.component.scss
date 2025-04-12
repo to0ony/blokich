@@ -7,8 +7,14 @@
   background-color: #ffffff;
 }
 
-img {
-  max-height: 60px;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.status-wrapper {
+  margin-bottom: 1rem;
 }
 
 input.ng-invalid.ng-touched {
@@ -28,14 +34,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
-// 📱 Mobile UX poboljšanje
 @media (max-width: 576px) {
   .card {
     padding: 1.5rem !important;
   }
 }
 
-/* 🔧 Uklanja strelice u Chrome, Edge, Safari */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
