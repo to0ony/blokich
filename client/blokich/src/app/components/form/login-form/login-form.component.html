@@ -11,6 +11,8 @@
       />
     </div>
 
+    <app-disponent-status [show]="isNextWeekAvailable" />
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="mb-3">
         <label for="sluzbeniBroj" class="form-label"
