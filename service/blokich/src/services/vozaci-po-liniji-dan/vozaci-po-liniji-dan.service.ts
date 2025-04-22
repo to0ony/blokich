@@ -65,7 +65,7 @@ export class VozaciPoLinijiService {
       const sluzbe = await this.sluzbaModel.find({
         linija,
         br_sl: { $regex: `^${r.br_sl}(P*)$`, $options: 'i' },
-        verzija: verzijaSluzbe
+        verzija: verzijaSluzbe,
       });
 
       for (const sl of sluzbe) {
@@ -86,13 +86,13 @@ export class VozaciPoLinijiService {
     }
 
     const sluzBrojeviBroj = rezultat.map((v) => Number(v.sluz_broj));
-    const godisnjiPodaci = await this.godisnjiModel.find({
-      'vozaci.sluz_broj': { $in: sluzBrojeviBroj },
-    });
+    const najnovijiGodisnji = await this.godisnjiModel
+      .findOne({ 'vozaci.sluz_broj': { $in: sluzBrojeviBroj } })
+      .sort({ createdAt: -1 });
 
     const mapaImena = new Map<number, string>();
-    for (const entry of godisnjiPodaci) {
-      for (const v of entry.vozaci) {
+    if (najnovijiGodisnji) {
+      for (const v of najnovijiGodisnji.vozaci) {
         mapaImena.set(Number(v.sluz_broj), v.ime_prezime);
       }
     }
