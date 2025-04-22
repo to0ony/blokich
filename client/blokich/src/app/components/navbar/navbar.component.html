@@ -18,11 +18,14 @@
 
   <!-- Collapse area -->
   <div class="collapse navbar-collapse" id="navbarNav">
-    <!-- Lijeva strana navigacije -->
     <div
       class="d-flex flex-column flex-lg-row align-items-center gap-2 w-100 justify-content-between py-3 py-lg-0"
     >
-      <div class="d-flex flex-column flex-lg-row gap-2 align-items-center">
+      <!-- Lijeva strana navigacije -->
+      <div
+        class="d-flex flex-column flex-lg-row gap-2 align-items-center"
+        [ngClass]="{ invisible: role === 'admin', visible: role === 'vozac' }"
+      >
         <button
           class="nav-btn"
           [class.active]="view === 'raspored'"
@@ -49,17 +52,19 @@
         </button>
       </div>
 
-      <!-- Desna strana (logout) -->
+      <!-- Desna strana (logout i ime) -->
       <div class="d-flex align-items-center gap-3 pt-2 pt-lg-0 ps-lg-4">
-        <div class="d-flex flex-column">
-          <span class="driver-name"
-            >Vozač: <strong>{{ imePrezime }}</strong></span
-          >
-          <span class="driver-name"
-            >Službeni broj: <strong>{{ sluzbeniBroj }}</strong></span
-          >
+        <!-- Podaci o vozaču - samo ako je vozač -->
+        <div class="d-flex flex-column" *ngIf="role === 'vozac'">
+          <span class="driver-name">
+            Vozač: <strong>{{ imePrezime }}</strong>
+          </span>
+          <span class="driver-name">
+            Službeni broj: <strong>{{ sluzbeniBroj }}</strong>
+          </span>
         </div>
 
+        <!-- Gumb za odjavu - za sve -->
         <button class="nav-btn danger-btn" (click)="logout()">Odjava</button>
       </div>
     </div>
