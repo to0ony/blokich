@@ -27,7 +27,6 @@ export class DisponentUploadService {
     const cleanedSluzBrojevi = rawSluzBrojevi
       .filter((broj) => typeof broj === 'string' && broj.trim().length > 0)
       .map((broj) => broj.replace(/^0+/, ''));
-// Removed debug logging to avoid exposing internal state details in production.
 
     // Dohvati sve postojeće brojeve iz godisnji
     const existingDocs = await this.godisnjiModel

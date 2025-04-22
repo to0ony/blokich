@@ -26,4 +26,14 @@ export class UploadService {
   fetchLastDisponentUpload() {
     return this.http.get(`/api/disponent-upload/last-upload`);
   }
+
+  uploadGodisnjiPdf(pdf: File) {
+    const formData = new FormData();
+    formData.append('pdf', pdf);
+    return this.http.post(`/api/godisnji-upload/upload`, formData);
+  }
+
+  fetchLastGodisnjiUpload() {
+    return this.http.get(`/api/godisnji-upload/last-upload`);
+  }
 }

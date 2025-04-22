@@ -18,8 +18,8 @@ import { GodisnjiUploadService } from '../../services/godisnji-upload/godisnji-u
 export class GodisnjiUploadController {
   constructor(private readonly godisnjiUploadService: GodisnjiUploadService) {}
 
-  //@UseGuards(JwtAuthGuard)
-  //@AdminOnly()
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('pdf', {
