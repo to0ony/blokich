@@ -6,7 +6,7 @@ import { UploadService } from '../../../services/upload.service';
   selector: 'app-upload-godisnji',
   standalone: true,
   templateUrl: './upload-godisnji.component.html',
-  styleUrl: './upload-godisnji.component.scss',
+  styleUrls: ['./upload-godisnji.component.scss'],
   imports: [CommonModule],
 })
 export class UploadGodisnjiComponent implements OnInit {
