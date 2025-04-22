@@ -1,0 +1,31 @@
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Upload godišnjeg</h5>
+
+    <div class="mb-3">
+      <label for="pdfUpload" class="form-label">Odaberi PDF:</label>
+      <input
+        type="file"
+        class="form-control"
+        id="pdfUpload"
+        accept=".pdf"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <button class="btn btn-primary" [disabled]="loading" (click)="upload()">
+      {{ loading ? "Učitavanje..." : "Pošalji" }}
+    </button>
+
+    <div
+      class="mt-3"
+      *ngIf="uploadStatus"
+      [ngClass]="{
+        'text-success': uploadStatus.includes('Uspješno'),
+        'text-danger': uploadStatus.includes('greške'),
+      }"
+    >
+      {{ uploadStatus }}
+    </div>
+  </div>
+</div>

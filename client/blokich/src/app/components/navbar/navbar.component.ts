@@ -10,11 +10,16 @@ import { Router } from '@angular/router';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
+  @Input() role: 'vozac' | 'admin' = 'vozac';
+
   @Input() view!: 'raspored' | 'vozaci' | 'smjena';
   @Output() switchView = new EventEmitter<'raspored' | 'vozaci' | 'smjena'>();
   isDrivingToday: boolean = false;
 
   ngOnInit(): void {
+    const adminToken = localStorage.getItem('token');
+    this.role = adminToken ? 'admin' : 'vozac';
+
     setInterval(() => {
       const linije = JSON.parse(
         sessionStorage.getItem('danasnjeLinije') || '[]',
@@ -30,6 +35,7 @@ export class NavbarComponent {
 
   logout(): void {
     sessionStorage.clear();
+    localStorage.clear();
     this.router.navigate(['/login']);
   }
 }
