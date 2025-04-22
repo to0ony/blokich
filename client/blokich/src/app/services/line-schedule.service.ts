@@ -1,20 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LineScheduleService {
-  constructor(private http: HttpClient) {}
+  constructor(private api: ApiService) {}
 
   fetchLineDrivers(
     linija: string,
     dan: string,
     tjedan: 'trenutni' | 'naredni' = 'trenutni',
   ): Observable<any> {
-    return this.http.get('/api/vozaci-po-liniji-dan', {
-      params: { linija, dan, tjedan },
-    });
+    const params = new HttpParams()
+      .set('linija', linija)
+      .set('dan', dan)
+      .set('tjedan', tjedan);
+
+    return this.api.get('vozaci-po-liniji-dan', params);
   }
 }
