@@ -1,39 +1,39 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service'; // prilagodi putanju ako treba
 
 @Injectable({
   providedIn: 'root',
 })
 export class UploadService {
-  constructor(private http: HttpClient) {}
+  constructor(private api: ApiService) {}
 
   uploadSluzbaPdf(pdf: File) {
     const formData = new FormData();
     formData.append('pdf', pdf);
-    return this.http.post(`/api/sluzba-upload/upload`, formData);
+    return this.api.post('sluzba-upload/upload', formData);
   }
 
   fetchLastSluzbaUpload() {
-    return this.http.get(`/api/sluzba-upload/last-upload`);
+    return this.api.get('sluzba-upload/last-upload');
   }
 
   uploadDisponentPdf(pdf: File) {
     const formData = new FormData();
     formData.append('pdf', pdf);
-    return this.http.post(`/api/disponent-upload/upload`, formData);
+    return this.api.post('disponent-upload/upload', formData);
   }
 
   fetchLastDisponentUpload() {
-    return this.http.get(`/api/disponent-upload/last-upload`);
+    return this.api.get('disponent-upload/last-upload');
   }
 
   uploadGodisnjiPdf(pdf: File) {
     const formData = new FormData();
     formData.append('pdf', pdf);
-    return this.http.post(`/api/godisnji-upload/upload`, formData);
+    return this.api.post('godisnji-upload/upload', formData);
   }
 
   fetchLastGodisnjiUpload() {
-    return this.http.get(`/api/godisnji-upload/last-upload`);
+    return this.api.get('godisnji-upload/last-upload');
   }
 }
