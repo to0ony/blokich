@@ -1,2 +1,5 @@
 pdfplumber
+PyMuPDF
 python-dateutil
+fastapi
+uvicorn
