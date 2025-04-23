@@ -3,3 +3,4 @@ PyMuPDF
 python-dateutil
 fastapi
 uvicorn
+python-multipart
