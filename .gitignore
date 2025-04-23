@@ -74,3 +74,7 @@ uploads/
 
 # OS-specific
 __MACOSX/
+service/blokich/python/__pycache__/disponent_utils.cpython-313.pyc
+service/blokich/python/__pycache__/godisnji_utils.cpython-313.pyc
+service/blokich/python/__pycache__/main.cpython-313.pyc
+service/blokich/python/__pycache__/sluzba_utils.cpython-313.pyc
