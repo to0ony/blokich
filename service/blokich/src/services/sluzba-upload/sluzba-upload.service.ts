@@ -23,8 +23,8 @@ export class SluzbaUploadService {
 
   async processPdf(file: Express.Multer.File) {
     try {
-      const parsed: Sluzba[] =
-        await this.pdfProcessingService.extractSluzba(file);
+      const response = await this.pdfProcessingService.extractSluzba(file);
+      const parsed: Sluzba[] = response.sluzbe;
 
       const verzija = await this.generateVersion();
       const withTimestamps = parsed.map((item) => ({
