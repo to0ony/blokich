@@ -3,9 +3,11 @@ import { GodisnjiUploadService } from '../../services/godisnji-upload/godisnji-u
 import { GodisnjiUploadController } from '../../controllers/godisnji-upload/godisnji-upload.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
+import { PdfModule } from '../pdf/pdf.module';
 
 @Module({
   imports: [
+    PdfModule,
     MongooseModule.forFeature([
       { name: Godisnji.name, schema: GodisnjiSchema },
     ]),

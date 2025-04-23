@@ -3,15 +3,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { spawn } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
-import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 import { getISOWeek } from 'date-fns';
+import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
 
 @Injectable()
 export class SluzbaUploadService {
@@ -20,88 +18,36 @@ export class SluzbaUploadService {
     private readonly sluzbaModel: Model<Sluzba>,
     @InjectModel(SluzbaUpload.name)
     private readonly sluzbaUploadModel: Model<SluzbaUpload>,
+    private readonly pdfProcessingService: PdfProcessingService,
   ) {}
-
-  // ...existing code...
 
   async processPdf(file: Express.Multer.File) {
     try {
-      const scriptPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
-        'python',
-        'extract_sluzba.py',
-      );
+      const response = await this.pdfProcessingService.extractSluzba(file);
+      const parsed: Sluzba[] = response.sluzbe;
 
-      const pythonProcess = spawn('python', [scriptPath, file.path]);
-      let stdout = '';
-      let stderr = '';
+      const verzija = await this.generateVersion();
+      const withTimestamps = parsed.map((item) => ({
+        ...item,
+        datum_unosa: new Date(),
+        verzija,
+      }));
 
-      pythonProcess.stdout.setEncoding('utf8');
-      pythonProcess.stdout.on('data', (data) => {
-        stdout += data;
+      await this.sluzbaModel.insertMany(withTimestamps);
+
+      await this.sluzbaUploadModel.create({
+        datum_unosa: new Date(),
+        broj_ubacenih: withTimestamps.length,
+        filename: file.filename,
+        original_filename: file.originalname,
+        verzija,
       });
 
-      pythonProcess.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      return new Promise((resolve, reject) => {
-        pythonProcess.on('close', async (code) => {
-          if (code !== 0) {
-            console.error('Greška u Python skripti:', stderr);
-            return reject(
-              new InternalServerErrorException('Greška prilikom obrade PDF-a.'),
-            );
-          }
-
-          const jsonPath = stdout.trim();
-
-          try {
-            const rawContent = fs.readFileSync(jsonPath, 'utf8');
-            const parsed: Sluzba[] = JSON.parse(rawContent);
-
-            // Generiraj verziju
-            const verzija = await this.generateVersion();
-
-            // Dodaj vrijeme unosa i verziju
-            const withTimestamps = parsed.map((item) => ({
-              ...item,
-              datum_unosa: new Date(),
-              verzija,
-            }));
-
-            // Očisti kolekciju
-            await this.sluzbaModel.insertMany(withTimestamps);
-
-            // Sprema info o uploadu
-            await this.sluzbaUploadModel.create({
-              datum_unosa: new Date(),
-              broj_ubacenih: withTimestamps.length,
-              filename: file.filename,
-              original_filename: file.originalname,
-              verzija,
-            });
-
-            // Obriši privremeni JSON
-            fs.unlinkSync(jsonPath);
-
-            resolve({
-              poruka: `Uspješno spremljeno ${withTimestamps.length} službi (nakon brisanja starih).`,
-            });
-          } catch (err) {
-            console.error('Greška u parsiranju JSON-a:', err);
-            reject(
-              new InternalServerErrorException(
-                'Neispravan izlaz iz Python skripte.',
-              ),
-            );
-          }
-        });
-      });
+      return {
+        poruka: `Uspješno spremljeno ${withTimestamps.length} službi (nakon brisanja starih).`,
+      };
     } catch (error) {
+      console.error('Greška pri obradi PDF-a:', error);
       throw new InternalServerErrorException(
         error.message || 'Greška prilikom obrade PDF-a.',
       );
@@ -109,13 +55,12 @@ export class SluzbaUploadService {
   }
 
   private async generateVersion(): Promise<string> {
-    const timeZone = 'Europe/Zagreb'; // Hrvatska vremenska zona
-    const now = toZonedTime(new Date(), timeZone); // Pretvori trenutni datum u hrvatsku vremensku zonu
+    const timeZone = 'Europe/Zagreb';
+    const now = toZonedTime(new Date(), timeZone);
 
     const currentYear = now.getFullYear();
-    const currentWeek = getISOWeek(now); // Dobij ISO tjedan prema lokalnom vremenu
+    const currentWeek = getISOWeek(now);
 
-    // Pronađi posljednji upload za trenutni tjedan i godinu
     const lastUpload = await this.sluzbaUploadModel
       .findOne({
         verzija: new RegExp(`^${currentYear}-${currentWeek}-\\d+$`),

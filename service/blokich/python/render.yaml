@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: blokich-python
+    runtime: docker
+    repo: https://github.com/to0ony/blokich
+    branch: main
+    rootDir: service/blokich/python
+    plan: free
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: '1'

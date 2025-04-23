@@ -10,6 +10,7 @@ import { Model } from 'mongoose';
 import { Disponent } from '../../schemas/disponent.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
+import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
 
 @Injectable()
 export class DisponentUploadService {
@@ -20,6 +21,7 @@ export class DisponentUploadService {
     private readonly sluzbaUploadModel: Model<SluzbaUpload>,
     @InjectModel(Godisnji.name)
     private readonly godisnjiModel: Model<Godisnji>,
+    private readonly pdfProcessingService: PdfProcessingService,
   ) {}
 
   private async addNewDriversToGodisnji(rawSluzBrojevi: string[]) {
@@ -70,81 +72,40 @@ export class DisponentUploadService {
 
   async processPdf(file: Express.Multer.File) {
     try {
-      const scriptPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
-        'python',
-        'extract_disponent.py',
-      );
+      const parsed = await this.pdfProcessingService.extractDisponent(file);
 
-      const pythonProcess = spawn('python', [scriptPath, file.path]);
+      if (!parsed.godina || !parsed.brojTjedna || !parsed.radnici) {
+        throw new Error('Nedostaju ključna polja u JSON-u.');
+      }
 
-      let stdout = '';
-      let stderr = '';
+      const sviSluzBrojevi = parsed.radnici.map((r: any) => r.radnik);
+      await this.addNewDriversToGodisnji(sviSluzBrojevi);
 
-      return new Promise(async (resolve, reject) => {
-        pythonProcess.stdout.on('data', (data) => {
-          stdout += data.toString();
-        });
-
-        pythonProcess.stderr.on('data', (data) => {
-          stderr += data.toString();
-        });
-
-        pythonProcess.on('close', async (code) => {
-          if (code !== 0) {
-            console.error('Python greška:', stderr);
-            return reject(
-              new InternalServerErrorException('Greška prilikom obrade PDF-a.'),
-            );
-          }
-
-          try {
-            const parsed = JSON.parse(stdout);
-
-            if (!parsed.godina || !parsed.brojTjedna || !parsed.radnici) {
-              throw new Error('Nedostaju ključna polja u JSON-u.');
-            }
-
-            const sviSluzBrojevi = parsed.radnici.map((r: any) => r.radnik);
-            await this.addNewDriversToGodisnji(sviSluzBrojevi);
-
-            await this.disponentModel.deleteOne({
-              godina: parsed.godina,
-              brojTjedna: parsed.brojTjedna,
-            });
-
-            const verzijaSluzbi = await this.sluzbaUploadModel
-              .findOne()
-              .sort({ datum_unosa: -1 })
-              .lean();
-
-            const doc = await this.disponentModel.create({
-              ...parsed,
-              datum_unosa: new Date(),
-              verzija_sluzbe: verzijaSluzbi?.verzija || null,
-            });
-
-            resolve({
-              poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
-              verzija: verzijaSluzbi?.verzija || null,
-              id: doc._id,
-            });
-          } catch (err) {
-            console.error('Greška pri parsiranju JSON-a:', err);
-            reject(
-              new InternalServerErrorException(
-                'Greška pri parsiranju JSON-a iz Python skripte.',
-              ),
-            );
-          }
-        });
+      await this.disponentModel.deleteOne({
+        godina: parsed.godina,
+        brojTjedna: parsed.brojTjedna,
       });
+
+      const verzijaSluzbi = await this.sluzbaUploadModel
+        .findOne()
+        .sort({ datum_unosa: -1 })
+        .lean();
+
+      const doc = await this.disponentModel.create({
+        ...parsed,
+        datum_unosa: new Date(),
+        verzija_sluzbe: verzijaSluzbi?.verzija || null,
+      });
+
+      return {
+        poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
+        verzija: verzijaSluzbi?.verzija || null,
+        id: doc._id,
+      };
     } catch (error) {
+      console.error('Greška:', error);
       throw new InternalServerErrorException(
-        error.message || 'Neuspješna obrada PDF-a',
+        error.message || 'Greška prilikom obrade PDF-a.',
       );
     }
   }

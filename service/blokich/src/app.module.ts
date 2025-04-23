@@ -13,7 +13,7 @@ import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminService } from './services/admin/admin.service';
 import { AdminModule } from './modules/admin/admin.module';
-import { GodisnjiUploadModule } from './modules/godisnji-upload/godisnji.module';
+import { GodisnjiUploadModule } from './modules/godisnji-upload/godisnji-upload.module';
 
 @Module({
   imports: [
