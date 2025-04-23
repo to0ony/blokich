@@ -6,6 +6,7 @@ import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { VozacStatsModule } from '../vozac-stats/vozac-stats.module';
 import { SluzbaUploadSchema } from 'src/schemas/sluzba-upload.schema';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
+import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
       { name: Godisnji.name, schema: GodisnjiSchema },
     ]),
     VozacStatsModule,
+    PdfProcessingService,
   ],
   controllers: [DisponentUploadController],
   providers: [DisponentUploadService],
