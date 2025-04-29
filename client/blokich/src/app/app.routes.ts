@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardDriverComponent } from './pages/dashboard-driver/dashboard-driver.component';
 import { DashboardAdminComponent } from './pages/dashboard-admin/dashboard-admin.component';
 import { AdminGuard } from './guards/admin.guard';
+import { DriverGuard } from './guards/driver.guard';
 
 export const routes: Routes = [
   // Redirect to login if no path is provided
@@ -25,6 +26,7 @@ export const routes: Routes = [
   },
   // Driver Dashboard page route
   {
+    canActivate: [DriverGuard],
     path: 'dashboard',
     component: DashboardDriverComponent,
     children: [
