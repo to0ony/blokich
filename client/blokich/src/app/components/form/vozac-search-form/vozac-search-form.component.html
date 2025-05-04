@@ -1,0 +1,56 @@
+<div class="mb-3">
+  <div class="input-group">
+    <input
+      type="text"
+      class="form-control"
+      [(ngModel)]="searchQuery"
+      id="searchVozac"
+      placeholder="Unesite ime ili broj"
+    />
+    <button class="btn btn-outline-secondary" (click)="openSearch()">
+      Pretraži
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="searchModal"
+  tabindex="-1"
+  aria-labelledby="searchModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="searchModalLabel">Rezultati pretrage</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Zatvori"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm table-hover text-start">
+          <thead class="table-light">
+            <tr>
+              <th>Službeni broj</th>
+              <th>Naziv vozača</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of searchResults">
+              <td>{{ v.sluz_broj }}</td>
+              <td>{{ v.ime_prezime }}</td>
+            </tr>
+            <tr *ngIf="!searchResults.length">
+              <td colspan="2" class="text-center">Nema rezultata</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
