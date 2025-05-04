@@ -26,11 +26,17 @@ export class VozacSearchFormComponent {
   openSearch() {
     if (!this.searchQuery.trim()) return;
 
-    this.vozaciService.searchVozaci(this.searchQuery).subscribe((res) => {
-      this.searchResults = res;
+    this.vozaciService.searchVozaci(this.searchQuery).subscribe(
+      (res) => {
+        this.searchResults = res;
 
-      const modal = new bootstrap.Modal(document.getElementById('searchModal'));
-      modal.show();
-    });
+        const modal = new bootstrap.Modal(document.getElementById('searchModal'));
+        modal.show();
+      },
+      (error) => {
+        console.error('Error occurred while searching for vozaci:', error);
+        alert('An error occurred while searching. Please try again later.');
+      }
+    );
   }
 }
