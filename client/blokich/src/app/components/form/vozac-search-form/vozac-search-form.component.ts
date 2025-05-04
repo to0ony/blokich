@@ -30,8 +30,13 @@ export class VozacSearchFormComponent {
       (res) => {
         this.searchResults = res;
 
-        const modal = new bootstrap.Modal(document.getElementById('searchModal'));
-        modal.show();
+        const modalElement = document.getElementById('searchModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        } else {
+          console.warn("Modal element with ID 'searchModal' not found.");
+        }
       },
       (error) => {
         console.error('Error occurred while searching for vozaci:', error);
