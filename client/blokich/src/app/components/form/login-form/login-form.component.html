@@ -1,54 +1,61 @@
-<div
-  class="min-vh-100 d-flex justify-content-center align-items-center bg-light"
->
-  <div class="card p-4 shadow-sm mx-3" style="width: 100%; max-width: 400px">
-    <div class="text-center mb-4">
-      <img
-        src="../../../../assets/blokich_logo.png"
-        alt="Blokich logo"
-        class="img-fluid"
-        style="max-height: 60px"
+<div class="card p-4 shadow-sm">
+  <div class="text-center mb-4">
+    <img
+      src="../../../../assets/blokich_logo.png"
+      alt="Blokich logo"
+      class="img-fluid"
+      style="max-height: 60px"
+    />
+  </div>
+
+  <app-disponent-status [show]="isNextWeekAvailable" />
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label for="sluzbeniBroj" class="form-label">Službeni broj vozača</label>
+      <input
+        type="number"
+        id="sluzbeniBroj"
+        class="form-control"
+        formControlName="sluzbeniBroj"
+        placeholder="Unesite broj"
+        [class.is-invalid]="
+          loginForm.get('sluzbeniBroj')?.invalid &&
+          loginForm.get('sluzbeniBroj')?.touched
+        "
       />
+      <div class="invalid-feedback">Obavezno polje.</div>
     </div>
 
-    <app-disponent-status [show]="isNextWeekAvailable" />
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label for="sluzbeniBroj" class="form-label"
-          >Službeni broj vozača</label
-        >
-        <input
-          type="number"
-          id="sluzbeniBroj"
-          class="form-control"
-          formControlName="sluzbeniBroj"
-          placeholder="Unesite broj"
-          [class.is-invalid]="
-            loginForm.get('sluzbeniBroj')?.invalid &&
-            loginForm.get('sluzbeniBroj')?.touched
-          "
-        />
-        <div class="invalid-feedback">Obavezno polje.</div>
-      </div>
-
-      <button
-        type="submit"
-        class="btn btn-primary w-100"
-        [disabled]="loginForm.invalid || isLoading"
-      >
-        Prijavi se
-      </button>
-    </form>
-
-    <!-- Loader -->
-    <div
-      *ngIf="isLoading"
-      class="d-flex justify-content-center align-items-center mt-3"
+    <button
+      type="submit"
+      class="btn btn-primary w-100"
+      [disabled]="loginForm.invalid || isLoading"
     >
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
+      Prijavi se
+    </button>
+    <hr />
+    <button
+      type="button"
+      class="btn btn-outline-secondary w-100"
+      (click)="toggleSearchForm()"
+    >
+      Pretraga vozača
+    </button>
+  </form>
+
+  <app-vozac-search-form
+    *ngIf="showSearchForm"
+    class="mt-3"
+  ></app-vozac-search-form>
+
+  <!-- Loader -->
+  <div
+    *ngIf="isLoading"
+    class="d-flex justify-content-center align-items-center mt-3"
+  >
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 </div>
