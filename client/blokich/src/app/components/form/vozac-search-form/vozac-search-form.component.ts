@@ -15,7 +15,7 @@ interface VozacInfo {
   selector: 'app-vozac-search-form',
   imports: [CommonModule, FormsModule],
   templateUrl: './vozac-search-form.component.html',
-  styleUrl: './vozac-search-form.component.scss',
+  styleUrls: ['./vozac-search-form.component.scss'],
 })
 export class VozacSearchFormComponent {
   searchQuery = '';
