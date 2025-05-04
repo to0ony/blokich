@@ -12,13 +12,19 @@ import { UploadService } from '../../../services/upload.service';
 import { DisponentStatusComponent } from '../../status/disponent-status/disponent-status.component';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
 
 dayjs.extend(isoWeek);
 
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DisponentStatusComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DisponentStatusComponent,
+    VozacSearchFormComponent,
+  ],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.scss'],
 })
@@ -27,6 +33,7 @@ export class LoginFormComponent implements OnInit {
   isLoading = false;
   lastDisponentUpload: any;
   isNextWeekAvailable: boolean = false;
+  showSearchForm = false;
 
   constructor(
     private fb: FormBuilder,
@@ -58,6 +65,10 @@ export class LoginFormComponent implements OnInit {
         );
       },
     });
+  }
+
+  toggleSearchForm() {
+    this.showSearchForm = !this.showSearchForm;
   }
 
   onSubmit(): void {

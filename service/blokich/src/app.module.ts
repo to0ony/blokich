@@ -14,6 +14,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AdminService } from './services/admin/admin.service';
 import { AdminModule } from './modules/admin/admin.module';
 import { GodisnjiUploadModule } from './modules/godisnji-upload/godisnji-upload.module';
+import { VozaciService } from './services/vozaci/vozaci.service';
+import { VozaciController } from './controllers/vozaci/vozaci.controller';
+import { VozaciModule } from './modules/vozaci/vozaci.module';
 
 @Module({
   imports: [
@@ -40,6 +43,7 @@ import { GodisnjiUploadModule } from './modules/godisnji-upload/godisnji-upload.
     VozacStatsModule,
     AuthModule,
     AdminModule,
+    VozaciModule,
   ],
   providers: [AdminService],
 })
