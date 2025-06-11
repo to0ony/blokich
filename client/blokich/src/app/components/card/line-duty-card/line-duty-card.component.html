@@ -2,7 +2,7 @@
   <div class="header">
     <div class="ime">{{ vozac.ime_prezime }}</div>
     <div class="broj">{{ vozac.sluz_broj }}</div>
-    <span class="badge bg-dark">{{vozac.br_sl}}</span>
+    <span class="badge bg-dark">{{ vozac.br_sl }}</span>
   </div>
 
   <div class="details">
@@ -18,7 +18,18 @@
 
     <div class="line-info" *ngIf="vozac['V.R']">
       <span class="vr-label">Linija:</span>
-      <span class="badge bg-accent1">{{vozac.linija}}</span>
+      <a
+        class="badge bg-accent1"
+        [href]="
+          'https://triglav.bezdomni.net/public_transport/zet/routes/' +
+          vozac.linija
+        "
+        target="_blank"
+        rel="noopener noreferrer"
+        style="text-decoration: none; color: white"
+      >
+        {{ vozac.linija }}
+      </a>
       <span class="vr-label">V.R:</span>
       <span class="badge bg-accent2">{{ vozac["V.R"] }}</span>
     </div>

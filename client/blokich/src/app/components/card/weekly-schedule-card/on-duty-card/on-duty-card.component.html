@@ -1,5 +1,4 @@
 <div class="duty-card" [ngClass]="getDayClass()">
-
   <div class="duty-header">
     <div class="dan d-flex align-items-center gap-1">
       {{ dan }}
@@ -9,33 +8,47 @@
         class="btn p-0 border-0 bg-transparent"
         tabindex="0"
         *ngIf="!brojSluzbe.includes('P')"
-        [appPopover]="'<b>Ukup. sati: </b>' + ukupSati +
-              '<br><b>Efek. sati: </b>' + efekSati +
-              '<br><b>Dr. smj.: </b>' + drSmj +
-              '<br><b>Noćni rad: </b>' + nocniRad"
-
-        [popoverTitle]="'Detalji smjene'">
+        [appPopover]="
+          '<b>Ukup. sati: </b>' +
+          ukupSati +
+          '<br><b>Efek. sati: </b>' +
+          efekSati +
+          '<br><b>Dr. smj.: </b>' +
+          drSmj +
+          '<br><b>Noćni rad: </b>' +
+          nocniRad
+        "
+        [popoverTitle]="'Detalji smjene'"
+      >
         <lucide-icon [img]="ClockIcon" class="my-icon"></lucide-icon>
       </button>
     </div>
     <div class="datum">{{ datum }}</div>
   </div>
 
-
-  <div class="vrijeme">
-    {{ vrijemePocetak }} – {{ vrijemeKraj }}
-  </div>
+  <div class="vrijeme">{{ vrijemePocetak }} – {{ vrijemeKraj }}</div>
 
   <div class="info">
     <span>Linija:</span>
-    <span class="badge bg-accent1">{{ linija }}</span>
+    <a
+      class="badge bg-accent1"
+      [href]="
+        'https://triglav.bezdomni.net/public_transport/zet/routes/' + linija
+      "
+      target="_blank"
+      rel="noopener noreferrer"
+      style="text-decoration: none; color: white"
+    >
+      {{ linija }}
+    </a>
     <span class="vr-label">V.R:</span>
     <span class="badge bg-accent2">{{ vr }}</span>
   </div>
 
-  <div class="nastup">Nastup:
-    <div class="badge light">{{ nastup }}</div> →
-    <div class="badge light" > {{zavrsetak }}</div>
+  <div class="nastup">
+    Nastup:
+    <div class="badge light">{{ nastup }}</div>
+    →
+    <div class="badge light">{{ zavrsetak }}</div>
   </div>
-
 </div>
