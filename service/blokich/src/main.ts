@@ -9,6 +9,7 @@ async function bootstrap() {
       'http://localhost:4200',
       'https://blokich.vercel.app',
       'https://blokich-git-develop-to0onys-projects.vercel.app',
+      'https://blokich-p55l8orrl-to0onys-projects.vercel.app',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
