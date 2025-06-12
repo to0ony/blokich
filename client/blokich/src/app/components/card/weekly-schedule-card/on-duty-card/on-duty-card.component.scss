@@ -1,4 +1,4 @@
-// on-on-duty-card.component.scss
+/* on-duty-card.component.scss */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap");
 
 .duty-card {
@@ -25,18 +25,46 @@
 }
 
 .radni-dan {
-  background: rgb(205,233,255);
-  background: linear-gradient(90deg, rgba(205,233,255,1) 0%, rgba(255,255,255,1) 25%);
+  background: rgb(205, 233, 255);
+  background: linear-gradient(
+    90deg,
+    rgba(205, 233, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 25%
+  );
 }
 
 .subota {
-  background: rgb(205,255,206);
-  background: linear-gradient(90deg, rgba(205,255,206,1) 0%, rgba(255,255,255,1) 25%);
+  background: rgb(205, 255, 206);
+  background: linear-gradient(
+    90deg,
+    rgba(205, 255, 206, 1) 0%,
+    rgba(255, 255, 255, 1) 25%
+  );
 }
 
 .nedjelja {
-  background: rgb(255,205,205);
-  background: linear-gradient(90deg, rgba(255,205,205,1) 0%, rgba(255,255,255,1) 25%);
+  background: rgb(255, 205, 205);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 205, 205, 1) 0%,
+    rgba(255, 255, 255, 1) 25%
+  );
+}
+
+/* =====  NERADNI DAN  ===== */
+.duty-card.neradni {
+  border-bottom: 4px solid #dc3545; /* crveni naglasak ispod kartice */
+}
+
+.neradni-banner {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+  padding: 2px 0;
+  background-color: #dc3545;
+  color: #fff;
+  border-radius: 0 0 10px 10px;
 }
 
 .duty-header {
@@ -121,4 +149,3 @@
   border-radius: 8px;
   align-self: start;
 }
-

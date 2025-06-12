@@ -1,7 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { BootstrapPopoverDirective } from '../../../../shared/bootstrap-popover.directive';
 import { LucideAngularModule, ClockIcon } from 'lucide-angular';
+import { OpenHolidaysService } from '../../../../services/open-holidays.service';
+
+interface HolidayMap {
+  [isoDate: string]: string;
+}
 
 @Component({
   selector: 'app-on-duty-card',
@@ -10,19 +16,17 @@ import { LucideAngularModule, ClockIcon } from 'lucide-angular';
   styleUrls: ['./on-duty-card.component.scss'],
   imports: [CommonModule, BootstrapPopoverDirective, LucideAngularModule],
 })
-export class OnDutyCardComponent {
+export class OnDutyCardComponent implements OnInit, OnDestroy {
   readonly ClockIcon = ClockIcon;
 
   @Input() dan!: string;
-  @Input() datum!: string;
+  @Input() datum!: string; // očekuje ISO format: yyyy-MM-dd
   @Input() vrijemePocetak!: string;
   @Input() vrijemeKraj!: string;
-
   @Input() nocniRad!: string;
   @Input() drSmj!: string;
   @Input() efekSati!: string;
   @Input() ukupSati!: string;
-
   @Input() brojSluzbe!: string;
   @Input() linija!: string;
   @Input() vr!: string;
@@ -30,7 +34,45 @@ export class OnDutyCardComponent {
   @Input() zavrsetak!: string;
   @Input() oznaka?: string;
 
+  isHoliday = false;
+  holidayName = '';
+
+  private static cache: HolidayMap = {};
+  private sub?: Subscription;
+
+  constructor(private holidays: OpenHolidaysService) {}
+
+  ngOnInit(): void {
+    if (OnDutyCardComponent.cache[this.datum] !== undefined) {
+      this.setHoliday(this.datum);
+    } else {
+      const year = this.datum.slice(0, 4);
+      this.sub = this.holidays
+        .getPublicHolidays(`${year}-01-01`, `${year}-12-31`)
+        .subscribe((list) => {
+          list.forEach(
+            (h) =>
+              (OnDutyCardComponent.cache[h.startDate] = h.name[0]?.text ?? ''),
+          );
+          this.setHoliday(this.datum);
+        });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private setHoliday(date: string) {
+    const name = OnDutyCardComponent.cache[date];
+    if (name) {
+      this.isHoliday = true;
+      this.holidayName = name;
+    }
+  }
+
   getDayClass(): string {
+    if (this.isHoliday) return 'neradni';
     switch (this.dan.toLowerCase()) {
       case 'subota':
         return 'subota';
