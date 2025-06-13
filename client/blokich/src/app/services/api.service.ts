@@ -15,6 +15,12 @@ export class ApiService {
     return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { params });
   }
 
+  getFromOpenHolidays<T>(endpoint: string, params?: HttpParams) {
+    return this.http.get<T>(`${this.openHolidaysApiUrl}/${endpoint}`, {
+      params,
+    });
+  }
+
   post<T>(endpoint: string, body: any, headers?: HttpHeaders) {
     return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body, { headers });
   }

@@ -46,9 +46,15 @@ export class OnDutyCardComponent implements OnInit, OnDestroy {
     if (OnDutyCardComponent.cache[this.datum] !== undefined) {
       this.setHoliday(this.datum);
     } else {
-      const year = this.datum.slice(0, 4);
+      const [year, month] = this.datum.split('-').map(Number);
+
+      const firstDay = `${year}-${month.toString().padStart(2, '0')}-01`;
+
+      const lastDayDate = new Date(year, month, 0);
+      const lastDay = `${year}-${month.toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
+
       this.sub = this.holidays
-        .getPublicHolidays(`${year}-01-01`, `${year}-12-31`)
+        .getPublicHolidays(firstDay, lastDay)
         .subscribe((list) => {
           list.forEach(
             (h) =>

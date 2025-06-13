@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
+import { HttpParams } from '@angular/common/http';
 
 interface PublicHoliday {
   id: string;
@@ -10,15 +11,17 @@ interface PublicHoliday {
 
 @Injectable({ providedIn: 'root' })
 export class OpenHolidaysService {
+  private readonly baseUrl = 'PublicHolidays';
+
   constructor(private api: ApiService) {}
 
   getPublicHolidays(validFrom: string, validTo: string) {
-    const query =
-      `countryIsoCode=HR&validFrom=${encodeURIComponent(validFrom)}` +
-      `&validTo=${encodeURIComponent(validTo)}&languageIsoCode=HR`;
+    const params = new HttpParams()
+      .set('countryIsoCode', 'HR')
+      .set('validFrom', validFrom)
+      .set('validTo', validTo)
+      .set('languageIsoCode', 'HR');
 
-    return this.api.get<PublicHoliday[]>(
-      `${this.getPublicHolidays}/PublicHolidays?${query}`,
-    );
+    return this.api.getFromOpenHolidays<PublicHoliday[]>(this.baseUrl, params);
   }
 }
