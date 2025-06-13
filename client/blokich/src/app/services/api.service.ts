@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 })
 export class ApiService {
   private readonly baseUrl = environment.apiUrl;
+  private readonly openHolidaysApiUrl = environment.openHolidaysApi;
 
   constructor(private http: HttpClient) {}
 

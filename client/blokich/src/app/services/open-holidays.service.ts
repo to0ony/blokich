@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { environment } from '../../environments/environment';
 
 interface PublicHoliday {
   id: string;
@@ -11,8 +10,6 @@ interface PublicHoliday {
 
 @Injectable({ providedIn: 'root' })
 export class OpenHolidaysService {
-  private readonly baseUrl = environment.openHolidaysApi;
-
   constructor(private api: ApiService) {}
 
   getPublicHolidays(validFrom: string, validTo: string) {
@@ -21,7 +18,7 @@ export class OpenHolidaysService {
       `&validTo=${encodeURIComponent(validTo)}&languageIsoCode=HR`;
 
     return this.api.get<PublicHoliday[]>(
-      `${this.baseUrl}/PublicHolidays?${query}`,
+      `${this.getPublicHolidays}/PublicHolidays?${query}`,
     );
   }
 }
