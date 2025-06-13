@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom, take } from 'rxjs';
+
 import { LineScheduleService } from '../../../services/line-schedule.service';
+import { OpenHolidaysService } from '../../../services/open-holidays.service';
 import { LineDutyCardComponent } from '../../card/line-duty-card/line-duty-card.component';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-driver-shift-schedule',
@@ -13,19 +15,25 @@ import { firstValueFrom } from 'rxjs';
 })
 export class DriverShiftScheduleComponent implements OnInit {
   danasnjeLinije: string[] = [];
-  danasnjiDan: string = '';
+  danasnjiDan = '';
   voznje: any[] = [];
+
   isLoading = true;
 
-  constructor(private vozaciService: LineScheduleService) {}
+  isHolidayToday = false;
+  holidayName = '';
 
-  ngOnInit(): void {
+  constructor(
+    private vozaciService: LineScheduleService,
+    private holidaysService: OpenHolidaysService,
+  ) {}
+
+  async ngOnInit(): Promise<void> {
+    this.setDanasnjiDan();
+    this.checkHolidayToday();
+
     const cached = sessionStorage.getItem('voznjeDanas');
-
     if (cached) {
-      const dani = ['ned', 'pon', 'uto', 'sri', 'cet', 'pet', 'sub'];
-      this.danasnjiDan = dani[new Date().getDay()];
-
       this.voznje = JSON.parse(cached);
       this.isLoading = false;
     } else {
@@ -33,14 +41,33 @@ export class DriverShiftScheduleComponent implements OnInit {
     }
   }
 
-  private fetchScheduleData(): void {
+  private setDanasnjiDan(): void {
     const dani = ['ned', 'pon', 'uto', 'sri', 'cet', 'pet', 'sub'];
     this.danasnjiDan = dani[new Date().getDay()];
+  }
 
+  private checkHolidayToday(): void {
+    const todayIso = new Date().toISOString().slice(0, 10); // yyyy-MM-dd
+    const year = todayIso.slice(0, 4);
+
+    this.holidaysService
+      .getPublicHolidays(`${year}-01-01`, `${year}-12-31`)
+      .pipe(take(1))
+      .subscribe({
+        next: (list) => {
+          const hit = list.find((h) => h.startDate === todayIso);
+          if (hit) {
+            this.isHolidayToday = true;
+            this.holidayName = hit.name[0]?.text ?? '';
+          }
+        },
+        error: (err) => console.error('Holiday API error:', err),
+      });
+  }
+
+  private fetchScheduleData(): void {
     const stored = sessionStorage.getItem('danasnjeLinije');
     this.danasnjeLinije = stored ? JSON.parse(stored) : [];
-
-    console.log(stored);
 
     if (this.danasnjeLinije.length === 0) {
       this.isLoading = false;

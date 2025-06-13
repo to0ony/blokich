@@ -1,10 +1,14 @@
 /* on-duty-card.component.scss */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap");
 
+/* ──────────────────────────────────────────────────────────────── */
+/*  KARTICA                                                         */
+/* ──────────────────────────────────────────────────────────────── */
 .duty-card {
   border: 1px solid #ddd;
   border-radius: 12px;
   padding: 16px;
+  padding-bottom: 32px; /* ↓ prostor za banner */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-family: "Inter", sans-serif;
   display: flex;
@@ -13,60 +17,58 @@
   width: 100%;
   max-width: 100%;
   transition: max-width 0.2s ease;
+  position: relative; /* ➜ banner absolute bottom */
+  overflow: hidden; /* zaobljeni rub banneru */
 
   @media (min-width: 768px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    max-width: 100%;
     padding: 20px;
+    padding-bottom: 36px; /* veći padding na desktopu */
     gap: 20px;
   }
 }
 
+/* ──────────────────────────────────────────────────────────────── */
+/*  POZADINE PO DANIMA                                              */
+/* ──────────────────────────────────────────────────────────────── */
 .radni-dan {
-  background: rgb(205, 233, 255);
-  background: linear-gradient(
-    90deg,
-    rgba(205, 233, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
+  background: linear-gradient(90deg, #cde9ff 0%, #ffffff 25%);
 }
 
 .subota {
-  background: rgb(205, 255, 206);
-  background: linear-gradient(
-    90deg,
-    rgba(205, 255, 206, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
+  background: linear-gradient(90deg, #cdffce 0%, #ffffff 25%);
 }
 
 .nedjelja {
-  background: rgb(255, 205, 205);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 205, 205, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
+  background: linear-gradient(90deg, #ffcdcd 0%, #ffffff 25%);
 }
 
-/* =====  NERADNI DAN  ===== */
+/* ──────────────────────────────────────────────────────────────── */
+/*  NERADNI DAN – BORDER I BANNER                                   */
+/* ──────────────────────────────────────────────────────────────── */
 .duty-card.neradni {
-  border-bottom: 4px solid #dc3545; /* crveni naglasak ispod kartice */
+  border-bottom: 4px solid #dc3545;
 }
 
 .neradni-banner {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 4px;
-  padding: 2px 0;
-  background-color: #dc3545;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 4px 0;
+  background: #dc3545;
   color: #fff;
-  border-radius: 0 0 10px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 0 0 12px 12px; /* prati radius kartice */
 }
 
+/* ──────────────────────────────────────────────────────────────── */
+/*  OSTALI ELEMENTI                                                 */
+/* ──────────────────────────────────────────────────────────────── */
 .duty-header {
   display: flex;
   flex-direction: column;
