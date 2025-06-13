@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import dayjs from 'dayjs';
 import { Subscription } from 'rxjs';
 import { BootstrapPopoverDirective } from '../../../../shared/bootstrap-popover.directive';
 import { LucideAngularModule, ClockIcon } from 'lucide-angular';
@@ -38,16 +39,17 @@ export class OnDutyCardComponent implements OnInit, OnDestroy {
   constructor(private holidays: OpenHolidaysService) {}
 
   ngOnInit(): void {
-    const [year, month] = this.datum.split('-').map(Number);
+    const parsedDate = dayjs(this.datum, 'DD.MM.YYYY');
 
-    const firstDay = `${year}-${month.toString().padStart(2, '0')}-01`;
-    const lastDayDate = new Date(year, month, 0);
-    const lastDay = `${year}-${month.toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
+    const firstDay = parsedDate.startOf('month').format('YYYY-MM-DD');
+    const lastDay = parsedDate.endOf('month').format('YYYY-MM-DD');
 
     this.sub = this.holidays
       .getPublicHolidays(firstDay, lastDay)
       .subscribe((list) => {
-        const found = list.find((h) => h.startDate === this.datum);
+        const found = list.find(
+          (h) => h.startDate === parsedDate.format('YYYY-MM-DD'),
+        );
         if (found) {
           this.isHoliday = true;
           this.holidayName = found.name[0]?.text ?? '';
