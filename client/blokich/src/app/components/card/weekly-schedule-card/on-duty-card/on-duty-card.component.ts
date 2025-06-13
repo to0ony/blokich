@@ -5,10 +5,6 @@ import { BootstrapPopoverDirective } from '../../../../shared/bootstrap-popover.
 import { LucideAngularModule, ClockIcon } from 'lucide-angular';
 import { OpenHolidaysService } from '../../../../services/open-holidays.service';
 
-interface HolidayMap {
-  [isoDate: string]: string;
-}
-
 @Component({
   selector: 'app-on-duty-card',
   standalone: true,
@@ -20,7 +16,7 @@ export class OnDutyCardComponent implements OnInit, OnDestroy {
   readonly ClockIcon = ClockIcon;
 
   @Input() dan!: string;
-  @Input() datum!: string; // očekuje ISO format: yyyy-MM-dd
+  @Input() datum!: string;
   @Input() vrijemePocetak!: string;
   @Input() vrijemeKraj!: string;
   @Input() nocniRad!: string;
@@ -37,44 +33,30 @@ export class OnDutyCardComponent implements OnInit, OnDestroy {
   isHoliday = false;
   holidayName = '';
 
-  private static cache: HolidayMap = {};
   private sub?: Subscription;
 
   constructor(private holidays: OpenHolidaysService) {}
 
   ngOnInit(): void {
-    if (OnDutyCardComponent.cache[this.datum] !== undefined) {
-      this.setHoliday(this.datum);
-    } else {
-      const [year, month] = this.datum.split('-').map(Number);
+    const [year, month] = this.datum.split('-').map(Number);
 
-      const firstDay = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const firstDay = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const lastDayDate = new Date(year, month, 0);
+    const lastDay = `${year}-${month.toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
 
-      const lastDayDate = new Date(year, month, 0);
-      const lastDay = `${year}-${month.toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
-
-      this.sub = this.holidays
-        .getPublicHolidays(firstDay, lastDay)
-        .subscribe((list) => {
-          list.forEach(
-            (h) =>
-              (OnDutyCardComponent.cache[h.startDate] = h.name[0]?.text ?? ''),
-          );
-          this.setHoliday(this.datum);
-        });
-    }
+    this.sub = this.holidays
+      .getPublicHolidays(firstDay, lastDay)
+      .subscribe((list) => {
+        const found = list.find((h) => h.startDate === this.datum);
+        if (found) {
+          this.isHoliday = true;
+          this.holidayName = found.name[0]?.text ?? '';
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
-  }
-
-  private setHoliday(date: string) {
-    const name = OnDutyCardComponent.cache[date];
-    if (name) {
-      this.isHoliday = true;
-      this.holidayName = name;
-    }
   }
 
   getDayClass(): string {
