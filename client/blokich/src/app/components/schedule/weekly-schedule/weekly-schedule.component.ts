@@ -6,6 +6,7 @@ import {
   SimpleChanges,
   Output,
   EventEmitter,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OnDutyCardComponent } from '../../card/weekly-schedule-card/on-duty-card/on-duty-card.component';
@@ -29,7 +30,9 @@ interface RasporedDan {
   templateUrl: './weekly-schedule.component.html',
   styleUrls: ['./weekly-schedule.component.scss'],
 })
-export class WeeklyScheduleComponent implements OnInit, OnChanges {
+export class WeeklyScheduleComponent
+  implements OnInit, OnChanges, AfterViewInit
+{
   @Input() data!: any;
   @Input() naredniTjedanDostupan: boolean = true;
   @Output() tjedanPromjena = new EventEmitter<'trenutni' | 'naredni'>();
@@ -45,6 +48,10 @@ export class WeeklyScheduleComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.dataDisplay();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.scrollToToday(), 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
