@@ -30,6 +30,18 @@ export class OnDutyCardComponent {
   @Input() zavrsetak!: string;
   @Input() oznaka?: string;
 
+  isToday(): boolean {
+    const [day, month, year] = this.datum.split('.');
+    const today = new Date();
+    const componentDate = new Date(+year, +month - 1, +day);
+
+    return (
+      componentDate.getDate() === today.getDate() &&
+      componentDate.getMonth() === today.getMonth() &&
+      componentDate.getFullYear() === today.getFullYear()
+    );
+  }
+
   getDayClass(): string {
     switch (this.dan.toLowerCase()) {
       case 'subota':

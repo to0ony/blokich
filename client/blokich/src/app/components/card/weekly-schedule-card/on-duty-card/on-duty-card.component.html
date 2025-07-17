@@ -1,4 +1,7 @@
-<div class="duty-card" [ngClass]="getDayClass()">
+<div
+  class="duty-card"
+  [ngClass]="[getDayClass(), isToday() ? 'duty-card-today' : '']"
+>
   <div class="duty-header">
     <div class="dan d-flex align-items-center gap-1">
       {{ dan }}
