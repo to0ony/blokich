@@ -18,4 +18,11 @@
   justify-content: center;
 }
 
-
+.jump-to-today {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin: 0.5rem;
+  width: 100%;
+  text-align: center;
+}

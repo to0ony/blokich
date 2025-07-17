@@ -103,4 +103,23 @@ export class WeeklyScheduleComponent implements OnInit, OnChanges {
       .add(danIndex, 'day')
       .format('DD.MM.YYYY');
   }
+
+  isToday(datum: string): boolean {
+    const [day, month, year] = datum.split('.');
+    const today = new Date();
+    const componentDate = new Date(+year, +month - 1, +day);
+
+    return (
+      componentDate.getDate() === today.getDate() &&
+      componentDate.getMonth() === today.getMonth() &&
+      componentDate.getFullYear() === today.getFullYear()
+    );
+  }
+
+  scrollToToday(): void {
+    const el = document.getElementById('danasnja-kartica');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }
