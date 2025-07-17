@@ -1,5 +1,5 @@
 .form-panel {
-  border: 1px solid #ddd;
+  border: 1px solid #dddddd;
   border-radius: 12px;
   padding: 20px;
   background-color: #f9f9f9;
@@ -22,7 +22,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  margin: 0.5rem;
   width: 100%;
   text-align: center;
+  color: #dddddd;
+  margin-bottom: 6px;
 }
