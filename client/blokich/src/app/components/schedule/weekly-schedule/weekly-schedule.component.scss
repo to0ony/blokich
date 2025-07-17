@@ -1,5 +1,5 @@
 .form-panel {
-  border: 1px solid #ddd;
+  border: 1px solid #dddddd;
   border-radius: 12px;
   padding: 20px;
   background-color: #f9f9f9;
@@ -18,4 +18,11 @@
   justify-content: center;
 }
 
-
+.jump-to-today {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 6px;
+}

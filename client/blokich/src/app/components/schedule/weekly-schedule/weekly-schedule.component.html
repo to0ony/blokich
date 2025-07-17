@@ -38,6 +38,13 @@
     </div>
   </div>
 
+  <!-- <button
+    class="btn btn-sm btn-primary jump-to-today d-md-none"
+    (click)="scrollToToday()"
+  >
+    Odvedi me na današnji dan
+  </button> -->
+
   <div class="tjedni-raspored">
     <ng-container *ngFor="let dan of rasporedZaPrikaz">
       <ng-container *ngIf="!dan.isOff && dan.duties.length">
@@ -57,6 +64,7 @@
             [nastup]="duty.nastup_sluzbe"
             [zavrsetak]="duty.zavrsna_sluzba"
             [oznaka]="duty.odsustvo"
+            [attr.id]="isToday(dan.datum) ? 'danasnja-kartica' : null"
           />
         </div>
       </ng-container>
