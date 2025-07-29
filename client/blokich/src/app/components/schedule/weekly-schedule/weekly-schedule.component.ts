@@ -45,6 +45,7 @@ export class WeeklyScheduleComponent
   rasporedZaPrikaz: RasporedDan[] = [];
   prikazaniTjedan: number | null = null;
   prikazanaGodina: number | null = null;
+  datum = dayjs().format('DD.MM.YYYY');
 
   ngOnInit() {
     this.dataDisplay();
