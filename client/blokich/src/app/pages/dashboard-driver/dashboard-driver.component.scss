@@ -1,0 +1,57 @@
+:host {
+  // Konzistentne varijable sustava
+  --apple-bg-system: #f2f2f7; // System Secondary Background (iOS stil)
+  --apple-max-width: 800px;
+}
+
+.ldc-app-root {
+  min-height: 100vh;
+  background-color: var(--apple-bg-system);
+  display: flex;
+  flex-direction: column;
+}
+
+.ldc-page-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // Padding da navigacija ne prekriva sadržaj (prilagodi visini tvog navbara)
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.ldc-view-wrapper {
+  width: 100%;
+  max-width: var(--apple-max-width);
+  padding: 0 16px; // Sigurnosni razmak na rubovima mobitela
+
+  // Apple "spring" animacija pri promjeni view-a
+  animation: viewFadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Responzivne prilagodbe
+@media (min-width: 768px) {
+  .ldc-page-container {
+    padding-top: 40px;
+  }
+}
+
+// Sakrivanje scrollbara ali zadržavanje funkcionalnosti (opcionalno za Apple clean look)
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}

@@ -1,22 +1,27 @@
-<app-navbar [view]="view" (switchView)="setView($event)"></app-navbar>
+<div class="ldc-app-root">
+  <app-navbar [view]="view" (switchView)="setView($event)"></app-navbar>
 
-<div class="container mt-4">
-  <app-weekly-schedule
-    *ngIf="
-      view === 'raspored' &&
-      rasporedData &&
-      godina !== null &&
-      brojTjedna !== null
-    "
-    [data]="rasporedData"
-    [godina]="godina"
-    [brojTjedna]="brojTjedna"
-    [naredniTjedanDostupan]="naredniTjedanDostupan"
-    [tjedanAktivan]="tjedanAktivan"
-    (tjedanPromjena)="onWeekChange($event)"
-  />
+  <main class="ldc-page-container">
+    <div class="ldc-view-wrapper">
+      <app-weekly-schedule
+        *ngIf="
+          view === 'raspored' &&
+          rasporedData &&
+          godina !== null &&
+          brojTjedna !== null
+        "
+        [data]="rasporedData"
+        [godina]="godina"
+        [brojTjedna]="brojTjedna"
+        [naredniTjedanDostupan]="naredniTjedanDostupan"
+        [tjedanAktivan]="tjedanAktivan"
+        (tjedanPromjena)="onWeekChange($event)"
+      ></app-weekly-schedule>
 
-  <app-line-schedule *ngIf="view === 'vozaci'" />
-
-  <app-driver-shift-schedule *ngIf="view === 'smjena'" />
+      <app-line-schedule *ngIf="view === 'vozaci'"></app-line-schedule>
+      <app-driver-shift-schedule
+        *ngIf="view === 'smjena'"
+      ></app-driver-shift-schedule>
+    </div>
+  </main>
 </div>
