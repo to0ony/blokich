@@ -30,6 +30,8 @@ export class NavbarComponent {
 
   imePrezime: string | null = sessionStorage.getItem('imePrezime');
   sluzbeniBroj: string | null = sessionStorage.getItem('sluzbeniBroj');
+  kontaktBroj: string | null = sessionStorage.getItem('kontaktBroj');
+  kontaktBrojInfo: string | null = sessionStorage.getItem('kontaktBrojInfo');
 
   constructor(private router: Router) {}
 

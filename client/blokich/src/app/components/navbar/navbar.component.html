@@ -50,13 +50,24 @@
         </button>
       </div>
 
-      <div class="order-2 order-lg-2 d-flex align-items-center gap-3 pt-2 pt-lg-0 mt-4 mt-lg-0">
+      <div
+        class="order-2 order-lg-2 d-flex align-items-center gap-3 pt-2 pt-lg-0 mt-4 mt-lg-0"
+      >
         <div class="d-flex flex-column">
           <span class="driver-name">
             Vozač: <strong>{{ imePrezime }}</strong>
           </span>
           <span class="driver-name">
             Službeni broj: <strong>{{ sluzbeniBroj }}</strong>
+          </span>
+          <span class="driver-name">
+            Kontakt:
+            <strong>
+              {{ kontaktBroj }}
+              <ng-container *ngIf="kontaktBrojInfo">
+                | {{ kontaktBrojInfo }}
+              </ng-container>
+            </strong>
           </span>
         </div>
         <button class="nav-btn danger-btn" (click)="logout()">Odjava</button>

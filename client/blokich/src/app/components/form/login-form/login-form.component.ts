@@ -81,6 +81,8 @@ export class LoginFormComponent implements OnInit {
         next: (res) => {
           sessionStorage.setItem('sluzbeniBroj', forSessionBroj);
           sessionStorage.setItem('imePrezime', res.imePrezime);
+          sessionStorage.setItem('kontaktBroj', res.kontaktBroj);
+          sessionStorage.setItem('kontaktBrojInfo', res.kontaktBrojInfo);
 
           this.router.navigate(['/dashboard']);
 

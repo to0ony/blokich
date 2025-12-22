@@ -26,7 +26,7 @@
     background-color: #e6f0ff; // blago plava
     border-color: #80bfff;
   }
-}z
+}
 
 .header {
   display: flex;
@@ -35,12 +35,45 @@
   font-size: 16px;
 
   .ime {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 18px;
   }
 
   .broj {
     font-size: 14px;
     color: #666;
+  }
+}
+
+.call-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: #005fcc;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
