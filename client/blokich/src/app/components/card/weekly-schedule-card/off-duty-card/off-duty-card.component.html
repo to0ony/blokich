@@ -1,10 +1,29 @@
-<div class="off-duty-card">
-  <div class="header">
-    <div class="dan">{{ dan }}</div>
-    <div class="datum">{{ datum }}</div>
-  </div>
-  <div class="odsustvo">
-    <span>Slobodan dan</span>
-    <span *ngIf="oznaka" class="badge badge-odsustvo">{{ oznaka }}</span>
+<div
+  class="ldc-card off-duty"
+  [ngClass]="{
+    subota: dan.toLowerCase().includes('sub'),
+    nedjelja: dan.toLowerCase().includes('ned'),
+  }"
+>
+  <div class="ldc-day-indicator"></div>
+
+  <div class="ldc-content-wrapper">
+    <header class="ldc-header">
+      <div class="ldc-identity">
+        <h3 class="ldc-name">{{ dan }}</h3>
+        <div class="ldc-pill-container">
+          <span class="ldc-badge-pill">{{ datum }}</span>
+        </div>
+      </div>
+
+      <div class="ldc-status-tag" *ngIf="oznaka">
+        {{ oznaka }}
+      </div>
+    </header>
+
+    <div class="ldc-off-body">
+      <div class="ldc-bed-icon"></div>
+      <span class="ldc-off-text">Slobodan dan</span>
+    </div>
   </div>
 </div>
