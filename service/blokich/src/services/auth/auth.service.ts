@@ -14,9 +14,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateVozac(
-    sluzbeniBroj: string,
-  ): Promise<{ sluzbeniBroj: string; imePrezime: string } | null> {
+  async validateVozac(sluzbeniBroj: string): Promise<{
+    sluzbeniBroj: string;
+    imePrezime: string;
+    kontaktBroj: string;
+    kontaktBrojInfo: string;
+  } | null> {
     const result = await this.godisnjiModel
       .aggregate([
         { $sort: { createdAt: -1 } },
