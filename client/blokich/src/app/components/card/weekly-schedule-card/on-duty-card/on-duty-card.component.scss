@@ -1,139 +1,224 @@
-// on-on-duty-card.component.scss
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap");
+:host {
+  --apple-blue: #007aff;
+  --apple-gray: #8e8e93;
+  --apple-bg-card: #ffffff;
+  --apple-bg-secondary: #f2f2f7;
+  --apple-text-primary: #1c1c1e;
+  --apple-separator: #d1d1d6;
 
-.duty-card {
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  font-family: "Inter", sans-serif;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  --color-work: #007aff;
+  --color-sat: #34c759;
+  --color-sun: #ff3b30;
+
+  --radius-card: 20px;
+  --radius-inner: 12px;
+}
+
+.ldc-card {
+  background: var(--apple-bg-card);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 100%;
-  transition: max-width 0.2s ease;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  color: var(--apple-text-primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 100%;
-    padding: 20px;
-    gap: 20px;
+  &.is-today {
+    border: 2px solid var(--apple-blue);
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.12);
+  }
+
+  // Bočna indikacija dana
+  .ldc-day-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--color-work);
+  }
+  &.subota .ldc-day-indicator {
+    background: var(--color-sat);
+  }
+  &.nedjelja .ldc-day-indicator {
+    background: var(--color-sun);
   }
 }
 
-.duty-card-today {
-  border-left: 4px solid red;
-}
-
-.radni-dan {
-  background: rgb(205, 233, 255);
-  background: linear-gradient(
-    90deg,
-    rgba(205, 233, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
-}
-
-.subota {
-  background: rgb(205, 255, 206);
-  background: linear-gradient(
-    90deg,
-    rgba(205, 255, 206, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
-}
-
-.nedjelja {
-  background: rgb(255, 205, 205);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 205, 205, 1) 0%,
-    rgba(255, 255, 255, 1) 25%
-  );
-}
-
-.duty-header {
+.ldc-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
 
-  @media (min-width: 768px) {
-    min-width: 140px;
-  }
-}
-
-.dan {
-  font-weight: 700;
-  font-size: 18px;
-}
-
-.datum {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-}
-
-.vrijeme {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 6px 0;
-
-  @media (min-width: 768px) {
-    font-size: 18px;
+  .ldc-name {
     margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .ldc-badge {
+    background: var(--apple-bg-secondary);
+    color: var(--apple-gray);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    &.date {
+      margin-top: 4px;
+      display: inline-block;
+    }
   }
 }
 
-.info {
+// Service Pill (Služba + Info)
+.ldc-service-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-}
+  background: var(--apple-bg-secondary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  gap: 8px;
+  height: 32px;
 
-.vr-label {
-  margin-left: 8px;
-}
+  .pill-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--apple-gray);
+  }
+  .pill-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
 
-.badge {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 13px;
-  display: inline-block;
-  min-width: 24px;
-  text-align: center;
-}
+  .info-trigger {
+    appearance: none;
+    background: transparent;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--apple-gray);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--apple-gray);
+    cursor: pointer;
+    flex-shrink: 0;
 
-.badge.primary {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.badge.light {
-  background-color: #e1efff;
-  color: #007bff;
-}
-
-.nastup {
-  font-size: 14px;
-  margin-top: 4px;
-  font-weight: 500;
-
-  @media (min-width: 768px) {
-    margin-top: 0;
+    &:active {
+      background: var(--apple-gray);
+      color: white;
+    }
   }
 }
 
-.oznaka-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #ff9800;
-  background-color: #fff3cd;
-  padding: 4px 8px;
-  border-radius: 8px;
-  align-self: start;
+// Timeline
+.ldc-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .ldc-node {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .ldc-label {
+      font-size: 0.65rem;
+      color: var(--apple-gray);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .ldc-time {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+    .ldc-location {
+      font-size: 0.85rem;
+      color: var(--apple-blue);
+      font-weight: 500;
+    }
+    &.text-right {
+      align-items: flex-end;
+      text-align: right;
+    }
+  }
+
+  .ldc-connector {
+    flex: 1;
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+
+    .ldc-route-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 2;
+
+      .route-num {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--apple-blue);
+        background: rgba(0, 122, 255, 0.12);
+        padding: 4px 14px;
+        border-radius: 20px;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .vr-num {
+        font-size: 0.8rem;
+        font-weight: 650;
+        color: var(--apple-text-primary);
+        margin-top: 4px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+    }
+
+    .ldc-line-path {
+      height: 2px;
+      width: 100%;
+      background: var(--apple-separator);
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: -3px;
+        width: 8px;
+        height: 8px;
+        background: var(--apple-separator);
+        border-radius: 50%;
+      }
+      &::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: -3px;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--apple-separator);
+        border-bottom: 2px solid var(--apple-separator);
+        transform: rotate(-45deg);
+      }
+    }
+  }
 }

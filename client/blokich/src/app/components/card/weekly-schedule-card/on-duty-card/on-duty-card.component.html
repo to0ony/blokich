@@ -1,57 +1,58 @@
-<div
-  class="duty-card"
-  [ngClass]="[getDayClass(), isToday() ? 'duty-card-today' : '']"
->
-  <div class="duty-header">
-    <div class="dan d-flex align-items-center gap-1">
-      {{ dan }}
-      <span class="badge bg-dark">{{ brojSluzbe }}</span>
-      <button
-        type="button"
-        class="btn p-0 border-0 bg-transparent"
-        tabindex="0"
-        *ngIf="!brojSluzbe.includes('P')"
-        [appPopover]="
-          '<b>Ukup. sati: </b>' +
-          ukupSati +
-          '<br><b>Efek. sati: </b>' +
-          efekSati +
-          '<br><b>Dr. smj.: </b>' +
-          drSmj +
-          '<br><b>Noćni rad: </b>' +
-          nocniRad
-        "
-        [popoverTitle]="'Detalji smjene'"
-      >
-        <lucide-icon [img]="ClockIcon" class="my-icon"></lucide-icon>
-      </button>
+<div class="ldc-card" [ngClass]="[getDayClass(), isToday() ? 'is-today' : '']">
+  <div class="ldc-day-indicator"></div>
+
+  <header class="ldc-header">
+    <div class="ldc-identity">
+      <h3 class="ldc-name">{{ dan }}</h3>
+      <div class="ldc-badges">
+        <span class="ldc-badge date">{{ datum }}</span>
+      </div>
     </div>
-    <div class="datum">{{ datum }}</div>
-  </div>
 
-  <div class="vrijeme">{{ vrijemePocetak }} – {{ vrijemeKraj }}</div>
+    <div class="ldc-actions">
+      <div class="ldc-service-pill">
+        <span class="pill-label">SLUŽBA</span>
+        <span class="pill-value">{{ brojSluzbe }}</span>
+        <button
+          type="button"
+          class="info-trigger"
+          *ngIf="!brojSluzbe.includes('P')"
+          [appPopover]="
+            '<b>Ukup. sati: </b>' +
+            ukupSati +
+            '<br><b>Efek. sati: </b>' +
+            efekSati +
+            '<br><b>Druga smjena: </b>' +
+            drSmj +
+            '<br><b>Noćni rad: </b>' +
+            nocniRad
+          "
+        >
+          i
+        </button>
+      </div>
+    </div>
+  </header>
 
-  <div class="info">
-    <span>Linija:</span>
-    <a
-      class="badge bg-accent1"
-      [href]="
-        'https://triglav.bezdomni.net/public_transport/zet/routes/' + linija
-      "
-      target="_blank"
-      rel="noopener noreferrer"
-      style="text-decoration: none; color: white"
-    >
-      {{ linija }}
-    </a>
-    <span class="vr-label">V.R:</span>
-    <span class="badge bg-accent2">{{ vr }}</span>
-  </div>
+  <div class="ldc-timeline">
+    <div class="ldc-node">
+      <span class="ldc-label">NASTUP</span>
+      <span class="ldc-time">{{ vrijemePocetak }}</span>
+      <span class="ldc-location">{{ nastup }}</span>
+    </div>
 
-  <div class="nastup">
-    Nastup:
-    <div class="badge light">{{ nastup }}</div>
-    →
-    <div class="badge light">{{ zavrsetak }}</div>
+    <div class="ldc-connector">
+      <div class="ldc-route-info">
+        <span class="route-num">{{ linija }}</span>
+        <span class="vr-num">V.R. {{ vr }}</span>
+      </div>
+      <div class="ldc-line-path"></div>
+    </div>
+
+    <div class="ldc-node text-right">
+      <span class="ldc-label">ZAVRŠETAK</span>
+      <span class="ldc-time">{{ vrijemeKraj }}</span>
+      <span class="ldc-location">{{ zavrsetak }}</span>
+    </div>
   </div>
 </div>
