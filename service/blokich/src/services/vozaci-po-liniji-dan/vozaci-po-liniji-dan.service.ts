@@ -50,6 +50,8 @@ export class VozaciPoLinijiService {
     const rezultat: {
       sluz_broj: string;
       ime_prezime: string | null;
+      kontakt_broj: string | null;
+      kontakt_broj_info: string | null;
 
       od: string;
       do: string;
@@ -72,6 +74,8 @@ export class VozaciPoLinijiService {
         rezultat.push({
           sluz_broj: r.sluz_broj.toString().padStart(5, '0'),
           ime_prezime: null,
+          kontakt_broj: null,
+          kontakt_broj_info: null,
 
           od: sl.od,
           do: sl.do,
@@ -91,15 +95,26 @@ export class VozaciPoLinijiService {
       .sort({ createdAt: -1 });
 
     const mapaImena = new Map<number, string>();
+    const mapaKontakta = new Map<
+      number,
+      { kontakt_broj: string | null; kontakt_broj_info: string | null }
+    >();
     if (najnovijiGodisnji) {
       for (const v of najnovijiGodisnji.vozaci) {
         mapaImena.set(Number(v.sluz_broj), v.ime_prezime);
+        mapaKontakta.set(Number(v.sluz_broj), {
+          kontakt_broj: v.kontakt_broj || null,
+          kontakt_broj_info: v.kontakt_broj_info || null,
+        });
       }
     }
 
     for (const v of rezultat) {
       const broj = Number(v.sluz_broj);
       v.ime_prezime = mapaImena.get(broj) || null;
+      const kontakt = mapaKontakta.get(broj);
+      v.kontakt_broj = kontakt?.kontakt_broj ?? null;
+      v.kontakt_broj_info = kontakt?.kontakt_broj_info ?? null;
     }
 
     rezultat.sort((a, b) => a.od.localeCompare(b.od));

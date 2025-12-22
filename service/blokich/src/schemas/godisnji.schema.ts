@@ -27,6 +27,10 @@ export class VozacGodisnji {
   godisnji: GodisnjiDio[];
 
   @Prop() ukupno_dana: string;
+
+  //dodani kontakt brojevi vozaca
+  @Prop() kontakt_broj: string;
+  @Prop() kontakt_broj_info: string;
 }
 
 @Schema({ timestamps: true, collection: 'godisnji' })
