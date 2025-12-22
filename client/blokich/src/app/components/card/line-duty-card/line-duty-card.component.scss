@@ -4,97 +4,37 @@
   --apple-bg-secondary: #f2f2f7;
   --apple-text: #1c1c1e;
   --radius-card: 20px;
-  --radius-inner: 12px;
 }
 
+/* Card Container - Desktop optimizacija */
 .ldc-card {
   background: #ffffff;
   border-radius: var(--radius-card);
-  padding: 20px;
+  padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  max-width: 400px;
-  margin: 0 auto 16px;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  
+  /* Desktop: Ograničavamo širinu da ne bude "razvučeno" */
+  max-width: 440px; 
+  margin: 16px auto;
+  transition: all 0.3s ease;
 }
 
 .ldc-card.is-highlighted {
   border: 2px solid var(--apple-blue);
-  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 122, 255, 0.12);
 }
 
-/* Header & Identity */
-.ldc-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.ldc-name {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--apple-text);
-  letter-spacing: -0.02em;
-}
-
-.ldc-badges {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.ldc-badge {
-  background: var(--apple-bg-secondary);
-  color: var(--apple-gray);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.ldc-line-tag {
-  color: var(--apple-blue);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* Actions */
-.ldc-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.ldc-icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--apple-bg-secondary);
-  color: var(--apple-blue);
-  transition: all 0.2s;
-  text-decoration: none;
-}
-
-.ldc-icon-btn svg { width: 18px; height: 18px; }
-
-.ldc-icon-btn:active {
-  transform: scale(0.9);
-  background: #e5e5ea;
-}
-
-/* Info Grid */
+/* Info Grid: Savršeno poravnanje rubova */
 .ldc-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: space-between; /* Razmakne elemente skroz lijevo i skroz desno */
+  align-items: center;
   background: var(--apple-bg-secondary);
-  padding: 12px;
-  border-radius: var(--radius-inner);
-  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 24px;
 }
 
 .ldc-info-item {
@@ -102,23 +42,23 @@
   flex-direction: column;
 }
 
+/* Label specifičan za Apple (all caps, small) */
 .ldc-label {
   font-size: 0.65rem;
   color: var(--apple-gray);
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   margin-bottom: 2px;
+  text-transform: uppercase;
 }
 
-.ldc-label.uppercase { text-transform: uppercase; }
-
 .ldc-value-bold {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--apple-text);
 }
 
-/* Timeline */
+/* Timeline: Apple Maps stil */
 .ldc-timeline {
   display: flex;
   align-items: center;
@@ -127,15 +67,14 @@
 
 .ldc-node {
   flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .ldc-time {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--apple-text);
-  margin: 2px 0;
+  letter-spacing: -0.03em;
+  display: block;
 }
 
 .ldc-location {
@@ -144,35 +83,50 @@
   font-weight: 500;
 }
 
+/* Connector između vremena */
 .ldc-connector {
-  flex: 0.5;
-  padding: 0 10px;
+  flex: 0.4;
   display: flex;
   align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 0 12px;
+  top: 6px; /* Centriranje u odnosu na velike brojeve sata */
 }
 
 .ldc-line-path {
   height: 2px;
   width: 100%;
-  background: #e5e5ea;
-  position: relative;
+  background: #d1d1d6;
 }
 
-.ldc-line-path::after {
-  content: '';
+.ldc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1d1d6;
   position: absolute;
-  right: 0;
-  top: -3px;
-  width: 8px;
-  height: 8px;
-  border-right: 2px solid #e5e5ea;
-  border-bottom: 2px solid #e5e5ea;
-  transform: rotate(-45deg);
 }
+.ldc-dot.start { left: 0; }
+.ldc-dot.end { right: 0; }
 
+/* Utils */
+.text-left { align-items: flex-start; text-align: left; }
 .text-right { align-items: flex-end; text-align: right; }
 
-/* Responsive tweaks */
-@media (max-width: 350px) {
-  .ldc-time { font-size: 1.1rem; }
+/* Desktop hover efekt */
+@media (min-width: 600px) {
+  .ldc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Mobile specifičnosti */
+@media (max-width: 480px) {
+  .ldc-card {
+    margin: 8px;
+    padding: 18px;
+  }
+  .ldc-time { font-size: 1.25rem; }
 }
