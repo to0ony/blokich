@@ -62,6 +62,8 @@ export class DisponentUploadService {
             ime_prezime: '?',
             godisnji: [],
             ukupno_dana: '0',
+            kontakt_broj: '',
+            kontakt_broj_info: '',
           });
         }
         await targetGodisnji.save();

@@ -44,7 +44,7 @@ export class SluzbaUploadService {
       });
 
       return {
-        poruka: `Uspješno spremljeno ${withTimestamps.length} službi (nakon brisanja starih).`,
+        poruka: `Uspješno spremljeno ${withTimestamps.length} službi. Verzija: ${verzija}`,
       };
     } catch (error) {
       console.error('Greška pri obradi PDF-a:', error);
