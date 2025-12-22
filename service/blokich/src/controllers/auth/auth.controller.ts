@@ -26,6 +26,8 @@ export class AuthController {
       success: true,
       sluzbeniBroj: vozac.sluzbeniBroj,
       imePrezime: vozac.imePrezime,
+      kontaktBroj: vozac.kontaktBroj,
+      kontaktBrojInfo: vozac.kontaktBrojInfo,
     };
   }
 
