@@ -1,51 +1,252 @@
-.nav-btn {
-  padding: 8px 18px;
-  font-size: 1rem;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background-color: white;
-  color: #0d6efd;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  width: 100%;
-  max-width: 220px;
+:host {
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-blur: 20px;
+  --apple-blue: #007aff;
+  --apple-red: #ff3b30;
+  --apple-text: #1d1d1f;
+  --apple-text-gray: #86868b;
+  --apple-border: rgba(0, 0, 0, 0.1);
+  --nav-height: 52px;
 }
 
-@media (min-width: 992px) {
-  .nav-btn {
-    width: auto;
+.ldc-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--nav-bg);
+  backdrop-filter: blur(var(--nav-blur));
+  -webkit-backdrop-filter: blur(var(--nav-blur));
+  border-bottom: 1px solid var(--apple-border);
+  z-index: 1100;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+}
+
+.ldc-nav-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ldc-brand img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+// --- HAMBURGER ---
+.ldc-menu-trigger {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1200;
+
+  .menu-icon {
+    width: 22px;
+    height: 1.5px;
+    background: var(--apple-text);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 1.5px;
+      background: var(--apple-text);
+      left: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    &::before {
+      top: -7px;
+    }
+    &::after {
+      bottom: -7px;
+    }
+  }
+
+  &.is-active .menu-icon {
+    background: transparent;
+    &::before {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    &::after {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
   }
 }
 
-.nav-btn:hover {
-  background-color: #e7f1ff;
-  border-color: #0d6efd;
+// --- NAVBAR LINKOVI---
+.ldc-nav-links {
+  display: flex;
+  gap: 4px;
+  background: rgba(118, 118, 128, 0.12);
+  padding: 3px;
+  border-radius: 10px;
 }
 
-.nav-btn.active {
-  background-color: #0d6efd;
-  color: white;
-  border-color: #0d6efd;
+.ldc-nav-item {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--apple-text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(.active):not(:disabled) {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  &.active {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    color: var(--apple-blue);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
-.nav-btn.danger-btn {
-  color: #dc3545;
-  border-color: #dc3545;
+// --- USER SEKCIJA ---
+.ldc-user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.nav-btn.danger-btn:hover {
-  background-color: #ffe5e8;
-}
-.driver-name {
-  font-size: 0.9rem;
-  color: #555;
-  white-space: nowrap;
+.ldc-user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+
+  .user-main {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .user-sub {
+    font-size: 11px;
+    color: var(--apple-text-gray);
+  }
 }
 
-.nav-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none; // opcionalno, dodatna zaštita
-  background-color: #e0e0e0; // siva
-  color: #999;
+.ldc-logout-btn {
+  border: 1px solid var(--apple-border);
+  background: white;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-red);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--apple-red);
+    color: white;
+    border-color: var(--apple-red);
+  }
+}
+
+// Desktop
+@media (min-width: 992px) {
+  .ldc-nav-collapse {
+    display: flex !important;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 40px;
+  }
+
+  .ldc-nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+// Mobitel
+@media (max-width: 991px) {
+  .ldc-menu-trigger {
+    display: block;
+  }
+
+  .ldc-nav-collapse {
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 24px;
+    border-bottom: 1px solid var(--apple-border);
+    display: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+
+    &.show {
+      display: block;
+      animation: appleSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  .ldc-nav-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .ldc-nav-links {
+    flex-direction: column;
+    background: transparent;
+    padding: 0;
+    gap: 8px;
+  }
+
+  .ldc-nav-item {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 17px; // Apple standard za touch
+    background: rgba(0, 0, 0, 0.03);
+
+    &.active {
+      background: var(--apple-blue);
+      color: white;
+    }
+  }
+
+  .ldc-user-section {
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: 1px solid var(--apple-border);
+    padding-top: 20px;
+  }
+
+  .ldc-user-info {
+    text-align: left;
+  }
+}
+
+@keyframes appleSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
