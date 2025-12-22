@@ -1,255 +1,124 @@
+
 .line-duty-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #e9ecef;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e5e5ea;
+  box-shadow: 0 2px 8px rgba(60,60,67,0.06);
+  padding: 20px 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   max-width: 100%;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #007bff, #28a745);
-  }
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 24px;
-    gap: 24px;
-  }
-
-  &.highlight {
-    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-    border-color: #2196f3;
-    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.15);
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
+  transition: box-shadow 0.2s;
+  margin-bottom: 16px;
 }
 
-.card-header {
+.line-duty-card.highlight {
+  border-color: #007aff;
+  box-shadow: 0 4px 16px rgba(0,122,255,0.10);
+}
+
+.ldc-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-
-  @media (min-width: 768px) {
-    flex: 1;
-  }
+  gap: 18px;
 }
 
-.driver-info {
+.ldc-header-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.driver-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #212529;
-
-  .icon {
-    width: 24px;
-    height: 24px;
-    color: #6c757d;
-  }
-}
-
-.driver-details {
-  display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
 }
 
-.service-number {
-  font-size: 16px;
-  font-weight: 600;
-  color: #495057;
+.ldc-name-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.status-badge {
-  background: linear-gradient(135deg, #6c757d, #495057);
-  color: #ffffff;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 14px;
+.ldc-name {
+  font-size: 1.25rem;
   font-weight: 600;
+  color: #1c1c1e;
+  letter-spacing: -0.01em;
 }
 
-.call-button {
+.ldc-line {
+  font-size: 1rem;
+  color: #007aff;
+  font-weight: 500;
+}
+
+.ldc-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ldc-call, .ldc-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: #fff;
+  background: #f2f2f7;
+  color: #007aff;
   text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover,
-  &:focus-visible {
-    background: linear-gradient(135deg, #218838, #17a2b8);
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
+  border: 1px solid #e5e5ea;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-.card-body {
+.ldc-call:hover, .ldc-link:hover {
+  background: #e5e5ea;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.10);
+}
+
+.ldc-details-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ldc-detail-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-
-  @media (min-width: 768px) {
-    flex: 2;
-    border-left: 1px solid #e9ecef;
-    padding-left: 24px;
-  }
+  gap: 2px;
+  min-width: 90px;
 }
 
-.time-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #007bff;
-
-  .icon {
-    width: 20px;
-    height: 20px;
-  }
-
-  .time-range {
-    background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-    padding: 8px 16px;
-    border-radius: 12px;
-    color: #0d47a1;
-  }
-}
-
-.shift-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  @media (min-width: 480px) {
-    flex-direction: row;
-    gap: 16px;
-  }
-}
-
-.shift-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
+.ldc-label {
+  font-size: 0.85rem;
+  color: #8e8e93;
   font-weight: 500;
-  color: #495057;
-
-  .icon {
-    width: 16px;
-    height: 16px;
-    color: #ffc107;
-  }
-
-  .label {
-    font-weight: 600;
-  }
 }
 
-.time-badge {
-  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-  color: #856404;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 600;
+.ldc-value {
+  font-size: 1rem;
+  color: #1c1c1e;
+  font-weight: 500;
 }
 
-.line-info {
+.ldc-times-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ldc-time-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-
-  @media (min-width: 480px) {
-    flex-direction: row;
-    gap: 16px;
-  }
+  gap: 2px;
+  min-width: 110px;
 }
 
-.line-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #495057;
-
-  .icon {
-    width: 16px;
-    height: 16px;
-    color: #dc3545;
+@media (max-width: 600px) {
+  .line-duty-card {
+    padding: 14px 8px;
   }
-
-  .label {
-    font-weight: 600;
+  .ldc-details-row, .ldc-times-row {
+    gap: 10px;
   }
-}
-
-.line-badge {
-  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-  color: #721c24;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: linear-gradient(135deg, #f5c6cb, #f1aeb5);
-    transform: translateY(-1px);
+  .ldc-header-row {
+    flex-direction: column;
+    gap: 8px;
   }
-}
-
-.vr-badge {
-  background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-  color: #0c5460;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 600;
 }
