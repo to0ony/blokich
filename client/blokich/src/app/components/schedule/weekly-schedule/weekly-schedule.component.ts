@@ -52,7 +52,7 @@ export class WeeklyScheduleComponent
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.scrollToToday(), 0);
+    //   setTimeout(() => this.scrollToToday(), 0);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -124,10 +124,10 @@ export class WeeklyScheduleComponent
     );
   }
 
-  scrollToToday(): void {
-    const el = document.getElementById('danasnja-kartica');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
+  // scrollToToday(): void {
+  //   const el = document.getElementById('danasnja-kartica');
+  //   if (el) {
+  //     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  //   }
+  // }
 }
