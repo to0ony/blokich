@@ -1,3 +1,74 @@
+// --- Novi prikaz vremena ---
+.ldc-time-flow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  margin-top: 2px;
+}
+
+.ldc-time-node {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #f2f2f7;
+  border-radius: 12px;
+  padding: 8px 14px 6px 14px;
+  min-width: 90px;
+  box-shadow: 0 1px 3px rgba(60,60,67,0.04);
+}
+
+.ldc-time-node .ldc-label {
+  font-size: 0.85rem;
+  color: #8e8e93;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.ldc-time-node .ldc-value {
+  font-size: 1.15rem;
+  color: #1c1c1e;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.ldc-time-sub {
+  font-size: 0.85rem;
+  color: #007aff;
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+.ldc-time-arrow {
+  font-size: 1.5rem;
+  color: #b0b0b8;
+  font-weight: 700;
+  margin: 0 6px;
+  user-select: none;
+}
+
+// --- Inline grupa za Broj službe i VR ---
+.ldc-group-inline {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+}
+
+// --- Badge za službeni broj ---
+.ldc-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-left: 8px;
+  background: #f2f2f7;
+  color: #636366;
+}
+.ldc-badge-secondary {
+  background: #e5e5ea;
+  color: #636366;
+}
 
 .line-duty-card {
   background: #fff;

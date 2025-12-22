@@ -3,6 +3,7 @@
     <div class="ldc-header-row">
       <div class="ldc-name-block">
         <span class="ldc-name">{{ vozac.ime_prezime }}</span>
+        <span *ngIf="vozac.sluz_broj" class="ldc-badge ldc-badge-secondary">{{ vozac.sluz_broj }}</span>
         <span *ngIf="vozac.linija" class="ldc-line">Linija {{ vozac.linija }}</span>
       </div>
       <div class="ldc-actions">
@@ -15,31 +16,26 @@
       </div>
     </div>
     <div class="ldc-details-row">
-      <div class="ldc-detail-group">
-        <span class="ldc-label">Servisni broj:</span>
-        <span class="ldc-value">{{ vozac.sluz_broj }}</span>
-      </div>
-      <div class="ldc-detail-group">
-        <span class="ldc-label">Status:</span>
+      <div class="ldc-detail-group ldc-group-inline">
+        <span class="ldc-label">Broj službe:</span>
         <span class="ldc-value">{{ vozac.br_sl }}</span>
-      </div>
-      <div class="ldc-detail-group">
-        <span class="ldc-label">V.R:</span>
+        <span class="ldc-label" style="margin-left:12px;">V.R.:</span>
         <span class="ldc-value">{{ vozac['V.R'] }}</span>
       </div>
     </div>
     <div class="ldc-times-row">
-      <div class="ldc-time-block">
-        <span class="ldc-label">Vrijeme:</span>
-        <span class="ldc-value">{{ vozac.od }} – {{ vozac.do }}</span>
-      </div>
-      <div class="ldc-time-block">
-        <span class="ldc-label">Nastup:</span>
-        <span class="ldc-value">{{ vozac.nastup }}</span>
-      </div>
-      <div class="ldc-time-block">
-        <span class="ldc-label">Završetak:</span>
-        <span class="ldc-value">{{ vozac.zavrsetak }}</span>
+      <div class="ldc-time-flow">
+        <div class="ldc-time-node">
+          <span class="ldc-label">Nastup</span>
+          <span class="ldc-value">{{ vozac.nastup }}</span>
+          <span class="ldc-time-sub">({{ vozac.od }})</span>
+        </div>
+        <div class="ldc-time-arrow">→</div>
+        <div class="ldc-time-node">
+          <span class="ldc-label">Završetak</span>
+          <span class="ldc-value">{{ vozac.zavrsetak }}</span>
+          <span class="ldc-time-sub">({{ vozac.do }})</span>
+        </div>
       </div>
     </div>
   </div>
