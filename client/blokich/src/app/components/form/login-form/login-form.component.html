@@ -7,9 +7,10 @@
     />
   </div>
 
-  <div class="status-wrapper" *ngIf="isNextWeekAvailable">
-    <app-disponent-status [show]="isNextWeekAvailable" />
-  </div>
+  <app-disponent-status
+    *ngIf="isNextWeekAvailable"
+    [show]="isNextWeekAvailable"
+  ></app-disponent-status>
 
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="apple-form">
     <div class="input-group-custom">
