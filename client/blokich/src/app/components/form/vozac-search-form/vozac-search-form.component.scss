@@ -108,14 +108,18 @@
   .item-icon {
     width: 36px;
     height: 36px;
-    background: rgba(0, 122, 255, 0.1);
-    color: #007aff;
-    border-radius: 8px;
+    background: rgba(0, 122, 255, 0.1); // Svijetlo plava pozadina
+    color: #007aff; // Apple Blue boja ikone
+    border-radius: 10px; // Lagano zaobljeno (squircle)
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
+    flex-shrink: 0; // Da se kocka ne stisne ako je tekst dugačak
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   .item-content {
