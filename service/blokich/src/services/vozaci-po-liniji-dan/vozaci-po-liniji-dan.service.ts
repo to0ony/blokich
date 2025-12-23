@@ -48,7 +48,7 @@ export class VozaciPoLinijiService {
     }
 
     // Pripremi sve regex upite za br_sl za sve radnike
-    const sluzbaQueries = radnici.map(r => ({
+    const sluzbaQueries = radnici.map((r) => ({
       linija,
       br_sl: { $regex: `^${r.br_sl}(P*)$`, $options: 'i' },
       verzija: verzijaSluzbe,
@@ -56,7 +56,7 @@ export class VozaciPoLinijiService {
 
     // Paralelno dohvaćanje svih sluzbi za sve radnike
     const sluzbeResults = await Promise.all(
-      sluzbaQueries.map(q => this.sluzbaModel.find(q))
+      sluzbaQueries.map((q) => this.sluzbaModel.find(q)),
     );
 
     // Sastavi rezultat
@@ -85,7 +85,7 @@ export class VozaciPoLinijiService {
           od: sl.od,
           do: sl.do,
           nastup: sl.nastup_sluzbe,
-          zavrsetak: sl.zavrsetak,
+          zavrsetak: sl.zavrsna_sluzba,
           br_sl: sl.br_sl,
           linija: sl.linija,
           'V.R': sl.varijanta || null,
