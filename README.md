@@ -11,19 +11,13 @@ Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
 - Prikaz vozačevog rasporeda vožnje za aktualni i naredni tjedan
 - Prikaz vozačeve današnje smjene uz podatke o ostalim vozačima s kojima dijeli smjenu
 - Prikaz svih vozača određene linije za određeni dan u tjednu (aktualnom ili narednom)
-
-## U izradi
-
-#### Funkcionalnosti za vozače
-
 - Prikaz svih vozača uz ispis odgovoarajućih službenih brojeva
+
+## U planu
+
 - Prikaz svih aktualnih službi
 - Integracija [openholidaysapi](https://www.openholidaysapi.org/en/sources/#croatia "API") za prikaz neradnih dana unutar rasporeda vožnji
 
-#### Funkcionalnosti za administratora
-
-- Potpuna implementacija admin dashboarda (UI)
-- Ručni unos promjena u disponent (iznenadna bolovanja, godišnji...)
 
 ## Screenshots
 
