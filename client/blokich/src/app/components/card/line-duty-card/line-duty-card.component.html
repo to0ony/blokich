@@ -1,37 +1,89 @@
-<div class="line-duty-card" [class.highlight]="jePrijavljeni">
-  <div class="header">
-    <div class="ime">{{ vozac.ime_prezime }}</div>
-    <div class="broj">{{ vozac.sluz_broj }}</div>
-    <span class="badge bg-dark">{{ vozac.br_sl }}</span>
-  </div>
-
-  <div class="details">
-    <div class="vrijeme">{{ vozac.od }} – {{ vozac.do }}</div>
-
-    <div class="info">
-      <span>Nastup:</span>
-      <span class="badge light">{{ vozac.nastup }}</span>
-      <span>➔</span>
-      <span>Završetak:</span>
-      <span class="badge light">{{ vozac.zavrsetak }}</span>
+<div class="ldc-card" [class.is-highlighted]="jePrijavljeni">
+  <header class="ldc-header">
+    <div class="ldc-identity">
+      <h3 class="ldc-name">{{ vozac.ime_prezime }}</h3>
+      <div class="ldc-badges">
+        <span *ngIf="vozac.sluz_broj" class="ldc-badge">{{
+          vozac.sluz_broj
+        }}</span>
+      </div>
     </div>
-
-    <div class="line-info" *ngIf="vozac['V.R']">
-      <span class="vr-label">Linija:</span>
+    <div class="ldc-actions">
       <a
-        class="badge bg-accent1"
+        *ngIf="vozac.kontakt_broj"
+        [href]="'tel:' + vozac.kontakt_broj"
+        class="ldc-icon-btn call"
+        aria-label="Nazovi"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+          ></path>
+        </svg>
+      </a>
+      <a
+        *ngIf="vozac.linija"
         [href]="
           'https://triglav.bezdomni.net/public_transport/zet/routes/' +
           vozac.linija
         "
         target="_blank"
-        rel="noopener noreferrer"
-        style="text-decoration: none; color: white"
+        class="ldc-icon-btn route"
+        aria-label="Ruta"
       >
-        {{ vozac.linija }}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="6" cy="19" r="3"></circle>
+          <circle cx="18" cy="5" r="3"></circle>
+          <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
+        </svg>
       </a>
-      <span class="vr-label">V.R:</span>
-      <span class="badge bg-accent2">{{ vozac["V.R"] }}</span>
+    </div>
+  </header>
+
+  <div class="ldc-info-grid">
+    <div class="ldc-info-item">
+      <span class="ldc-label">SLUŽBA</span>
+      <span class="ldc-value-bold">{{ vozac.br_sl }}</span>
+    </div>
+    <div class="ldc-info-item">
+      <span class="ldc-label">LINIJA</span>
+      <span class="ldc-value-bold">{{ vozac.linija }}</span>
+    </div>
+    <div class="ldc-info-item">
+      <span class="ldc-label">V.R.</span>
+      <span class="ldc-value-bold">{{ vozac["V.R"] }}</span>
+    </div>
+  </div>
+
+  <div class="ldc-timeline">
+    <div class="ldc-node">
+      <span class="ldc-label uppercase">Nastup</span>
+      <span class="ldc-time">{{ vozac.od }}</span>
+      <span class="ldc-location">{{ vozac.nastup }}</span>
+    </div>
+
+    <div class="ldc-connector">
+      <div class="ldc-line-path"></div>
+    </div>
+
+    <div class="ldc-node text-right">
+      <span class="ldc-label uppercase">Završetak</span>
+      <span class="ldc-time">{{ vozac.do }}</span>
+      <span class="ldc-location">{{ vozac.zavrsetak }}</span>
     </div>
   </div>
 </div>

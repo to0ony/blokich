@@ -12,6 +12,8 @@ export class LineDutyCardComponent implements OnInit {
   @Input() vozac!: {
     sluz_broj: string;
     ime_prezime: string;
+    kontakt_broj: string;
+    kontakt_broj_info: string;
     od: string;
     do: string;
     nastup: string;

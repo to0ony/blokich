@@ -14,20 +14,25 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateVozac(
-    sluzbeniBroj: string,
-  ): Promise<{ sluzbeniBroj: string; imePrezime: string } | null> {
+  async validateVozac(sluzbeniBroj: string): Promise<{
+    sluzbeniBroj: string;
+    imePrezime: string;
+    kontaktBroj: string;
+    kontaktBrojInfo: string;
+  } | null> {
     const result = await this.godisnjiModel
       .aggregate([
-        { $sort: { createdAt: -1 } }, 
+        { $sort: { createdAt: -1 } },
         { $unwind: '$vozaci' },
         { $match: { 'vozaci.sluz_broj': sluzbeniBroj } },
-        { $limit: 1 }, 
+        { $limit: 1 },
         {
           $project: {
             _id: 0,
             sluzbeniBroj: '$vozaci.sluz_broj',
             imePrezime: '$vozaci.ime_prezime',
+            kontaktBroj: '$vozaci.kontakt_broj',
+            kontaktBrojInfo: '$vozaci.kontakt_broj_info',
           },
         },
       ])
@@ -80,7 +85,7 @@ export class AuthService {
     return {
       access_token: token,
       expires_in: expiresIn,
-      token_type: 'Bearer'
+      token_type: 'Bearer',
     };
   }
 }

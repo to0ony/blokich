@@ -1,50 +1,159 @@
 :host {
-  display: block;
-}
-
-.card {
-  width: 100%;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  background-color: #ffffff;
-  box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.1);
-}
-
-.form {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
 }
 
-.status-wrapper {
-  margin-bottom: 1rem;
+.apple-login-container {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-input.ng-invalid.ng-touched {
-  border-color: #dc3545;
-}
+.apple-brand-header {
+  text-align: center;
+  margin-bottom: 32px;
 
-.invalid-feedback {
-  font-size: 0.875rem;
-}
-
-button {
-  transition: background-color 0.2s ease;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-@media (max-width: 576px) {
-  .card {
-    padding: 1.5rem !important;
+  .apple-logo {
+    max-height: 72px; //52px regular
+    width: auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
   }
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+.apple-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.input-group-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #86868b; // Apple gray text
+    margin-left: 4px;
+  }
+
+  input {
+    height: 48px;
+    background: rgba(118, 118, 128, 0.12);
+    border: none;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 16px;
+    color: #1d1d1f;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      background: rgba(118, 118, 128, 0.18);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+    }
+
+    &.has-error {
+      background: rgba(255, 59, 48, 0.08);
+      color: #ff3b30;
+    }
+  }
+}
+
+.error-text {
+  font-size: 12px;
+  color: #ff3b30;
+  margin-left: 4px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+// Apple Primary Button (Solid Blue)
+.apple-btn-primary {
+  height: 50px;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    background: #0066d6;
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Apple Secondary Button (Link style)
+.apple-btn-secondary {
+  height: 44px;
+  background: transparent;
+  color: #007aff;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Apple Spinner
+.apple-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-collapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.open {
+    max-height: 500px;
+    margin-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 16px;
+  }
+}
+
+// Reset number arrows
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }

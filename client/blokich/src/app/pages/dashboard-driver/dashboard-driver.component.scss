@@ -1,0 +1,54 @@
+:host {
+  --apple-bg-system: #f2f2f7;
+  --apple-max-width: 800px;
+}
+
+.ldc-app-root {
+  min-height: 100vh;
+  background-color: var(--apple-bg-system);
+  display: flex;
+  flex-direction: column;
+}
+
+.ldc-page-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // Padding da navbar ne prekriva sadržaj
+  padding-top: 52px;
+  padding-bottom: 12px;
+}
+
+.ldc-view-wrapper {
+  width: 100%;
+  max-width: var(--apple-max-width);
+  padding: 0 16px;
+
+  // Apple "spring" animacija pri promjeni view-a
+  animation: viewFadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .ldc-page-container {
+    padding-top: 52px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}

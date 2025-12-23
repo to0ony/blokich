@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VozaciService } from '../../../services/vozaci.service';
@@ -20,28 +20,32 @@ interface VozacInfo {
 export class VozacSearchFormComponent {
   searchQuery = '';
   searchResults: VozacInfo[] = [];
+  isModalVisible = false;
+
+  @Output() selectVozac = new EventEmitter<string>();
 
   constructor(private vozaciService: VozaciService) {}
 
   openSearch() {
     if (!this.searchQuery.trim()) return;
 
-    this.vozaciService.searchVozaci(this.searchQuery).subscribe(
-      (res) => {
+    this.vozaciService.searchVozaci(this.searchQuery).subscribe({
+      next: (res) => {
         this.searchResults = res;
-
-        const modalElement = document.getElementById('searchModal');
-        if (modalElement) {
-          const modal = new bootstrap.Modal(modalElement);
-          modal.show();
-        } else {
-          console.warn("Modal element with ID 'searchModal' not found.");
-        }
+        this.isModalVisible = true;
       },
-      (error) => {
-        console.error('Error occurred while searching for vozaci:', error);
-        alert('An error occurred while searching. Please try again later.');
-      }
-    );
+      error: (error) => {
+        console.error('Greška:', error);
+      },
+    });
+  }
+
+  closeSearch() {
+    this.isModalVisible = false;
+  }
+
+  onSelectVozac(sluzbeniBroj: string) {
+    this.selectVozac.emit(sluzbeniBroj);
+    this.isModalVisible = false;
   }
 }

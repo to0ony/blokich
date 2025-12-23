@@ -1,4 +1,26 @@
-<div *ngIf="show" class="status-box">
-  <lucide-icon [img]="Info" class="my-icon" [size]="20"></lucide-icon>
-  <span>Dostupan je disponent za naredni tjedan!</span>
+<div class="apple-status-container" [class.show]="show">
+  <div class="apple-status-inner">
+    <div class="status-icon-wrap">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+        <path
+          d="M12 16V12"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+        <circle cx="12" cy="8" r="1" fill="currentColor" />
+      </svg>
+    </div>
+    <div class="status-text">
+      <span class="status-title">Dostupan naredni tjedan</span>
+      <span class="status-desc">Novi disponent je ubačen.</span>
+    </div>
+  </div>
 </div>

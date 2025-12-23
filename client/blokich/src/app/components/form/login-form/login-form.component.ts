@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -34,6 +34,9 @@ export class LoginFormComponent implements OnInit {
   lastDisponentUpload: any;
   isNextWeekAvailable: boolean = false;
   showSearchForm = false;
+
+  @ViewChild(VozacSearchFormComponent)
+  vozacSearchFormComponent?: VozacSearchFormComponent;
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +74,12 @@ export class LoginFormComponent implements OnInit {
     this.showSearchForm = !this.showSearchForm;
   }
 
+  onVozacSelected(sluzbeniBroj: string) {
+    this.loginForm.get('sluzbeniBroj')?.setValue(sluzbeniBroj);
+    this.loginForm.get('sluzbeniBroj')?.markAsTouched();
+    this.showSearchForm = false;
+  }
+
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
@@ -81,6 +90,12 @@ export class LoginFormComponent implements OnInit {
         next: (res) => {
           sessionStorage.setItem('sluzbeniBroj', forSessionBroj);
           sessionStorage.setItem('imePrezime', res.imePrezime);
+          sessionStorage.setItem('kontaktBroj', res.kontaktBroj);
+          sessionStorage.setItem('kontaktBrojInfo', res.kontaktBrojInfo);
+          sessionStorage.setItem(
+            'isNextWeekAvailable',
+            this.isNextWeekAvailable ? 'true' : 'false',
+          );
 
           this.router.navigate(['/dashboard']);
 

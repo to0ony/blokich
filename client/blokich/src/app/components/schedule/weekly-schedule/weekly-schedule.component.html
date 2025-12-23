@@ -1,82 +1,74 @@
-<div class="raspored-wrapper">
-  <div class="form-panel">
-    <div
-      class="d-flex justify-content-between align-items-center flex-wrap gap-2"
-    >
-      <div class="btn-group" role="group" aria-label="Tjedan izbor">
+<div class="ldc-main-wrapper">
+  <div class="ldc-main-container">
+    <header class="ldc-view-header">
+      <div class="ldc-segmented-control">
         <input
           type="radio"
-          class="btn-check"
-          name="tjedan"
           id="trenutni"
-          autocomplete="off"
+          name="tjedan"
           [checked]="tjedanAktivan === 'trenutni'"
           (change)="changeWeek('trenutni')"
         />
-        <label class="btn btn-outline-primary" for="trenutni"
-          >Trenutni tjedan</label
-        >
+        <label for="trenutni">Aktualni tjedan</label>
 
         <input
           type="radio"
-          class="btn-check"
-          name="tjedan"
           id="naredni"
-          autocomplete="off"
+          name="tjedan"
           [checked]="tjedanAktivan === 'naredni'"
           (change)="changeWeek('naredni')"
           [disabled]="!naredniTjedanDostupan"
         />
-        <label class="btn btn-outline-primary" for="naredni"
-          >Naredni tjedan</label
+        <label
+          for="naredni"
+          [ngClass]="{ 'is-disabled': !naredniTjedanDostupan }"
+        >
+          Naredni tjedan
+          <span class="lock-icon" *ngIf="!naredniTjedanDostupan"></span>
+        </label>
+
+        <div class="selection-slider"></div>
+      </div>
+
+      <div class="ldc-week-info" *ngIf="prikazaniTjedan">
+        <span class="week-label"
+          >Raspored vožnji za {{ prikazaniTjedan }}. tjedan
+          {{ prikazanaGodina }}.</span
         >
       </div>
+    </header>
 
-      <h6 class="mb-0" *ngIf="prikazaniTjedan">
-        Tjedan {{ prikazaniTjedan }} / {{ prikazanaGodina }} ,
-        {{ datum }}
-      </h6>
-    </div>
-  </div>
+    <main class="ldc-timeline-list">
+      <ng-container *ngFor="let dan of rasporedZaPrikaz">
+        <ng-container *ngIf="!dan.isOff && dan.duties.length">
+          <div class="ldc-item-wrapper" *ngFor="let duty of dan.duties">
+            <app-on-duty-card
+              [dan]="dan.dan"
+              [datum]="dan.datum"
+              [vrijemePocetak]="duty.od"
+              [vrijemeKraj]="duty.do"
+              [brojSluzbe]="duty.br_sl"
+              [linija]="duty.linija"
+              [ukupSati]="duty.ukupni_sati"
+              [efekSati]="duty.efektivni_sati"
+              [drSmj]="duty.druga_smjena"
+              [nocniRad]="duty.nocni_rad"
+              [vr]="duty.varijanta"
+              [nastup]="duty.nastup_sluzbe"
+              [zavrsetak]="duty.zavrsna_sluzba"
+              [id]="isToday(dan.datum) ? 'danasnja-kartica' : ''"
+            ></app-on-duty-card>
+          </div>
+        </ng-container>
 
-  <!-- <button
-    class="btn btn-sm btn-primary jump-to-today d-md-none"
-    (click)="scrollToToday()"
-  >
-    Odvedi me na današnji dan
-  </button> -->
-
-  <div class="tjedni-raspored">
-    <ng-container *ngFor="let dan of rasporedZaPrikaz">
-      <ng-container *ngIf="!dan.isOff && dan.duties.length">
-        <div class="kartica-wrapper" *ngFor="let duty of dan.duties">
-          <app-on-duty-card
+        <div class="ldc-item-wrapper" *ngIf="dan.isOff">
+          <app-off-duty-card
             [dan]="dan.dan"
             [datum]="dan.datum"
-            [vrijemePocetak]="duty.od"
-            [vrijemeKraj]="duty.do"
-            [brojSluzbe]="duty.br_sl"
-            [linija]="duty.linija"
-            [ukupSati]="duty.ukupni_sati"
-            [efekSati]="duty.efektivni_sati"
-            [drSmj]="duty.druga_smjena"
-            [nocniRad]="duty.nocni_rad"
-            [vr]="duty.varijanta"
-            [nastup]="duty.nastup_sluzbe"
-            [zavrsetak]="duty.zavrsna_sluzba"
-            [oznaka]="duty.odsustvo"
-            [attr.id]="isToday(dan.datum) ? 'danasnja-kartica' : null"
-          />
+            [oznaka]="dan.duties[0]?.odsustvo"
+          ></app-off-duty-card>
         </div>
       </ng-container>
-
-      <div class="kartica-wrapper" *ngIf="dan.isOff">
-        <app-off-duty-card
-          [dan]="dan.dan"
-          [datum]="dan.datum"
-          [oznaka]="dan.duties[0]?.odsustvo"
-        />
-      </div>
-    </ng-container>
+    </main>
   </div>
 </div>
