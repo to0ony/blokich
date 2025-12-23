@@ -15,7 +15,7 @@
         <span class="pill-value">{{ brojSluzbe }}</span>
         <button
           type="button"
-          (click)="$event.stopPropagation()"
+          tabindex="0"
           class="info-trigger"
           *ngIf="!brojSluzbe.includes('P')"
           [appPopover]="
