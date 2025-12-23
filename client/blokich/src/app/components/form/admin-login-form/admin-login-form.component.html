@@ -1,21 +1,39 @@
-<div class="admin-login-form">
-  <h2>Blokich admin</h2>
-  <form (ngSubmit)="login()">
-    <input
-      [(ngModel)]="username"
-      name="username"
-      placeholder="Korisničko ime"
-      required
-    />
-    <input
-      [(ngModel)]="password"
-      name="password"
-      type="password"
-      placeholder="Lozinka"
-      required
-    />
-    <button type="submit">Prijava</button>
-  </form>
+<div class="apple-admin-card">
+  <div class="apple-brand-header">
+    <h2 class="apple-title">Blokich Admin</h2>
+  </div>
 
-  <p *ngIf="error" class="error">{{ error }}</p>
+  <form (ngSubmit)="login()" class="apple-form">
+    <div class="input-group-custom">
+      <label for="username">Korisničko ime</label>
+      <div class="input-wrapper">
+        <input
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          type="text"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="input-group-custom">
+      <label for="password">Lozinka</label>
+      <div class="input-wrapper">
+        <input
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          required
+        />
+      </div>
+    </div>
+
+    <button type="submit" class="apple-btn-primary">Prijavi se</button>
+
+    <div *ngIf="error" class="apple-error-box">
+      <span>{{ error }}</span>
+    </div>
+  </form>
 </div>
