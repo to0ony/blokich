@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LineDutyCardComponent } from '../../card/line-duty-card/line-duty-card.component';
 import { LineScheduleService } from '../../../services/line-schedule.service';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-line-schedule',
@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './line-schedule.component.html',
   styleUrls: ['./line-schedule.component.scss'],
 })
-export class LineScheduleComponent {
+export class LineScheduleComponent implements OnInit {
   odabranaLinija: string = '';
   odabraniDan: string = '';
   odabraniTjedan: 'trenutni' | 'naredni' = 'trenutni';
@@ -20,6 +20,10 @@ export class LineScheduleComponent {
   dan: string = '';
   isSearched: boolean = false;
   isLoading: boolean = false;
+
+  // Provjera dostupnosti iz session storagea koji si postavio kod logina
+  isNextWeekAvailable: boolean =
+    sessionStorage.getItem('nextWeekDisponentAvailable') === 'true';
 
   dani = [
     { key: 'pon', label: 'Ponedjeljak' },
@@ -33,10 +37,19 @@ export class LineScheduleComponent {
 
   constructor(private vozaciService: LineScheduleService) {}
 
+  ngOnInit(): void {
+    // Ako naredni tjedan nije dostupan, osiguraj da je default uvijek trenutni
+    if (!this.isNextWeekAvailable) {
+      this.odabraniTjedan = 'trenutni';
+    }
+  }
+
   fetchScheduleData() {
-    this.isLoading = true;
     if (!this.odabranaLinija || !this.odabraniDan) return;
+
+    this.isLoading = true;
     this.isSearched = true;
+
     this.vozaciService
       .fetchLineDrivers(
         this.odabranaLinija,

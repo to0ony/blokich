@@ -1,92 +1,87 @@
-<div class="line-schedule-wrapper">
-  <div class="form-panel">
-    <form
-      class="filters d-flex flex-column flex-md-row gap-3 align-items-md-end mb-0"
-    >
-      <!-- Odabir tjedna -->
-      <div class="form-group">
-        <label class="form-label">Tjedan</label>
-        <div class="form-check">
-          <input
-            type="radio"
-            class="form-check-input"
-            id="trenutni"
-            name="tjedan"
-            value="trenutni"
-            [(ngModel)]="odabraniTjedan"
-            ngModel
-          />
-          <label for="trenutni" class="form-check-label">Trenutni</label>
-        </div>
-        <div class="form-check">
-          <input
-            type="radio"
-            class="form-check-input"
-            id="naredni"
-            name="tjedan"
-            value="naredni"
-            [(ngModel)]="odabraniTjedan"
-          />
-          <label for="naredni" class="form-check-label">Naredni</label>
-        </div>
-      </div>
+<div class="apple-container">
+  <header class="apple-header">
+    <h1 class="apple-title">Pregled linija</h1>
+    <p class="apple-subtitle">Pronađite raspored vozača za određenu liniju</p>
+  </header>
 
-      <!-- Odabir linije -->
-      <div class="form-group">
-        <label for="linija" class="form-label">Linija</label>
+  <div class="apple-filter-card">
+    <div class="segmented-control">
+      <input
+        type="radio"
+        id="trenutni"
+        name="tjedan"
+        value="trenutni"
+        [(ngModel)]="odabraniTjedan"
+      />
+      <label for="trenutni">Aktualni tjedan</label>
+
+      <input
+        type="radio"
+        id="naredni"
+        name="tjedan"
+        value="naredni"
+        [(ngModel)]="odabraniTjedan"
+        [disabled]="!isNextWeekAvailable"
+      />
+      <label for="naredni" [class.is-disabled]="!isNextWeekAvailable">
+        Naredni tjedan
+      </label>
+
+      <div class="selection-bg"></div>
+    </div>
+
+    <div class="input-grid">
+      <div class="apple-input-group">
+        <label>Broj linije</label>
         <input
           type="text"
-          id="linija"
-          class="form-control"
           [(ngModel)]="odabranaLinija"
-          name="linija"
           placeholder="npr. 102"
+          class="apple-input"
         />
       </div>
 
-      <!-- Odabir dana -->
-      <div class="form-group">
-        <label for="dan" class="form-label">Dan</label>
-        <select
-          id="dan"
-          class="form-select"
-          [(ngModel)]="odabraniDan"
-          name="dan"
-        >
-          <option *ngFor="let d of dani" [value]="d.key">{{ d.label }}</option>
-        </select>
+      <div class="apple-input-group">
+        <label>Dan u tjednu</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="odabraniDan" class="apple-select">
+            <option value="" disabled selected>Odaberi dan</option>
+            <option *ngFor="let d of dani" [value]="d.key">
+              {{ d.label }}
+            </option>
+          </select>
+        </div>
       </div>
-
-      <button
-        class="btn btn-primary"
-        type="button"
-        (click)="fetchScheduleData()"
-        [disabled]="!odabranaLinija || !odabraniDan"
-      >
-        Prikaži
-      </button>
-    </form>
-  </div>
-
-  <div *ngIf="isLoading" class="text-center py-3">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Učitavanje...</span>
     </div>
+
+    <button
+      class="apple-btn-main"
+      (click)="fetchScheduleData()"
+      [disabled]="!odabranaLinija || !odabraniDan || isLoading"
+    >
+      <span *ngIf="!isLoading">Dohvati raspored</span>
+      <div *ngIf="isLoading" class="apple-spinner"></div>
+    </button>
   </div>
 
-  <!-- Prikaz rasporeda -->
-  <div *ngIf="voze?.length">
-    <h5 class="heading">Raspored za liniju {{ linija }} – {{ dan }}</h5>
+  <div class="results-area" *ngIf="voze?.length && !isLoading">
+    <div class="results-header">
+      <div class="title-wrap">
+        <span class="line-badge">{{ linija }}</span>
+        <h2>{{ dan }}</h2>
+      </div>
+    </div>
 
-    <div class="voznje-list">
+    <div class="duty-stack">
       <app-line-duty-card *ngFor="let vozac of voze" [vozac]="vozac" />
     </div>
   </div>
 
   <div
-    *ngIf="isSearched && !isLoading && voze && !voze.length"
-    class="text-muted"
+    *ngIf="isSearched && !isLoading && !voze?.length"
+    class="apple-empty-state"
   >
-    Nema dostupnih vožnji za odabranu kombinaciju.
+    <div class="empty-icon">🔍</div>
+    <p>Nema pronađenih vožnji za traženu kombinaciju.</p>
   </div>
 </div>

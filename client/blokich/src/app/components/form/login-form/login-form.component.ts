@@ -92,6 +92,10 @@ export class LoginFormComponent implements OnInit {
           sessionStorage.setItem('imePrezime', res.imePrezime);
           sessionStorage.setItem('kontaktBroj', res.kontaktBroj);
           sessionStorage.setItem('kontaktBrojInfo', res.kontaktBrojInfo);
+          sessionStorage.setItem(
+            'isNextWeekAvailable',
+            this.isNextWeekAvailable ? 'true' : 'false',
+          );
 
           this.router.navigate(['/dashboard']);
 
