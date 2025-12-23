@@ -1,56 +1,39 @@
-<div class="mb-3">
-  <div class="input-group">
-    <input
-      type="text"
-      class="form-control"
-      [(ngModel)]="searchQuery"
-      id="searchVozac"
-      placeholder="Unesite ime ili broj"
-    />
-    <button class="btn btn-outline-secondary" (click)="openSearch()">
-      Pretraži
-    </button>
+<div class="apple-search-wrapper">
+  <div class="apple-search-bar">
+    <div class="search-input-container">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        id="searchVozac"
+        placeholder="Ime ili službeni broj..."
+        (keyup.enter)="openSearch()"
+      />
+    </div>
+    <button class="apple-search-btn" (click)="openSearch()">Pretraži</button>
   </div>
-</div>
 
-<!-- Modal -->
-<div
-  class="modal fade"
-  id="searchModal"
-  tabindex="-1"
-  aria-labelledby="searchModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="searchModalLabel">Rezultati pretrage</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Zatvori"
-        ></button>
+  <div class="results-container" *ngIf="isModalVisible">
+    <div class="results-header">
+      <span class="results-title">Rezultati pretrage</span>
+      <button class="close-link" (click)="closeSearch()">Zatvori</button>
+    </div>
+
+    <div class="apple-list" *ngIf="searchResults.length > 0">
+      <div
+        class="apple-list-item"
+        *ngFor="let v of searchResults"
+        (click)="onSelectVozac(v.sluz_broj)"
+      >
+        <div class="item-icon">{{ v.sluz_broj.slice(-2) }}</div>
+        <div class="item-content">
+          <span class="item-name">{{ v.ime_prezime }}</span>
+          <span class="item-sub">Službeni broj: {{ v.sluz_broj }}</span>
+        </div>
       </div>
-      <div class="modal-body">
-        <table class="table table-sm table-hover text-start">
-          <thead class="table-light">
-            <tr>
-              <th>Službeni broj</th>
-              <th>Naziv vozača</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let v of searchResults">
-              <td>{{ v.sluz_broj }}</td>
-              <td>{{ v.ime_prezime }}</td>
-            </tr>
-            <tr *ngIf="!searchResults.length">
-              <td colspan="2" class="text-center">Nema rezultata</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    </div>
+
+    <div class="apple-empty-state" *ngIf="searchResults.length === 0">
+      <p>Nema rezultata za "{{ searchQuery }}"</p>
     </div>
   </div>
 </div>

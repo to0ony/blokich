@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -35,6 +35,9 @@ export class LoginFormComponent implements OnInit {
   isNextWeekAvailable: boolean = false;
   showSearchForm = false;
 
+  @ViewChild(VozacSearchFormComponent)
+  vozacSearchFormComponent?: VozacSearchFormComponent;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -69,6 +72,12 @@ export class LoginFormComponent implements OnInit {
 
   toggleSearchForm() {
     this.showSearchForm = !this.showSearchForm;
+  }
+
+  onVozacSelected(sluzbeniBroj: string) {
+    this.loginForm.get('sluzbeniBroj')?.setValue(sluzbeniBroj);
+    this.loginForm.get('sluzbeniBroj')?.markAsTouched();
+    this.showSearchForm = false;
   }
 
   onSubmit(): void {
