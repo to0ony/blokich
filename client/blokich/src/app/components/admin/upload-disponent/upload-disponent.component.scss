@@ -1,7 +1,185 @@
-.card-title {
-  margin-bottom: 1rem;
+.apple-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-button[disabled] {
-  opacity: 0.6;
+/* Ponovna uporaba istog Apple File Picker stila */
+.file-picker-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #f5f5f7;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px dashed #d1d1d6;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #007aff;
+    background: #f0f7ff;
+  }
+}
+
+.input-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  .label-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+  .hidden-input {
+    display: none;
+  }
+}
+
+.selected-file-name {
+  font-size: 13px;
+  color: #86868b;
+  margin-left: 36px;
+}
+
+.apple-action-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+
+  &:disabled {
+    background: #d1d1d6;
+    cursor: not-allowed;
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+}
+
+/* Status Pill */
+.status-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+
+  &.success {
+    background: rgba(52, 199, 89, 0.1);
+    color: #248a3d;
+    .dot {
+      background: #34c759;
+    }
+  }
+  &.error {
+    background: rgba(255, 59, 48, 0.1);
+    color: #d70015;
+    .dot {
+      background: #ff3b30;
+    }
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+}
+
+/* Apple List Style */
+.history-section {
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #86868b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    margin-left: 4px;
+  }
+}
+
+.apple-data-list {
+  background: #f5f5f7;
+  border-radius: 16px;
+  overflow: hidden;
+
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    font-size: 15px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+    .data-label {
+      color: #1d1d1f;
+    }
+    .data-value {
+      color: #86868b;
+    }
+
+    &.week-highlight {
+      background: rgba(0, 122, 255, 0.03);
+    }
+  }
+}
+
+/* Specifičan tjedan badge */
+.week-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+  .week-text {
+    font-size: 9px;
+    font-weight: 800;
+    color: #007aff;
+    line-height: 1;
+  }
+
+  .week-number {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1d1d1f;
+    line-height: 1.1;
+  }
+}
+
+.apple-spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
