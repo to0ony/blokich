@@ -47,47 +47,51 @@ export class VozaciPoLinijiService {
       }
     }
 
+    // Pripremi sve regex upite za br_sl za sve radnike
+    const sluzbaQueries = radnici.map(r => ({
+      linija,
+      br_sl: { $regex: `^${r.br_sl}(P*)$`, $options: 'i' },
+      verzija: verzijaSluzbe,
+    }));
+
+    // Paralelno dohvaćanje svih sluzbi za sve radnike
+    const sluzbeResults = await Promise.all(
+      sluzbaQueries.map(q => this.sluzbaModel.find(q))
+    );
+
+    // Sastavi rezultat
     const rezultat: {
       sluz_broj: string;
       ime_prezime: string | null;
       kontakt_broj: string | null;
       kontakt_broj_info: string | null;
-
       od: string;
       do: string;
       nastup: string;
       zavrsetak: string;
-
       br_sl?: string;
       linija?: string;
       'V.R'?: string | null;
     }[] = [];
 
-    for (const r of radnici) {
-      const sluzbe = await this.sluzbaModel.find({
-        linija,
-        br_sl: { $regex: `^${r.br_sl}(P*)$`, $options: 'i' },
-        verzija: verzijaSluzbe,
-      });
-
+    radnici.forEach((r, idx) => {
+      const sluzbe = sluzbeResults[idx];
       for (const sl of sluzbe) {
         rezultat.push({
           sluz_broj: r.sluz_broj.toString().padStart(5, '0'),
           ime_prezime: null,
           kontakt_broj: null,
           kontakt_broj_info: null,
-
           od: sl.od,
           do: sl.do,
           nastup: sl.nastup_sluzbe,
-          zavrsetak: sl.zavrsna_sluzba,
-
+          zavrsetak: sl.zavrsetak,
           br_sl: sl.br_sl,
           linija: sl.linija,
           'V.R': sl.varijanta || null,
         });
       }
-    }
+    });
 
     const sluzBrojeviBroj = rezultat.map((v) => Number(v.sluz_broj));
     const najnovijiGodisnji = await this.godisnjiModel
