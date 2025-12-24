@@ -10,7 +10,7 @@ from datetime import timedelta
 def extract_week_info(dates):
     first_date = datetime.strptime(dates[0], '%d.%m.%Y')
     week_num = first_date.isocalendar()[1]
-    year = first_date.year
+    year = first_date.isocalendar()[0]  # Koristi ISO godinu umjesto godine iz datuma
     return year, week_num
 
 def extract_dates_from_title(pdf):
