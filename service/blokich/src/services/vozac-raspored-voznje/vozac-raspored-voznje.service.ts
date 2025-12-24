@@ -25,16 +25,18 @@ export class VozacRasporedVoznjeService {
 
   async dohvatiRasporedZaVozaca(sluzBroj: string): Promise<any> {
     const danas = new Date();
-    const godina = danas.getFullYear();
     const brojTjedna = this.izracunajBrojTjedna(danas);
+    const godina = dayjs(danas).isoWeekYear();
 
     return this.dohvatiRaspored(sluzBroj, godina, brojTjedna);
   }
 
   async dohvatiNaredniTjedanRasporedZaVozaca(sluzBroj: string): Promise<any> {
     const danas = new Date();
-    const godina = danas.getFullYear();
-    const brojTjedna = this.izracunajBrojTjedna(danas) + 1;
+    const nextWeekDate = dayjs(danas).add(1, 'week');
+    const brojTjedna = nextWeekDate.isoWeek();
+    const godina = nextWeekDate.isoWeekYear();
+
     return this.dohvatiRaspored(sluzBroj, godina, brojTjedna);
   }
 

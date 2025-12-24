@@ -29,7 +29,9 @@ export class VozaciPoLinijiService {
     const datumZaTjedan =
       tjedanTip === 'naredni' ? danas.add(1, 'week') : danas;
 
-    const godina = datumZaTjedan.year();
+    const mondayOfWeek = datumZaTjedan.startOf('isoWeek');
+    const thursdayOfWeek = mondayOfWeek.add(3, 'day');
+    const godina = thursdayOfWeek.year();
     const brojTjedna = datumZaTjedan.isoWeek();
 
     const disponent = await this.disponentModel.findOne({ godina, brojTjedna });
