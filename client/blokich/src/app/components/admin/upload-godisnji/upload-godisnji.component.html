@@ -1,43 +1,61 @@
-<div class="apple-upload-container is-disabled">
-  <div class="disabled-overlay">
-    <div class="lock-icon">
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-      >
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-    </div>
-    <span>Modul trenutno nedostupan</span>
-  </div>
-
+<div class="apple-upload-container">
   <div class="file-picker-zone">
     <div class="input-stack">
-      <label class="file-label">
+      <label for="godisnjiPdf" class="file-label">
         <div class="upload-icon">
           <svg
             width="24"
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#86868b"
+            stroke="#007aff"
             stroke-width="2"
           >
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
         </div>
         <span class="label-text">Odaberi PDF godišnjih odmora</span>
-        <input type="file" [disabled]="false" class="hidden-input" />
+        <input
+          type="file"
+          id="godisnjiPdf"
+          accept=".pdf"
+          (change)="onFileSelected($event)"
+          class="hidden-input"
+        />
       </label>
+
+      <div class="selected-file-name" *ngIf="selectedFile">
+        {{ selectedFile.name }}
+      </div>
     </div>
 
-    <button class="apple-action-btn" [disabled]="false">Učitaj</button>
+    <button
+      class="apple-action-btn"
+      [disabled]="loading || !selectedFile"
+      (click)="upload()"
+    >
+      <span *ngIf="!loading">Učitaj</span>
+      <div *ngIf="loading" class="apple-spinner-small"></div>
+    </button>
+  </div>
+
+  <div
+    class="status-toast"
+    *ngIf="uploadStatus"
+    [ngClass]="{
+      success: uploadStatus.includes('Uspješno'),
+      error: uploadStatus.includes('greške'),
+    }"
+  >
+    <span class="dot"></span>
+    <span class="status-message">{{ uploadStatus }}</span>
   </div>
 </div>
