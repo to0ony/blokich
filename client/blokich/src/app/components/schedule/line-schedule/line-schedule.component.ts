@@ -21,7 +21,7 @@ export class LineScheduleComponent implements OnInit {
   isSearched: boolean = false;
   isLoading: boolean = false;
 
-  // Provjera dostupnosti iz session storagea koji si postavio kod logina
+  // Provjera dostupnosti iz session storagea koji je postavljen kod logina
   isNextWeekAvailable: boolean =
     sessionStorage.getItem('nextWeekDisponentAvailable') === 'true';
 

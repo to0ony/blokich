@@ -56,8 +56,11 @@ export class LoginFormComponent implements OnInit {
 
         this.lastDisponentUpload = data;
 
-        const aktualniTjedan = dayjs().isoWeek();
-        if (data.brojTjedna === aktualniTjedan + 1) {
+        const nextWeekDate = dayjs().add(1, 'week');
+        const nextYear = nextWeekDate.isoWeekYear();
+        const nextWeek = nextWeekDate.isoWeek();
+
+        if (data.godina === nextYear && data.brojTjedna === nextWeek) {
           this.isNextWeekAvailable = true;
         }
       },

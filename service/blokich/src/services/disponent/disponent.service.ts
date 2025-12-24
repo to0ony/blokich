@@ -14,7 +14,6 @@ export class DisponentService {
   async getByRadnik(radnik: string): Promise<any> {
     try {
       const today = new Date();
-      const godina = today.getFullYear();
 
       // Izračunaj broj tjedna (ISO standard)
       const prviCetvrtak = new Date(today.getFullYear(), 0, 4);
@@ -25,6 +24,15 @@ export class DisponentService {
       const brojTjedna = Math.ceil(
         ((today.getTime() - prviTjedan.getTime()) / 86400000 + 1) / 7,
       );
+
+      // Izračunaj ISO godinu na temelju četvrtka trenutnog tjedna
+      const mondayOfCurrentWeek = new Date(
+        prviTjedan.getTime() + (brojTjedna - 1) * 7 * 86400000,
+      );
+      const thursdayOfCurrentWeek = new Date(
+        mondayOfCurrentWeek.getTime() + 3 * 86400000,
+      );
+      const godina = thursdayOfCurrentWeek.getFullYear();
 
       const dokument = await this.model.findOne(
         {

@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
 import { toZonedTime } from 'date-fns-tz';
-import { getISOWeek } from 'date-fns';
+import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
 
 @Injectable()
@@ -58,7 +58,7 @@ export class SluzbaUploadService {
     const timeZone = 'Europe/Zagreb';
     const now = toZonedTime(new Date(), timeZone);
 
-    const currentYear = now.getFullYear();
+    const currentYear = getISOWeekYear(now);
     const currentWeek = getISOWeek(now);
 
     const lastUpload = await this.sluzbaUploadModel
