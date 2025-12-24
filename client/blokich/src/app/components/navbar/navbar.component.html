@@ -41,22 +41,25 @@
           </button>
         </div>
 
-        <div class="ldc-user-info">
-          <span class="user-main">{{ sluzbeniBroj }} • {{ imePrezime }}</span>
-          <span class="user-sub" *ngIf="kontaktBroj || kontaktBrojInfo">
-            <span *ngIf="kontaktBroj">{{ kontaktBroj }}</span>
-            <span *ngIf="kontaktBroj && kontaktBrojInfo"> ili </span>
-            <span *ngIf="kontaktBrojInfo">{{ kontaktBrojInfo }}</span>
-          </span>
+          <div class="ldc-user-info">
+            <span class="user-main">{{ sluzbeniBroj }} • {{ imePrezime }}</span>
+            <span class="user-sub" *ngIf="kontaktBroj || kontaktBrojInfo">
+              <span *ngIf="kontaktBroj">{{ kontaktBroj }}</span>
+              <span *ngIf="kontaktBroj && kontaktBrojInfo"> ili </span>
+              <span *ngIf="kontaktBrojInfo">{{ kontaktBrojInfo }}</span>
+            </span>
+          </div>
+          <button class="ldc-logout-btn" (click)="logout()">Odjava</button>
         </div>
-        <button class="ldc-logout-btn" (click)="logout()">Odjava</button>
       </div>
-    </div>
 
-    <div *ngIf="role === 'admin'" class="ldc-nav-inner justify-content-end">
-      <div class="ldc-user-section">
-        <span class="user-main" style="margin-right: 10px">Administrator</span>
-        <button class="ldc-logout-btn" (click)="logout()">Odjava</button>
+      <div *ngIf="role === 'admin'" class="ldc-nav-inner justify-content-end">
+        <div class="ldc-user-section">
+          <span class="user-main" style="margin-right: 10px"
+            >Administrator</span
+          >
+          <button class="ldc-logout-btn" (click)="logout()">Odjava</button>
+        </div>
       </div>
     </div>
   </div>
