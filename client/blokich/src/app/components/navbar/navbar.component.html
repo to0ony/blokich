@@ -41,15 +41,13 @@
           </button>
         </div>
 
-        <div class="ldc-user-section">
           <div class="ldc-user-info">
             <span class="user-main">{{ sluzbeniBroj }} • {{ imePrezime }}</span>
-            <span class="user-sub">
-              {{ kontaktBroj }}
-              <span *ngIf="kontaktBrojInfo"
-                >ili {{ kontaktBrojInfo }}</span
-              ></span
-            >
+            <span class="user-sub" *ngIf="kontaktBroj || kontaktBrojInfo">
+              <span *ngIf="kontaktBroj">{{ kontaktBroj }}</span>
+              <span *ngIf="kontaktBroj && kontaktBrojInfo"> ili </span>
+              <span *ngIf="kontaktBrojInfo">{{ kontaktBrojInfo }}</span>
+            </span>
           </div>
           <button class="ldc-logout-btn" (click)="logout()">Odjava</button>
         </div>
