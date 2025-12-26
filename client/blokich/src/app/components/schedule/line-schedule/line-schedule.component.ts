@@ -23,7 +23,7 @@ export class LineScheduleComponent implements OnInit {
 
   // Provjera dostupnosti iz session storagea koji je postavljen kod logina
   isNextWeekAvailable: boolean =
-    sessionStorage.getItem('nextWeekDisponentAvailable') === 'true';
+    sessionStorage.getItem('isNextWeekAvailable') === 'true';
 
   dani = [
     { key: 'pon', label: 'Ponedjeljak' },
