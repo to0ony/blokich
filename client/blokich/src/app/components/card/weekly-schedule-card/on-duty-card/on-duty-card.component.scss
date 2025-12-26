@@ -51,14 +51,12 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
-
   .ldc-name {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
-
   .ldc-badge {
     background: var(--apple-bg-secondary);
     color: var(--apple-gray);
@@ -81,7 +79,6 @@
   border-radius: 20px;
   gap: 8px;
   height: 32px;
-
   .pill-label {
     font-size: 0.6rem;
     font-weight: 700;
@@ -91,7 +88,6 @@
     font-size: 0.9rem;
     font-weight: 700;
   }
-
   .info-trigger {
     appearance: none;
     background: transparent;
@@ -108,7 +104,6 @@
     font-weight: 800;
     color: var(--apple-gray);
     cursor: pointer;
-    flex-shrink: 0;
     &:active {
       background: var(--apple-gray);
       color: white;
@@ -120,7 +115,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   .ldc-node {
     flex: 1;
     display: flex;
@@ -162,35 +156,17 @@
       align-items: center;
       margin-bottom: 10px;
       z-index: 2;
+      gap: 6px;
 
-      .route-link {
+      .route-link,
+      .timetable-link {
         text-decoration: none;
-        transition: all 0.2s ease;
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
-
-        // Omogucuje hover samo na uredajima s misem (popravlja sticky hover na mobitelu)
-        @media (hover: hover) {
-          &:hover {
-            transform: translateY(-2px);
-            .route-num {
-              background: var(--apple-blue);
-              color: white;
-            }
-          }
-        }
-
-        &:active {
-          transform: scale(0.9);
-          opacity: 0.8;
-          // Kratki bljesak plave samo dok se drzi prst
-          .route-num {
-            background: var(--apple-blue);
-            color: white;
-          }
-        }
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
+      // Stil za broj linije (Pulsira ako je danas)
       .route-num {
         display: inline-flex;
         align-items: center;
@@ -203,18 +179,60 @@
         border-radius: 20px;
         line-height: 1;
         border: 1px solid rgba(0, 122, 255, 0.2);
-        transition:
-          background 0.2s,
-          color 0.2s,
-          transform 0.2s;
-
         .route-icon {
           width: 14px;
           height: 14px;
         }
       }
 
-      // Privlacenje paznje samo na danasnjoj smjeni
+      // Stil za VOZNI RED
+      .timetable-link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--apple-gray);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        padding: 4px 8px;
+        border-radius: 8px;
+
+        .timetable-icon {
+          width: 12px;
+          height: 12px;
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            color: var(--apple-text-primary);
+            background: var(--apple-bg-secondary);
+          }
+        }
+        &:active {
+          transform: scale(0.95);
+          background: var(--apple-bg-secondary);
+        }
+      }
+
+      // Poseban feedback za rutu
+      @media (hover: hover) {
+        .route-link:hover {
+          transform: translateY(-2px);
+          .route-num {
+            background: var(--apple-blue);
+            color: white;
+          }
+        }
+      }
+      .route-link:active {
+        transform: scale(0.9);
+        .route-num {
+          background: var(--apple-blue);
+          color: white;
+        }
+      }
+
+      // Animacija za paznju (Samo danas)
       .is-today & {
         .route-num {
           animation: pulse-border 3s infinite;
@@ -226,7 +244,7 @@
         font-size: 0.8rem;
         font-weight: 650;
         color: var(--apple-text-primary);
-        margin-top: 4px;
+        margin-top: 2px;
       }
     }
 
