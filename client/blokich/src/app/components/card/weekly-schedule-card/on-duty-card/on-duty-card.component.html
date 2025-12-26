@@ -44,7 +44,33 @@
 
     <div class="ldc-connector">
       <div class="ldc-route-info">
-        <span class="route-num">{{ linija }}</span>
+        <a
+          *ngIf="linija"
+          [href]="
+            'https://triglav.bezdomni.net/public_transport/zet/routes/' + linija
+          "
+          target="_blank"
+          class="route-link"
+        >
+          <span class="route-num">
+            {{ linija }}
+            <svg
+              class="route-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="6" cy="19" r="3"></circle>
+              <circle cx="18" cy="5" r="3"></circle>
+              <path
+                d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
+              ></path>
+            </svg>
+          </span>
+        </a>
         <span class="vr-num">V.R. {{ vr }}</span>
       </div>
       <div class="ldc-line-path"></div>
