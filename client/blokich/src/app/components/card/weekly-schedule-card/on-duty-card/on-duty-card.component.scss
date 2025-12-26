@@ -1,8 +1,10 @@
 :host {
   --apple-blue: #007aff;
+  --apple-blue-dark: #0056b3;
   --apple-gray: #8e8e93;
   --apple-bg-card: #ffffff;
   --apple-bg-secondary: #f2f2f7;
+  --apple-bg-tertiary: #e5e5ea;
   --apple-text-primary: #1c1c1e;
   --apple-separator: #d1d1d6;
   --color-work: #007aff;
@@ -166,7 +168,7 @@
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      // Stil za broj linije (Pulsira ako je danas)
+      // LINIJA BOJE
       .route-num {
         display: inline-flex;
         align-items: center;
@@ -183,68 +185,77 @@
           width: 14px;
           height: 14px;
         }
+        .label {
+          font-size: 0.6rem;
+          font-weight: 600;
+          color: var(--apple-blue);
+          opacity: 0.7;
+          margin-right: 4px;
+        }
       }
 
-      // Stil za VOZNI RED
-      .timetable-link {
-        display: flex;
+      // VOZNI RED BOJE
+      .vr-num {
+        display: inline-flex;
         align-items: center;
-        gap: 4px;
-        color: var(--apple-gray);
-        font-size: 0.65rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        padding: 4px 8px;
-        border-radius: 8px;
-
-        .timetable-icon {
-          width: 12px;
-          height: 12px;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--apple-text-primary);
+        background: var(--apple-bg-secondary);
+        padding: 6px 16px;
+        border-radius: 20px;
+        line-height: 1;
+        border: 1px solid rgba(142, 142, 149, 0.15);
+        .vr-icon {
+          width: 14px;
+          height: 14px;
+          color: var(--apple-gray);
         }
+        .label {
+          font-size: 0.6rem;
+          font-weight: 600;
+          color: var(--apple-gray);
+          margin-right: 4px;
+        }
+      }
 
-        @media (hover: hover) {
-          &:hover {
-            color: var(--apple-text-primary);
-            background: var(--apple-bg-secondary);
+      // FEEDBACK NA HOVER I KLIK (Apple Style)
+      @media (hover: hover) {
+        .route-link:hover .route-num {
+          background: var(--apple-blue);
+          color: white;
+          .label {
+            color: white;
           }
         }
-        &:active {
-          transform: scale(0.95);
-          background: var(--apple-bg-secondary);
+        .timetable-link:hover .vr-num {
+          background: var(--apple-bg-tertiary);
         }
       }
 
-      // Poseban feedback za rutu
-      @media (hover: hover) {
-        .route-link:hover {
-          transform: translateY(-2px);
-          .route-num {
-            background: var(--apple-blue);
+      .route-link:active {
+        transform: scale(0.92);
+        .route-num {
+          background: var(--apple-blue-dark);
+          color: white;
+          .label {
             color: white;
           }
         }
       }
-      .route-link:active {
-        transform: scale(0.9);
-        .route-num {
-          background: var(--apple-blue);
-          color: white;
+
+      .timetable-link:active {
+        transform: scale(0.92);
+        .vr-num {
+          background: var(--apple-separator);
         }
       }
 
-      // Animacija za paznju (Samo danas)
-      .is-today & {
-        .route-num {
-          animation: pulse-border 3s infinite;
-          border-color: rgba(0, 122, 255, 0.5);
-        }
-      }
-
-      .vr-num {
-        font-size: 0.8rem;
-        font-weight: 650;
-        color: var(--apple-text-primary);
-        margin-top: 2px;
+      // Pulsiranje za danas
+      .is-today & .route-num {
+        animation: pulse-border 3s infinite;
+        border-color: rgba(0, 122, 255, 0.5);
       }
     }
 
