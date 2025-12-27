@@ -11,21 +11,20 @@
   --color-sat: #34c759;
   --color-sun: #ff3b30;
   --radius-card: 20px;
+  --radius-control: 12px;
 }
 
 .ldc-card {
   background: var(--apple-bg-card);
   border-radius: var(--radius-card);
-  padding: 20px;
+  padding: 18px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  width: 100%;
   margin-bottom: 16px;
   position: relative;
   overflow: hidden;
   color: var(--apple-text-primary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.is-today {
     border: 2px solid var(--apple-blue);
@@ -66,10 +65,6 @@
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
-    &.date {
-      margin-top: 4px;
-      display: inline-block;
-    }
   }
 }
 
@@ -85,6 +80,7 @@
     font-size: 0.6rem;
     font-weight: 700;
     color: var(--apple-gray);
+    text-transform: uppercase;
   }
   .pill-value {
     font-size: 0.9rem;
@@ -106,10 +102,6 @@
     font-weight: 800;
     color: var(--apple-gray);
     cursor: pointer;
-    &:active {
-      background: var(--apple-gray);
-      color: white;
-    }
   }
 }
 
@@ -117,10 +109,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+
   .ldc-node {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
+    min-width: 60px;
     .ldc-label {
       font-size: 0.65rem;
       color: var(--apple-gray);
@@ -146,157 +141,106 @@
 
   .ldc-connector {
     flex: 1;
-    padding: 0 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
 
-    .ldc-route-info {
+    .ldc-direction-path {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
       display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-bottom: 10px;
-      z-index: 2;
-      gap: 6px;
-
-      .route-link,
-      .timetable-link {
-        text-decoration: none;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      // LINIJA BOJE
-      .route-num {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 800;
-        font-size: 1.1rem;
-        color: var(--apple-blue);
-        background: rgba(0, 122, 255, 0.1);
-        padding: 6px 16px;
-        border-radius: 20px;
-        line-height: 1;
-        border: 1px solid rgba(0, 122, 255, 0.2);
-        .route-icon {
-          width: 14px;
-          height: 14px;
-        }
-        .label {
-          font-size: 0.6rem;
-          font-weight: 600;
-          color: var(--apple-blue);
-          opacity: 0.7;
-          margin-right: 4px;
-        }
-      }
-
-      // VOZNI RED BOJE
-      .vr-num {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 800;
-        font-size: 1.1rem;
-        color: var(--apple-text-primary);
-        background: var(--apple-bg-secondary);
-        padding: 6px 16px;
-        border-radius: 20px;
-        line-height: 1;
-        border: 1px solid rgba(142, 142, 149, 0.15);
-        .vr-icon {
-          width: 14px;
-          height: 14px;
-          color: var(--apple-gray);
-        }
-        .label {
-          font-size: 0.6rem;
-          font-weight: 600;
-          color: var(--apple-gray);
-          margin-right: 4px;
-        }
-      }
-
-      // FEEDBACK NA HOVER I KLIK (Apple Style)
-      @media (hover: hover) {
-        .route-link:hover .route-num {
-          background: var(--apple-blue);
-          color: white;
-          .label {
-            color: white;
-          }
-        }
-        .timetable-link:hover .vr-num {
-          background: var(--apple-bg-tertiary);
-        }
-      }
-
-      .route-link:active {
-        transform: scale(0.92);
-        .route-num {
-          background: var(--apple-blue-dark);
-          color: white;
-          .label {
-            color: white;
-          }
-        }
-      }
-
-      .timetable-link:active {
-        transform: scale(0.92);
-        .vr-num {
-          background: var(--apple-separator);
-        }
-      }
-
-      // Pulsiranje za danas
-      .is-today & .route-num {
-        animation: pulse-border 3s infinite;
-        border-color: rgba(0, 122, 255, 0.5);
-      }
-    }
-
-    .ldc-line-path {
-      height: 2px;
-      width: 100%;
-      background: var(--apple-separator);
-      position: relative;
-      &::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: -3px;
-        width: 8px;
-        height: 8px;
+      z-index: 1;
+      .path-line {
+        flex: 1;
+        height: 2px;
         background: var(--apple-separator);
-        border-radius: 50%;
+        opacity: 0.5;
       }
-      &::after {
-        content: "";
-        position: absolute;
-        right: 0;
-        top: -3px;
+      .path-arrow {
         width: 8px;
         height: 8px;
         border-right: 2px solid var(--apple-separator);
         border-bottom: 2px solid var(--apple-separator);
         transform: rotate(-45deg);
+        margin-left: -8px;
+        opacity: 0.5;
+      }
+    }
+
+    .ldc-unified-control {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      background: var(--apple-bg-secondary);
+      border-radius: var(--radius-control);
+      padding: 2px;
+      border: 0.5px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 0 0 6px var(--apple-bg-card);
+
+      .control-segment {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        text-decoration: none;
+        color: var(--apple-text-primary);
+        border-radius: 10px;
+        .value {
+          font-weight: 700;
+          font-size: 0.95rem;
+        }
+        .label {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: var(--apple-gray);
+        }
+        .icon {
+          width: 14px;
+          height: 14px;
+          color: var(--apple-blue);
+        }
+        &:active {
+          background: var(--apple-bg-tertiary);
+          transform: scale(0.94);
+        }
+      }
+
+      .segment-separator {
+        width: 1px;
+        height: 14px;
+        background: var(--apple-separator);
+        opacity: 0.6;
+      }
+      .route-segment .value {
+        color: var(--apple-blue);
       }
     }
   }
 }
 
-@keyframes pulse-border {
-  0% {
-    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(0, 122, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0);
+@media (max-width: 400px) {
+  .ldc-timeline {
+    .ldc-node {
+      min-width: 50px;
+      .ldc-time {
+        font-size: 1.35rem;
+      }
+      .ldc-location {
+        font-size: 0.75rem;
+      }
+    }
+    .ldc-connector .ldc-unified-control .control-segment {
+      padding: 6px 8px;
+      .icon {
+        display: none;
+      }
+    }
   }
 }
