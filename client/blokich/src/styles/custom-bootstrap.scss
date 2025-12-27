@@ -15,38 +15,118 @@
 );
 
 .popover {
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  max-width: 250px;
-  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(8px) saturate(200%);
+  -webkit-backdrop-filter: blur(8px) saturate(200%);
+
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+  max-width: 260px;
+  overflow: visible;
 
   .popover-header {
-    background-color: #d5d5d5;
-    color: #00050c;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
-    border-bottom: none;
-    border-radius: 0.75rem 0.75rem 0.75rem 0.75rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    // Apple stil: Sva velika slova s blagim razmakom
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .popover-body {
-    font-size: 0.875rem;
-    color: #333;
-    padding: 0.5rem 1rem;
-    line-height: 1.4;
+    padding: 14px 16px;
+    line-height: 1.7;
+    color: #1c1c1e;
+    font-size: 0.85rem;
 
-    display: grid;
-    row-gap: 4px;
+    b {
+      // SMALL CAPS EFEKT:
+      font-variant: small-caps;
+      text-transform: lowercase; // Kombinacija ova dva radi Apple "sub-header" efekt
+      letter-spacing: 0.02em;
 
-    span.label {
       font-weight: 600;
-      color: #555;
+      color: #8e8e93; // Svjetlije siva za labele (Apple Secondary Label)
+      display: inline-block;
+      min-width: 105px;
+      font-size: 0.95rem; // Blago veće jer su small-caps vizualno niža
     }
 
-    span.value {
-      font-family: monospace;
-      color: #000;
+    // Vrijednosti (tekst nakon b taga)
+    span.value,
+    & {
+      font-weight: 600;
+      color: #000; // Crna boja za vrijednosti radi kontrasta
+      font-variant-numeric: tabular-nums;
+    }
+
+    display: block;
+  }
+
+  .popover-arrow::before {
+    display: none !important;
+  }
+
+  .popover-arrow::after {
+    // Dodajemo blur i na samu strelicu
+    backdrop-filter: blur(15px) saturate(200%);
+    -webkit-backdrop-filter: blur(15px) saturate(200%);
+  }
+
+  &.bs-popover-top,
+  &.bs-popover-auto[data-popper-placement^="top"] {
+    > .popover-arrow::after {
+      border-top-color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+
+  &.bs-popover-bottom,
+  &.bs-popover-auto[data-popper-placement^="bottom"] {
+    > .popover-arrow::after {
+      border-bottom-color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+
+  &.bs-popover-start,
+  &.bs-popover-auto[data-popper-placement^="left"] {
+    > .popover-arrow::after {
+      border-left-color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+
+  &.bs-popover-end,
+  &.bs-popover-auto[data-popper-placement^="right"] {
+    > .popover-arrow::after {
+      border-right-color: rgba(255, 255, 255, 0.7) !important;
     }
   }
 }
+
+//
+// @media (prefers-color-scheme: dark) {
+//   .popover {
+//     background-color: rgba(30, 30, 32, 0.75) !important;
+//     border: 1px solid rgba(255, 255, 255, 0.12) !important;
+//     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+//     .popover-header {
+//       color: #fff;
+//       background-color: rgba(255, 255, 255, 0.05);
+//     }
+
+//     .popover-body {
+//       color: #f2f2f7;
+//       b {
+//         color: #aeaeb2; // Svjetlija siva za labele u dark modeu
+//       }
+//     }
+//   }
+// }
