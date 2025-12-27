@@ -12,6 +12,7 @@ Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
 - Prikaz vozačeve današnje smjene uz podatke o ostalim vozačima s kojima dijeli smjenu
 - Prikaz svih vozača određene linije za određeni dan u tjednu (aktualnom ili narednom)
 - Prikaz svih vozača uz ispis odgovoarajućih službenih brojeva
+- Prikaz voznog reda linije i rute na mapi
 
 ## U planu
 
@@ -22,9 +23,11 @@ Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
 ## Screenshots
 
 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-  <img src="https://i.imgur.com/tLdjM2s.png" alt="screenshot 1" width="200" />
-  <img src="https://i.imgur.com/EqDBLKx.png" alt="screenshot 2" width="200" />
-  <img src="https://i.imgur.com/JF1le4n.png" alt="screenshot 3" width="200" />
+  <img src="https://i.postimg.cc/W1KdKZkG/blokich-vercel-app-login(i-Phone-14-Pro-Max)-portrait.png" alt="screenshot 2" width="200" />
+  <img src="https://i.postimg.cc/jSCWZcLv/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(1)-portrait.png" alt="screenshot 1" width="200" />
+  <img src="https://i.postimg.cc/7Zc5cz2S/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(2)-portrait.png" alt="screenshot 3" width="200" />
+  <img src="https://i.postimg.cc/Z509VHC7/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(3)-portrait.png" alt="screenshot 3" width="200" />
+
 </div>
 
 Ovaj projekt je licenciran pod [MIT licencom](LICENSE).
