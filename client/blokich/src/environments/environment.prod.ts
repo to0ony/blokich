@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://blokich-backend-yc8to.ondigitalocean.app/api',
+  apiUrl: 'http://46.224.189.44:3000/api',
 };
