@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://46.224.189.44:3000/api',
+  apiUrl: 'https://treacherous-lavinia-touchedly.ngrok-free.dev/api',
 };
