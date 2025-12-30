@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema()
-export class Sluzba extends Document {
+@Schema({ _id: false })
+export class SluzbaItem {
   @Prop() br_sl: string;
   @Prop() linija: string;
   @Prop() varijanta: string;
@@ -14,7 +14,17 @@ export class Sluzba extends Document {
   @Prop() druga_smjena: string;
   @Prop() efektivni_sati: string;
   @Prop() ukupni_sati: string;
+}
+
+export const SluzbaItemSchema = SchemaFactory.createForClass(SluzbaItem);
+
+@Schema({ timestamps: true })
+export class Sluzba extends Document {
   @Prop({ required: true }) verzija: string;
+  @Prop({ type: [SluzbaItemSchema] }) sluzbe: SluzbaItem[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const SluzbaSchema = SchemaFactory.createForClass(Sluzba);
