@@ -1,0 +1,114 @@
+<div class="service-card" *ngIf="serviceData">
+  <!-- Header: Service Only -->
+  <div class="card-header">
+    <div class="service-identity">
+      <span class="label">Služba</span>
+      <h1 class="service-number">{{ serviceData.br_sl }}</h1>
+    </div>
+  </div>
+
+  <!-- Timeline: Start & End with Line/Variant Connector -->
+  <div class="timeline-section">
+    <div class="time-point start">
+      <span class="time-label">Nastup</span>
+      <span class="time-value">{{ serviceData.od }}</span>
+      <span class="location">{{ serviceData.nastup_sluzbe }}</span>
+    </div>
+
+    <div class="timeline-connector">
+      <div class="direction-path">
+        <div class="path-line"></div>
+        <div class="path-arrow"></div>
+      </div>
+
+      <div class="unified-control">
+        <a
+          [href]="
+            'https://content.citymapper.com/zagreb/bus/autobus-' +
+            serviceData.linija
+          "
+          target="_blank"
+          class="control-segment route-segment"
+        >
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          >
+            <circle cx="6" cy="19" r="3"></circle>
+            <circle cx="18" cy="5" r="3"></circle>
+            <path
+              d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
+            ></path>
+          </svg>
+          <span class="value">{{ serviceData.linija }}</span>
+        </a>
+
+        <div class="segment-separator"></div>
+
+        <a
+          [href]="
+            'https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/' +
+            serviceData.linija +
+            '.pdf'
+          "
+          target="_blank"
+          class="control-segment"
+        >
+          <span class="label">V.R.</span>
+          <span class="value">{{ serviceData.varijanta }}</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="time-point end">
+      <span class="time-label">Završetak</span>
+      <span class="time-value">{{ serviceData.do }}</span>
+      <span class="location">{{ serviceData.zavrsna_sluzba }}</span>
+    </div>
+  </div>
+
+  <!-- Stats Toggle -->
+  <button
+    class="stats-toggle"
+    (click)="toggleStats()"
+    [class.expanded]="isStatsExpanded"
+  >
+    <span class="toggle-label">Detalji satnice</span>
+    <svg
+      class="toggle-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+
+  <!-- Stats Grid -->
+  <div class="stats-wrapper" [class.expanded]="isStatsExpanded">
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">Ukupno</span>
+        <span class="stat-value">{{ serviceData.ukupni_sati }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Efektivno</span>
+        <span class="stat-value">{{ serviceData.efektivni_sati }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Druga smjena</span>
+        <span class="stat-value">{{ serviceData.druga_smjena }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Noćni rad</span>
+        <span class="stat-value">{{ serviceData.nocni_rad }}</span>
+      </div>
+    </div>
+  </div>
+</div>
