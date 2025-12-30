@@ -75,28 +75,28 @@ export class VozacRasporedVoznjeService {
     verzija: string,
   ): Promise<Record<string, any[]>> {
     const dani = ['pon', 'uto', 'sri', 'cet', 'pet', 'sub', 'ned'];
-    const vrijednostiZaDane = dani.map((dan) => radnik[dan]);
-    const regexi = vrijednostiZaDane.map((v) => new RegExp(`^${v}(P*)$`, 'i'));
+    const brojSluzbiPoDanima = dani.map((dan) => radnik[dan]);
 
-    const sveSluzbe = await this.sluzbaModel
-      .find({
-        verzija,
-        br_sl: { $in: regexi },
-      })
-      .lean();
+    const sluzbeDokumenti = await this.sluzbaModel.find({ verzija }).lean();
+
+    const sveSluzbe = sluzbeDokumenti.flatMap(
+      (dokument) => dokument.sluzbe || [],
+    );
 
     const raspored: Record<string, any[]> = {};
 
     for (let i = 0; i < dani.length; i++) {
       const dan = dani[i];
-      const vrijednost = vrijednostiZaDane[i];
+      const brojSluzbe = brojSluzbiPoDanima[i];
 
-      const matchingSluzbe = sveSluzbe.filter((s) =>
-        new RegExp(`^${vrijednost}(P*)$`, 'i').test(s.br_sl),
+      const pronadeneSluzbe = sveSluzbe.filter((sluzba) =>
+        new RegExp(`^${brojSluzbe}(P*)$`, 'i').test(sluzba.br_sl),
       );
 
       raspored[dan] =
-        matchingSluzbe.length > 0 ? matchingSluzbe : [{ odsustvo: vrijednost }];
+        pronadeneSluzbe.length > 0
+          ? pronadeneSluzbe
+          : [{ odsustvo: brojSluzbe }];
     }
 
     return raspored;

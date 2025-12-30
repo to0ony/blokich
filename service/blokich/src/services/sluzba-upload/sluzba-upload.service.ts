@@ -24,27 +24,25 @@ export class SluzbaUploadService {
   async processPdf(file: Express.Multer.File) {
     try {
       const response = await this.pdfProcessingService.extractSluzba(file);
-      const parsed: Sluzba[] = response.sluzbe;
+      const parsed = response.sluzbe;
 
       const verzija = await this.generateVersion();
-      const withTimestamps = parsed.map((item) => ({
-        ...item,
-        datum_unosa: new Date(),
-        verzija,
-      }));
 
-      await this.sluzbaModel.insertMany(withTimestamps);
+      await this.sluzbaModel.create({
+        verzija,
+        sluzbe: parsed,
+      });
 
       await this.sluzbaUploadModel.create({
         datum_unosa: new Date(),
-        broj_ubacenih: withTimestamps.length,
+        broj_ubacenih: parsed.length,
         filename: file.filename,
         original_filename: file.originalname,
         verzija,
       });
 
       return {
-        poruka: `Uspješno spremljeno ${withTimestamps.length} službi. Verzija: ${verzija}`,
+        poruka: `Uspješno spremljeno ${parsed.length} službi. Verzija: ${verzija}`,
       };
     } catch (error) {
       console.error('Greška pri obradi PDF-a:', error);
