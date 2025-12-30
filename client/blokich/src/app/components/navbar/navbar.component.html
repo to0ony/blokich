@@ -39,6 +39,13 @@
           >
             Vozači linije
           </button>
+          <button
+            class="ldc-nav-item"
+            [class.active]="view === 'sluzba'"
+            (click)="onViewChange('sluzba')"
+          >
+            Vozači službe
+          </button>
         </div>
 
         <div class="ldc-user-section">

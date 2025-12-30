@@ -6,6 +6,7 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { LineScheduleComponent } from '../../components/schedule/line-schedule/line-schedule.component';
 import { LineScheduleService } from '../../services/line-schedule.service';
 import { DriverShiftScheduleComponent } from '../../components/schedule/driver-shift-schedule/driver-shift-schedule.component';
+import { ServiceScheduleComponent } from '../../components/schedule/service-schedule/service-schedule.component';
 
 @Component({
   selector: 'app-dashboard-driver',
@@ -16,6 +17,7 @@ import { DriverShiftScheduleComponent } from '../../components/schedule/driver-s
     NavbarComponent,
     LineScheduleComponent,
     DriverShiftScheduleComponent,
+    ServiceScheduleComponent,
   ],
   templateUrl: './dashboard-driver.component.html',
   styleUrls: ['./dashboard-driver.component.scss'],
@@ -24,7 +26,7 @@ export class DashboardDriverComponent implements OnInit {
   rasporedData: any = null;
   loading = true;
   error: string | null = null;
-  view: 'raspored' | 'vozaci' | 'smjena' = 'raspored';
+  view: 'raspored' | 'vozaci' | 'smjena' | 'sluzba' = 'raspored';
   naredniTjedanDostupan: boolean = true;
 
   linijaParam: string | null = null;
@@ -50,7 +52,7 @@ export class DashboardDriverComponent implements OnInit {
   }
 
   setView(
-    view: 'raspored' | 'vozaci' | 'smjena',
+    view: 'raspored' | 'vozaci' | 'smjena' | 'sluzba',
     linija?: string,
     dan?: string,
     tjedan: 'trenutni' | 'naredni' = 'trenutni',
