@@ -1,5 +1,7 @@
 ![Logo](https://i.imgur.com/GS2tBvQ.png "Logo")
 
+[![Deploy FastAPI](https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml/badge.svg)](https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml) [![Deploy NestJS](https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml/badge.svg)](https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml) 
+
 ![](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![SASS](https://img.shields.io/badge/SASS-hotpink.svg?style=for-the-badge&logo=SASS&logoColor=white) ![](https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white) ![](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
 
 Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
