@@ -9,7 +9,6 @@ import { DisponentUploadModule } from './modules/disponent-upload/disponent-uplo
 import { SluzbaUploadModule } from './modules/sluzba-upload/sluzba-upload.module';
 import { VozacRasporedVoznjeModule } from './modules/vozac-raspored-voznje/vozac-raspored-voznje.module';
 import { VozaciPoLinijiDanModule } from './modules/vozaci-po-liniji-dan/vozaci-po-liniji-dan.module';
-import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminService } from './services/admin/admin.service';
 import { AdminModule } from './modules/admin/admin.module';
@@ -40,7 +39,6 @@ import { VozaciModule } from './modules/vozaci/vozaci.module';
     GodisnjiUploadModule,
     VozacRasporedVoznjeModule,
     VozaciPoLinijiDanModule,
-    VozacStatsModule,
     AuthModule,
     AdminModule,
     VozaciModule,
