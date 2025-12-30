@@ -21,7 +21,6 @@ export class LineScheduleComponent implements OnInit {
   isSearched: boolean = false;
   isLoading: boolean = false;
 
-  // Provjera dostupnosti iz session storagea koji je postavljen kod logina
   isNextWeekAvailable: boolean =
     sessionStorage.getItem('isNextWeekAvailable') === 'true';
 
@@ -38,7 +37,6 @@ export class LineScheduleComponent implements OnInit {
   constructor(private vozaciService: LineScheduleService) {}
 
   ngOnInit(): void {
-    // Ako naredni tjedan nije dostupan, osiguraj da je default uvijek trenutni
     if (!this.isNextWeekAvailable) {
       this.odabraniTjedan = 'trenutni';
     }

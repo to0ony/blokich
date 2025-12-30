@@ -3,7 +3,6 @@ import { DisponentUploadController } from '../../controllers/disponent-upload/di
 import { DisponentUploadService } from '../../services/disponent-upload/disponent-upload.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
-import { VozacStatsModule } from '../vozac-stats/vozac-stats.module';
 import { SluzbaUploadSchema } from 'src/schemas/sluzba-upload.schema';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
 import { PdfModule } from '../pdf/pdf.module';
@@ -16,7 +15,6 @@ import { PdfModule } from '../pdf/pdf.module';
       { name: 'SluzbaUpload', schema: SluzbaUploadSchema },
       { name: Godisnji.name, schema: GodisnjiSchema },
     ]),
-    VozacStatsModule,
   ],
   controllers: [DisponentUploadController],
   providers: [DisponentUploadService],

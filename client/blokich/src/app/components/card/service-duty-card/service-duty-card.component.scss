@@ -1,0 +1,116 @@
+:host {
+  /* Apple System Colors */
+  --system-blue: #007aff;
+  --system-gray: #8e8e93;
+  --system-gray-6: #f2f2f7;
+  --header-bg: #e5e5ea; /* Darker gray for better contrast */
+  --label-primary: #000000;
+  --label-secondary: #3c3c4399; // 60% opacity per HIG
+  --card-bg: #ffffff;
+  --separator: #c6c6c8;
+}
+
+.sdc-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 0; /* Removed padding to allow header to fill width */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    sans-serif;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Ensure header background respects border radius */
+}
+
+.sdc-header {
+  background: var(--header-bg); /* Distinct background for header */
+  padding: 16px 20px;
+  margin-bottom: 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+
+  .sdc-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sdc-day-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--system-gray); /* Muted color for label */
+    text-transform: uppercase;
+  }
+
+  .sdc-date-display {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--label-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+}
+
+.sdc-drivers {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 16px; /* Padding for content area */
+}
+
+.sdc-driver-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 0.5px solid var(--separator); // Separator iznad reda, kao u iOS listama
+
+  &:first-child {
+    border-top: none;
+    padding-top: 4px;
+  }
+}
+
+.sdc-driver-info {
+  display: flex;
+  flex-direction: column;
+
+  .sdc-driver-name {
+    font-size: 17px; // Standardni body font size u iOS-u
+    font-weight: 600;
+    color: var(--label-primary);
+    letter-spacing: -0.4px;
+  }
+
+  .sdc-driver-id {
+    font-size: 13px;
+    color: var(--label-secondary);
+    font-weight: 400;
+  }
+}
+
+.sdc-actions {
+  .sdc-call-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--system-gray-6);
+    color: var(--system-blue);
+    transition:
+      background 0.2s ease,
+      transform 0.1s ease;
+    text-decoration: none;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:active {
+      background: #d1d1d6;
+      transform: scale(0.95);
+    }
+  }
+}
