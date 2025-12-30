@@ -7,8 +7,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://blokich.vercel.app',
-      'https://blokich-git-develop-to0onys-projects.vercel.app',
+      'https://sluzbe.vercel.app/',
+      'https://sluzbe-git-develop-to0onys-projects.vercel.app',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
