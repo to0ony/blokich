@@ -142,25 +142,34 @@ export class WeeklyScheduleComponent
     if (!this.rasporedZaPrikaz.length) return;
 
     const imePrezime = sessionStorage.getItem('imePrezime') || 'Vozač';
-    const sluzbeniBroj = sessionStorage.getItem('sluzbeniBroj') || '';
+    // const sluzbeniBroj = sessionStorage.getItem('sluzbeniBroj') || '';
 
-    let text = `📅 *Raspored rada (${this.prikazaniTjedan}. tjedan ${this.prikazanaGodina}.)*\n`;
-    text += `👤 *${imePrezime} (${sluzbeniBroj})*\n\n`;
+    let text = `📅 *RASPORED ${this.prikazaniTjedan}. TJEDAN ${this.prikazanaGodina}.*\n`;
+    text += `👤 ${imePrezime}\n\n`;
 
     this.rasporedZaPrikaz.forEach((dan) => {
-      text += `*${dan.dan.substring(0, 3)} ${dan.datum.substring(0, 5)}*: `;
+      // Format: PON 10.02.
+      const danKratko = dan.dan.substring(0, 3).toUpperCase(); // PON
+      const datumKratko = dan.datum.substring(0, 5); // 10.02
+
+      text += `*${danKratko} ${datumKratko}.*\n`;
 
       if (dan.isOff) {
-        text += `🛌 ${dan.duties[0]?.odsustvo || 'Slobodno'}\n`;
+        // Prikazuje se npr: 🛌 SLOBODAN DAN (GO) ako ima oznaku, inace samo SLOBODAN DAN
+        const oznaka = dan.duties[0]?.odsustvo
+          ? `(${dan.duties[0]?.odsustvo})`
+          : '';
+        text += `🛌 SLOBODAN DAN ${oznaka}\n`;
       } else {
-        const dutiesText = dan.duties
-          .map((d) => `🚌 SL${d.br_sl} (${d.od}-${d.do})`)
-          .join(', ');
-        text += `${dutiesText}\n`;
+        dan.duties.forEach((d) => {
+          // Format: � SL123: (DUBRAVA) 13:00 -> 15:00 (SAVSKI MOST)
+          text += `🔹 SL${d.br_sl}: (${d.nastup_sluzbe}) ${d.od} -> ${d.do} (${d.zavrsna_sluzba})\n`;
+        });
       }
+      text += `\n`; // Prazan red između dana
     });
 
-    text += `\n🔗 https://blokich.com`;
+    text += `🔗 https://blokich.com`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
