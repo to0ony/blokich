@@ -4,95 +4,107 @@
   <header class="ldc-header">
     <div class="ldc-identity">
       <h3 class="ldc-name">{{ dan }}</h3>
-      <div class="ldc-badges">
-        <span class="ldc-badge date">{{ datum }}</span>
-      </div>
     </div>
-
-    <div class="ldc-actions">
-      <div class="ldc-service-pill">
-        <span class="pill-label">SLUŽBA</span>
-        <span class="pill-value">{{ brojSluzbe }}</span>
-        <button
-          type="button"
-          tabindex="0"
-          class="info-trigger"
-          *ngIf="!brojSluzbe.includes('P')"
-          [appPopover]="
-            '<b>Ukup. sati: </b>' +
-            ukupSati +
-            '<br><b>Efek. sati: </b>' +
-            efekSati +
-            '<br><b>Dr. smjena: </b>' +
-            drSmj +
-            '<br><b>Noćni rad: </b>' +
-            nocniRad
-          "
-        >
-          i
-        </button>
-      </div>
+    <div class="ldc-badges">
+      <span class="ldc-badge date">{{ datum }}</span>
     </div>
   </header>
 
-  <div class="ldc-timeline">
-    <div class="ldc-node">
-      <span class="ldc-label">NASTUP</span>
-      <span class="ldc-time">{{ vrijemePocetak }}</span>
-      <span class="ldc-location">{{ nastup }}</span>
-    </div>
-
-    <div class="ldc-connector">
-      <div class="ldc-direction-path">
-        <div class="path-line"></div>
-        <div class="path-arrow"></div>
-      </div>
-
-      <div class="ldc-unified-control">
-        <a
-          *ngIf="linija"
-          [href]="'https://content.citymapper.com/zagreb/bus/autobus-' + linija"
-          target="_blank"
-          class="control-segment route-segment"
-        >
-          <svg
-            class="icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
+  <div class="ldc-body">
+    <ng-container *ngFor="let duty of duties; let last = last">
+      <div class="ldc-duty-header">
+        <div class="ldc-service-pill">
+          <span class="pill-label">SLUŽBA</span>
+          <span class="pill-value">{{ duty.br_sl }}</span>
+          <button
+            type="button"
+            tabindex="0"
+            class="info-trigger"
+            *ngIf="duty.br_sl && !duty.br_sl.includes('P')"
+            [appPopover]="
+              '<b>Ukup. sati: </b>' +
+              duty.ukupni_sati +
+              '<br><b>Efek. sati: </b>' +
+              duty.efektivni_sati +
+              '<br><b>Dr. smjena: </b>' +
+              duty.druga_smjena +
+              '<br><b>Noćni rad: </b>' +
+              duty.nocni_rad
+            "
           >
-            <circle cx="6" cy="19" r="3"></circle>
-            <circle cx="18" cy="5" r="3"></circle>
-            <path
-              d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
-            ></path>
-          </svg>
-          <span class="value">{{ linija }}</span>
-        </a>
-
-        <div class="segment-separator" *ngIf="linija && vr"></div>
-
-        <a
-          *ngIf="vr"
-          [href]="
-            'https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/' +
-            linija +
-            '.pdf'
-          "
-          target="_blank"
-          class="control-segment vr-segment"
-        >
-          <span class="label">V.R.</span>
-          <span class="value">{{ vr }}</span>
-        </a>
+            i
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="ldc-node text-right">
-      <span class="ldc-label">ZAVRŠETAK</span>
-      <span class="ldc-time">{{ vrijemeKraj }}</span>
-      <span class="ldc-location">{{ zavrsetak }}</span>
-    </div>
+      <div class="ldc-timeline">
+        <div class="ldc-node">
+          <span class="ldc-label">NASTUP</span>
+          <span class="ldc-time">{{ duty.od }}</span>
+          <span class="ldc-location">{{ duty.nastup_sluzbe }}</span>
+        </div>
+
+        <div class="ldc-connector">
+          <div class="ldc-direction-path">
+            <div class="path-line"></div>
+            <div class="path-arrow"></div>
+          </div>
+
+          <div class="ldc-unified-control">
+            <a
+              *ngIf="duty.linija"
+              [href]="
+                'https://content.citymapper.com/zagreb/bus/autobus-' +
+                duty.linija
+              "
+              target="_blank"
+              class="control-segment route-segment"
+            >
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+              >
+                <circle cx="6" cy="19" r="3"></circle>
+                <circle cx="18" cy="5" r="3"></circle>
+                <path
+                  d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
+                ></path>
+              </svg>
+              <span class="value">{{ duty.linija }}</span>
+            </a>
+
+            <div
+              class="segment-separator"
+              *ngIf="duty.linija && duty.varijanta"
+            ></div>
+
+            <a
+              *ngIf="duty.varijanta"
+              [href]="
+                'https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/' +
+                duty.linija +
+                '.pdf'
+              "
+              target="_blank"
+              class="control-segment vr-segment"
+            >
+              <span class="label">V.R.</span>
+              <span class="value">{{ duty.varijanta }}</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="ldc-node text-right">
+          <span class="ldc-label">ZAVRŠETAK</span>
+          <span class="ldc-time">{{ duty.do }}</span>
+          <span class="ldc-location">{{ duty.zavrsna_sluzba }}</span>
+        </div>
+      </div>
+
+      <div class="duty-separator" *ngIf="!last"></div>
+    </ng-container>
   </div>
 </div>

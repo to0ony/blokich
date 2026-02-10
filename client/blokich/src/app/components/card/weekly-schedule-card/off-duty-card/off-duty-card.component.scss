@@ -13,14 +13,17 @@
 .ldc-card {
   background: #fbfbfd;
   border-radius: var(--radius-card);
-  padding: 16px 20px;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   border: 1px dashed var(--apple-separator);
   position: relative;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   width: 100%;
   margin-bottom: 12px;
+
+  --header-bg: var(--apple-gray); /* Default siva za slobodne dane */
 
   .ldc-day-indicator {
     position: absolute;
@@ -29,13 +32,7 @@
     bottom: 0;
     width: 6px;
     background: var(--apple-gray);
-    opacity: 0.5;
-  }
-  &.subota .ldc-day-indicator {
-    background: var(--apple-gray);
-  }
-  &.nedjelja .ldc-day-indicator {
-    background: var(--apple-gray);
+    /* opacity: 0.5; Uklonjeno da odgovara punoj boji headera */
   }
 }
 
@@ -43,88 +40,92 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  width: 100%; /* Puni width */
 }
 
 .ldc-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  background-color: var(--header-bg);
+  padding: 12px 18px 12px 24px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
 
-  .ldc-identity {
-    .ldc-name {
-      margin: 0 0 4px 0;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--apple-text-primary);
-    }
-
-    .ldc-badge-pill {
-      background: var(--apple-bg-secondary);
-      color: var(--apple-gray);
-      padding: 2px 10px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      display: inline-block;
-    }
+  .ldc-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .ldc-badge {
+    background: transparent;
+    color: #ffffff;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 600;
   }
 }
 
-// Oznaka (GO, BOL...) - Tamna pilula
-.ldc-status-tag {
-  background: var(--apple-text-primary);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+.ldc-body {
+  padding: 20px;
 }
 
-.ldc-off-body {
+.ldc-off-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 0;
 
-  .ldc-bed-icon {
-    width: 22px;
-    height: 14px;
-    position: relative;
-    border-bottom: 2px solid var(--apple-gray);
-    border-radius: 1px;
-    flex-shrink: 0;
+  /* Oznaka (GO, BOL...) - Tamna pilula - Sada unutar body-ja */
+  .ldc-status-tag {
+    background: var(--apple-text-primary);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-left: auto; /* Push to right */
+  }
+}
 
-    &::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 2px;
-      height: 10px;
-      background: var(--apple-gray);
-      border-radius: 2px 2px 0 0;
-    }
+.ldc-off-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--apple-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
-    &::after {
-      content: "";
-      position: absolute;
-      left: 4px;
-      bottom: 2px;
-      width: 14px;
-      height: 6px;
-      border: 2px solid var(--apple-gray);
-      border-bottom: none;
-      border-radius: 4px 4px 0 0;
-    }
+.ldc-bed-icon {
+  width: 22px;
+  height: 14px;
+  position: relative;
+  border-bottom: 2px solid var(--apple-gray);
+  border-radius: 1px;
+  flex-shrink: 0;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 2px;
+    height: 10px;
+    background: var(--apple-gray);
+    border-radius: 2px 2px 0 0;
   }
 
-  .ldc-off-text {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--apple-gray);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    bottom: 2px;
+    width: 14px;
+    height: 6px;
+    border: 2px solid var(--apple-gray);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
   }
 }

@@ -54,7 +54,9 @@ export class NavbarComponent implements OnInit {
 
   logout(): void {
     sessionStorage.clear();
-    localStorage.clear();
+    // Umjesto potpunog brisanja, uklanjamo samo auth podatke kako bi sacuvali recentDriverNumbers
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
 }

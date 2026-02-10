@@ -17,7 +17,7 @@
 .ldc-card {
   background: var(--apple-bg-card);
   border-radius: var(--radius-card);
-  padding: 18px;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -25,6 +25,9 @@
   position: relative;
   overflow: hidden;
   color: var(--apple-text-primary);
+
+  /* Default header background variable (Workday blue) */
+  --header-bg: var(--color-work);
 
   &.is-today {
     border: 2px solid var(--apple-blue);
@@ -39,8 +42,14 @@
     width: 6px;
     background: var(--color-work);
   }
+  &.subota {
+    --header-bg: var(--color-sat);
+  }
   &.subota .ldc-day-indicator {
     background: var(--color-sat);
+  }
+  &.nedjelja {
+    --header-bg: var(--color-sun);
   }
   &.nedjelja .ldc-day-indicator {
     background: var(--color-sun);
@@ -50,22 +59,31 @@
 .ldc-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
+  align-items: center;
+  background-color: var(--header-bg);
+  padding: 12px 18px 12px 24px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+
   .ldc-name {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
   }
   .ldc-badge {
-    background: var(--apple-bg-secondary);
-    color: var(--apple-gray);
-    padding: 2px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    background: transparent;
+    color: #ffffff;
+    padding: 0;
+    font-size: 1rem;
     font-weight: 600;
   }
+}
+
+.ldc-body {
+  padding: 20px;
+  position: relative;
 }
 
 .ldc-service-pill {
@@ -103,6 +121,22 @@
     color: var(--apple-gray);
     cursor: pointer;
   }
+}
+
+.ldc-duty-header {
+  display: flex;
+  justify-content: flex-start; /* Promjena: Poravnanje lijevo za prirodniji tok čitanja */
+  margin-bottom: 12px;
+}
+
+.duty-separator {
+  height: 1px;
+  background-color: var(--apple-separator); /* Klasicna iOS siva linija */
+  margin: 20px 0; /* Malo više zraka između službi */
+  opacity: 1; /* Uklonjena prozirnost za jasniju granicu */
+  transform: scaleY(
+    0.5
+  ); /* Trik za 0.5px tanku liniju na retina ekranima, izgleda elegantnije */
 }
 
 .ldc-timeline {
