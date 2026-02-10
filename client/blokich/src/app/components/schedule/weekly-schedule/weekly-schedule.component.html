@@ -1,44 +1,49 @@
 <div class="ldc-main-wrapper">
   <div class="ldc-main-container">
     <header class="ldc-view-header">
-      <div class="ldc-segmented-control">
-        <input
-          type="radio"
-          id="trenutni"
-          name="tjedan"
-          [checked]="tjedanAktivan === 'trenutni'"
-          (change)="changeWeek('trenutni')"
-        />
-        <label for="trenutni">Aktualni tjedan</label>
+      <div class="ldc-ios-group">
+        <div class="ldc-segmented-control">
+          <input
+            type="radio"
+            id="trenutni"
+            name="tjedan"
+            [checked]="tjedanAktivan === 'trenutni'"
+            (change)="changeWeek('trenutni')"
+          />
+          <label for="trenutni">Aktualni</label>
 
-        <input
-          type="radio"
-          id="naredni"
-          name="tjedan"
-          [checked]="tjedanAktivan === 'naredni'"
-          (change)="changeWeek('naredni')"
-          [disabled]="!naredniTjedanDostupan"
-        />
-        <label
-          for="naredni"
-          [ngClass]="{ 'is-disabled': !naredniTjedanDostupan }"
-        >
-          Naredni tjedan
-          <span class="lock-icon" *ngIf="!naredniTjedanDostupan"></span>
-        </label>
+          <input
+            type="radio"
+            id="naredni"
+            name="tjedan"
+            [checked]="tjedanAktivan === 'naredni'"
+            (change)="changeWeek('naredni')"
+            [disabled]="!naredniTjedanDostupan"
+          />
+          <label
+            for="naredni"
+            [ngClass]="{ 'is-disabled': !naredniTjedanDostupan }"
+          >
+            Naredni
+          </label>
+          <div class="selection-slider"></div>
+        </div>
 
-        <div class="selection-slider"></div>
-      </div>
-
-      <div class="ldc-week-info" *ngIf="prikazaniTjedan">
-        <span class="week-label"
-          >Raspored vožnji za {{ prikazaniTjedan }}. tjedan
-          {{ prikazanaGodina }}.</span
-        >
-        <button class="share-btn" (click)="shareSchedule()">
-          <lucide-icon [img]="ShareIcon" [size]="18"></lucide-icon>
-          <span>Pošalji na WhatsApp</span>
-        </button>
+        <div class="ldc-week-summary" *ngIf="prikazaniTjedan">
+          <div class="text-group">
+            <span class="week-kicker">RASPORED RADA</span>
+            <span class="week-title"
+              >{{ prikazaniTjedan }}. tjedan {{ prikazanaGodina }}.</span
+            >
+          </div>
+          <button
+            class="share-icon-btn"
+            (click)="shareSchedule()"
+            aria-label="Podijeli raspored"
+          >
+            <lucide-icon [img]="ShareIcon" [size]="22"></lucide-icon>
+          </button>
+        </div>
       </div>
     </header>
 

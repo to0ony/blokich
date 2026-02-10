@@ -97,49 +97,81 @@
   }
 }
 
-// INFO SEKCIJA (Konzistentna s headerima kartica)
-.ldc-week-info {
-  margin-top: 24px;
-  text-align: center;
+// HEADER & INFO SEKCIJA (Apple HIG Title + Action)
+.ldc-ios-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 22px;
+  max-width: 400px; // Match segmented control width generally, or full width
+  margin: 0 auto;
+}
 
-  .week-label {
-    display: block;
-    font-size: 17px;
+.ldc-week-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  animation: appleFadeIn 0.3s ease-out;
+
+  .text-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .week-kicker {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--apple-text-gray);
+    letter-spacing: -0.2px;
+    margin-bottom: 2px;
+  }
+
+  .week-title {
+    font-size: 26px;
     font-weight: 700;
     color: var(--apple-text-main);
-    letter-spacing: -0.02em;
+    letter-spacing: 0.3px;
+    line-height: 1.1;
   }
 }
 
-.share-btn {
+.share-icon-btn {
   background: rgba(0, 122, 255, 0.1);
   border: none;
   color: var(--apple-blue);
   cursor: pointer;
-  padding: 8px 16px;
-  border-radius: 20px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-
-  font-size: 0.9rem;
-  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: rgba(0, 122, 255, 0.15);
-    transform: scale(1.02);
+    background-color: var(--apple-blue);
+    color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
   }
 
   &:active {
-    opacity: 0.7;
-    transform: scale(0.98);
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+@keyframes appleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

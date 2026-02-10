@@ -162,8 +162,11 @@ export class WeeklyScheduleComponent
         text += `🛌 SLOBODAN DAN ${oznaka}\n`;
       } else {
         dan.duties.forEach((d) => {
-          // Format: � SL123: (DUBRAVA) 13:00 -> 15:00 (SAVSKI MOST)
-          text += `🔹 SL${d.br_sl}: (${d.nastup_sluzbe}) ${d.od} -> ${d.do} (${d.zavrsna_sluzba})\n`;
+          // Format: 🔹 SL123/268: (DUBRAVA) 13:00 -> 15:00 (SAVSKI MOST)
+          const oznakaSluzbe = d.linija
+            ? `SL${d.br_sl}/${d.linija}`
+            : `SL${d.br_sl}`;
+          text += `🔹 ${oznakaSluzbe}: (${d.nastup_sluzbe}) ${d.od} -> ${d.do} (${d.zavrsna_sluzba})\n`;
         });
       }
       text += `\n`; // Prazan red između dana
