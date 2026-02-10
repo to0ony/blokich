@@ -34,6 +34,7 @@ export class LoginFormComponent implements OnInit {
   lastDisponentUpload: any;
   isNextWeekAvailable: boolean = false;
   showSearchForm = false;
+  recentNumbers: string[] = [];
 
   @ViewChild(VozacSearchFormComponent)
   vozacSearchFormComponent?: VozacSearchFormComponent;
@@ -46,6 +47,8 @@ export class LoginFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadRecentNumbers();
+
     this.loginForm = this.fb.group({
       sluzbeniBroj: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     });
@@ -78,9 +81,37 @@ export class LoginFormComponent implements OnInit {
   }
 
   onVozacSelected(sluzbeniBroj: string) {
-    this.loginForm.get('sluzbeniBroj')?.setValue(sluzbeniBroj);
-    this.loginForm.get('sluzbeniBroj')?.markAsTouched();
+    this.selectRecentNumber(sluzbeniBroj);
     this.showSearchForm = false;
+  }
+
+  loadRecentNumbers() {
+    const stored = localStorage.getItem('recentDriverNumbers');
+    if (stored) {
+      this.recentNumbers = JSON.parse(stored);
+    }
+  }
+
+  saveRecentNumber(broj: string) {
+    let numbers = this.recentNumbers.filter((n) => n !== broj);
+    numbers.unshift(broj);
+    if (numbers.length > 3) numbers = numbers.slice(0, 3);
+    this.recentNumbers = numbers;
+    localStorage.setItem('recentDriverNumbers', JSON.stringify(numbers));
+  }
+
+  selectRecentNumber(broj: string) {
+    this.loginForm.get('sluzbeniBroj')?.setValue(broj);
+    this.loginForm.get('sluzbeniBroj')?.markAsTouched();
+  }
+
+  removeRecentNumber(event: Event, broj: string) {
+    event.stopPropagation();
+    this.recentNumbers = this.recentNumbers.filter((n) => n !== broj);
+    localStorage.setItem(
+      'recentDriverNumbers',
+      JSON.stringify(this.recentNumbers),
+    );
   }
 
   onSubmit(): void {
@@ -91,6 +122,8 @@ export class LoginFormComponent implements OnInit {
 
       this.authService.loginWithEmployeeNumber(broj).subscribe({
         next: (res) => {
+          this.saveRecentNumber(forSessionBroj);
+
           sessionStorage.setItem('sluzbeniBroj', forSessionBroj);
           sessionStorage.setItem('imePrezime', res.imePrezime);
           sessionStorage.setItem('kontaktBroj', res.kontaktBroj);

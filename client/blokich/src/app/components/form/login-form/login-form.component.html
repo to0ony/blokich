@@ -34,6 +34,27 @@
       >
         Obavezno polje.
       </span>
+
+      <div class="recent-numbers-container" *ngIf="recentNumbers.length > 0">
+        <p class="recent-label">Nedavno korišteni:</p>
+        <div class="recent-chips">
+          <div
+            *ngFor="let num of recentNumbers"
+            class="recent-chip"
+            (click)="selectRecentNumber(num)"
+          >
+            <span class="chip-number">{{ num }}</span>
+            <button
+              type="button"
+              class="chip-remove"
+              (click)="removeRecentNumber($event, num)"
+              aria-label="Ukloni broj"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="action-buttons">
