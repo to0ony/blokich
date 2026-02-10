@@ -35,6 +35,9 @@
           >Raspored vožnji za {{ prikazaniTjedan }}. tjedan
           {{ prikazanaGodina }}.</span
         >
+        <button class="share-btn" (click)="shareSchedule()">
+          <lucide-icon [img]="ShareIcon" [size]="20"></lucide-icon>
+        </button>
       </div>
     </header>
 
