@@ -26,6 +26,9 @@
   overflow: hidden;
   color: var(--apple-text-primary);
 
+  /* Default header background variable (Workday blue) */
+  --header-bg: var(--color-work);
+
   &.is-today {
     border: 2px solid var(--apple-blue);
     box-shadow: 0 8px 32px rgba(0, 122, 255, 0.12);
@@ -39,8 +42,14 @@
     width: 6px;
     background: var(--color-work);
   }
+  &.subota {
+    --header-bg: var(--color-sat);
+  }
   &.subota .ldc-day-indicator {
     background: var(--color-sat);
+  }
+  &.nedjelja {
+    --header-bg: var(--color-sun);
   }
   &.nedjelja .ldc-day-indicator {
     background: var(--color-sun);
@@ -51,7 +60,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--apple-bg-secondary);
+  background-color: var(--header-bg);
   padding: 12px 18px 12px 24px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
 
@@ -61,11 +70,11 @@
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--apple-gray);
+    color: rgba(255, 255, 255, 0.95);
   }
   .ldc-badge {
     background: transparent;
-    color: var(--apple-text-primary);
+    color: #ffffff;
     padding: 0;
     font-size: 1rem;
     font-weight: 600;
