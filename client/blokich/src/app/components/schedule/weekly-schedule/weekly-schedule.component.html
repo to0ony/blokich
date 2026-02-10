@@ -41,21 +41,11 @@
     <main class="ldc-timeline-list">
       <ng-container *ngFor="let dan of rasporedZaPrikaz">
         <ng-container *ngIf="!dan.isOff && dan.duties.length">
-          <div class="ldc-item-wrapper" *ngFor="let duty of dan.duties">
+          <div class="ldc-item-wrapper">
             <app-on-duty-card
               [dan]="dan.dan"
               [datum]="dan.datum"
-              [vrijemePocetak]="duty.od"
-              [vrijemeKraj]="duty.do"
-              [brojSluzbe]="duty.br_sl"
-              [linija]="duty.linija"
-              [ukupSati]="duty.ukupni_sati"
-              [efekSati]="duty.efektivni_sati"
-              [drSmj]="duty.druga_smjena"
-              [nocniRad]="duty.nocni_rad"
-              [vr]="duty.varijanta"
-              [nastup]="duty.nastup_sluzbe"
-              [zavrsetak]="duty.zavrsna_sluzba"
+              [duties]="dan.duties"
               [id]="isToday(dan.datum) ? 'danasnja-kartica' : ''"
             ></app-on-duty-card>
           </div>

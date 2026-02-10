@@ -15,20 +15,7 @@ export class OnDutyCardComponent {
 
   @Input() dan!: string;
   @Input() datum!: string;
-  @Input() vrijemePocetak!: string;
-  @Input() vrijemeKraj!: string;
-
-  @Input() nocniRad!: string;
-  @Input() drSmj!: string;
-  @Input() efekSati!: string;
-  @Input() ukupSati!: string;
-
-  @Input() brojSluzbe!: string;
-  @Input() linija!: string;
-  @Input() vr!: string;
-  @Input() nastup!: string;
-  @Input() zavrsetak!: string;
-  @Input() oznaka?: string;
+  @Input() duties: any[] = [];
 
   isToday(): boolean {
     const [day, month, year] = this.datum.split('.');

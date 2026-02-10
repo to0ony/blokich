@@ -51,7 +51,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   .ldc-name {
     margin: 0;
     font-size: 1.2rem;
@@ -103,6 +103,22 @@
     color: var(--apple-gray);
     cursor: pointer;
   }
+}
+
+.ldc-duty-header {
+  display: flex;
+  justify-content: flex-start; /* Promjena: Poravnanje lijevo za prirodniji tok čitanja */
+  margin-bottom: 12px;
+}
+
+.duty-separator {
+  height: 1px;
+  background-color: var(--apple-separator); /* Klasicna iOS siva linija */
+  margin: 20px 0; /* Malo više zraka između službi */
+  opacity: 1; /* Uklonjena prozirnost za jasniju granicu */
+  transform: scaleY(
+    0.5
+  ); /* Trik za 0.5px tanku liniju na retina ekranima, izgleda elegantnije */
 }
 
 .ldc-timeline {
