@@ -27,7 +27,7 @@
   color: var(--apple-text-primary);
 
   /* Default header background variable (Workday blue) */
-  --header-bg: linear-gradient(135deg, #007aff 0%, #0062cc 100%);
+  --header-bg: var(--color-work);
 
   &.is-today {
     border: 2px solid var(--apple-blue);
@@ -43,13 +43,13 @@
     background: var(--color-work);
   }
   &.subota {
-    --header-bg: linear-gradient(135deg, #34c759 0%, #2db84d 100%);
+    --header-bg: var(--color-sat);
   }
   &.subota .ldc-day-indicator {
     background: var(--color-sat);
   }
   &.nedjelja {
-    --header-bg: linear-gradient(135deg, #ff3b30 0%, #d63229 100%);
+    --header-bg: var(--color-sun);
   }
   &.nedjelja .ldc-day-indicator {
     background: var(--color-sun);
@@ -60,7 +60,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--header-bg);
+  background-color: var(--header-bg);
   padding: 12px 18px 12px 24px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
 

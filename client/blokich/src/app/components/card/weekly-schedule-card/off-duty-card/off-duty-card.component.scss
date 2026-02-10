@@ -23,11 +23,7 @@
   width: 100%;
   margin-bottom: 12px;
 
-  --header-bg: linear-gradient(
-    135deg,
-    #8e8e93 0%,
-    #6c6c70 100%
-  ); /* Default siva za slobodne dane */
+  --header-bg: var(--apple-gray); /* Default siva za slobodne dane */
 
   .ldc-day-indicator {
     position: absolute;
@@ -51,7 +47,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--header-bg);
+  background-color: var(--header-bg);
   padding: 12px 18px 12px 24px;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
 
