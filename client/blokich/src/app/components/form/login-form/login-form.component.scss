@@ -41,10 +41,13 @@
   gap: 8px;
 
   label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #86868b; // Apple gray text
+    font-size: 11px;
+    font-weight: 600;
+    color: #8e8e93; // Apple gray text aka recent-label color
     margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: -2px; /* Malo pribliziti inputu */
   }
 
   input {
