@@ -172,7 +172,7 @@ export class WeeklyScheduleComponent
       text += `\n`; // Prazan red između dana
     });
 
-    text += `🔗 https://blokich.com`;
+    text += `🔗 https://blokich.vercel.app/`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
