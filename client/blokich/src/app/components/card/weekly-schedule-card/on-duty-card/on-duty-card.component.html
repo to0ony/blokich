@@ -26,6 +26,7 @@
           <span class="pill-value">{{ duty.br_sl }}</span>
           <button
             type="button"
+            tabindex="0"
             class="info-trigger"
             *ngIf="duty.br_sl && !duty.br_sl.includes('P')"
             [appPopover]="
