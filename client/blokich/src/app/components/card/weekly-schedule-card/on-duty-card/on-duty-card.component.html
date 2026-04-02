@@ -4,6 +4,14 @@
   <header class="ldc-header">
     <div class="ldc-identity">
       <h3 class="ldc-name">{{ dan }}</h3>
+      <button
+        type="button"
+        class="smjena-btn"
+        (click)="openShiftModal()"
+        aria-label="Pogledaj smjenu"
+      >
+        Smjena
+      </button>
     </div>
     <div class="ldc-badges">
       <span class="ldc-badge date">{{ datum }}</span>
@@ -18,22 +26,15 @@
           <span class="pill-value">{{ duty.br_sl }}</span>
           <button
             type="button"
-            tabindex="0"
             class="info-trigger"
             *ngIf="duty.br_sl && !duty.br_sl.includes('P')"
             [appPopover]="
-              '<b>Ukup. sati: </b>' +
-              duty.ukupni_sati +
-              '<br><b>Efek. sati: </b>' +
-              duty.efektivni_sati +
-              '<br><b>Dr. smjena: </b>' +
-              duty.druga_smjena +
-              '<br><b>Noćni rad: </b>' +
-              duty.nocni_rad
+              '<b>Ukup. sati: </b>' + duty.ukupni_sati +
+              '<br><b>Efek. sati: </b>' + duty.efektivni_sati +
+              '<br><b>Dr. smjena: </b>' + duty.druga_smjena +
+              '<br><b>Noćni rad: </b>' + duty.nocni_rad
             "
-          >
-            i
-          </button>
+          >i</button>
         </div>
       </div>
 
@@ -51,46 +52,19 @@
           </div>
 
           <div class="ldc-unified-control">
-            <a
-              *ngIf="duty.linija"
-              [href]="
-                'https://content.citymapper.com/zagreb/bus/autobus-' +
-                duty.linija
-              "
-              target="_blank"
-              class="control-segment route-segment"
-            >
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="3"
-              >
-                <circle cx="6" cy="19" r="3"></circle>
-                <circle cx="18" cy="5" r="3"></circle>
-                <path
-                  d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
-                ></path>
+            <a *ngIf="duty.linija" 
+               [href]="'https://content.citymapper.com/zagreb/bus/autobus-' + duty.linija"
+               target="_blank" class="control-segment route-segment">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <circle cx="6" cy="19" r="3"></circle><circle cx="18" cy="5" r="3"></circle>
+                <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
               </svg>
               <span class="value">{{ duty.linija }}</span>
             </a>
-
-            <div
-              class="segment-separator"
-              *ngIf="duty.linija && duty.varijanta"
-            ></div>
-
-            <a
-              *ngIf="duty.varijanta"
-              [href]="
-                'https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/' +
-                duty.linija +
-                '.pdf'
-              "
-              target="_blank"
-              class="control-segment vr-segment"
-            >
+            <div class="segment-separator" *ngIf="duty.linija && duty.varijanta"></div>
+            <a *ngIf="duty.varijanta" 
+               [href]="'https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/' + duty.linija + '.pdf'"
+               target="_blank" class="control-segment vr-segment">
               <span class="label">V.R.</span>
               <span class="value">{{ duty.varijanta }}</span>
             </a>
@@ -103,8 +77,71 @@
           <span class="ldc-location">{{ duty.zavrsna_sluzba }}</span>
         </div>
       </div>
-
       <div class="duty-separator" *ngIf="!last"></div>
     </ng-container>
+  </div>
+
+  <div class="shift-modal-overlay" *ngIf="isModalVisible" (click)="closeShiftModal()">
+    <div class="shift-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h5 class="modal-title">Smjena za: {{ datum }} | {{ dan }}</h5>
+        <button type="button" class="btn-close" (click)="closeShiftModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="isLoading" class="text-center py-4">
+          <div class="spinner-border"></div>
+        </div>
+
+        <div *ngIf="!isLoading && voznje.length > 0" class="voznje-list">
+          <div class="ldc-modal-card" *ngFor="let vozac of voznje" [class.is-me]="isUlogiran(vozac.sluz_broj)">
+            <header class="card-top">
+              <div class="vozac-meta">
+                <span *ngIf="vozac.sluz_broj" class="vozac-badge">{{ vozac.sluz_broj }}</span>
+                <span class="vozac-name">{{ vozac.ime_prezime }}</span>
+              </div>
+              <div class="card-actions">
+                <a *ngIf="vozac.kontakt_broj" [href]="'tel:' + vozac.kontakt_broj" class="ldc-icon-btn call">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </a>
+              </div>
+            </header>
+
+            <div class="ldc-info-grid">
+              <div class="ldc-info-item">
+                <span class="ldc-label">SLUŽBA</span>
+                <span class="ldc-value-bold">{{ vozac.br_sl }}</span>
+              </div>
+              <div class="ldc-info-item">
+                <span class="ldc-label">LINIJA</span>
+                <span class="ldc-value-bold">{{ vozac.linija }}</span>
+              </div>
+              <div class="ldc-info-item">
+                <span class="ldc-label">V.R.</span>
+                <span class="ldc-value-bold">{{ vozac["V.R"] || vozac.varijanta }}</span>
+              </div>
+            </div>
+
+            <div class="ldc-timeline-mini">
+              <div class="t-node">
+                <span class="t-time">{{ vozac.od }}</span>
+                <span class="t-loc">{{ vozac.nastup || 'Nastup' }}</span>
+              </div>
+              <div class="ldc-connector">
+                <div class="ldc-line-path"></div>
+            </div>
+              <div class="t-node text-right">
+                <span class="t-time">{{ vozac.do }}</span>
+                <span class="t-loc">{{ vozac.zavrsetak || 'Završetak' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && voznje.length === 0" class="text-muted text-center py-4">
+          Nema dostupnih vožnji za ovaj dan.
+        </div>
+      </div>
+    </div>
   </div>
 </div>
