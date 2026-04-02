@@ -22,6 +22,7 @@ interface RasporedDan {
   datum: string;
   duties: any[];
   isOff: boolean;
+  danSkraceno: string;
 }
 
 @Component({
@@ -90,6 +91,7 @@ export class WeeklyScheduleComponent
         datum,
         duties,
         isOff,
+        danSkraceno: dan,
       };
     });
 
