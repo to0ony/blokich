@@ -6,10 +6,12 @@ import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { SluzbaUploadSchema } from 'src/schemas/sluzba-upload.schema';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
 import { PdfModule } from '../pdf/pdf.module';
+import { VozacStatsModule } from '../vozac-stats/vozac-stats.module';
 
 @Module({
   imports: [
     PdfModule,
+    VozacStatsModule,
     MongooseModule.forFeature([
       { name: Disponent.name, schema: DisponentSchema },
       { name: 'SluzbaUpload', schema: SluzbaUploadSchema },
