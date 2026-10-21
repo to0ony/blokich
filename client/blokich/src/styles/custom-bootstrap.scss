@@ -69,6 +69,19 @@
     }
 
     display: block;
+
+    // Objašnjenja na stranici Statistika – običan tekst umjesto stila oznaka
+    .st-pop {
+      display: block;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #3a3a3c;
+
+      strong {
+        font-weight: 600;
+        color: #1d1d1f;
+      }
+    }
   }
 
   .popover-arrow::before {

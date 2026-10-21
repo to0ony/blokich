@@ -72,7 +72,19 @@
     <!-- SAŽETAK -->
     <section class="st-card st-summary">
       <div class="st-summary-main">
-        <span class="st-label">Ukupno sati</span>
+        <span class="st-label"
+          >Ukupno sati
+          <button
+            type="button"
+            class="st-info"
+            tabindex="0"
+            popoverTrigger="hover focus"
+            [appPopover]="info.ukupno"
+            aria-label="Objašnjenje"
+          >
+            i
+          </button></span
+        >
         <div class="st-big">
           {{ hhmm(s.ukupniSati) }}<span class="st-unit">h</span>
         </div>
@@ -90,19 +102,67 @@
 
       <dl class="st-kpis">
         <div>
-          <dt>Radni dani</dt>
+          <dt>
+            Radni dani
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.radni"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </dt>
           <dd>{{ s.radniDani }}</dd>
         </div>
         <div>
-          <dt>Slobodni dani</dt>
+          <dt>
+            Slobodni dani
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.slobodni"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </dt>
           <dd>{{ s.slobodniDani }}</dd>
         </div>
         <div>
-          <dt>Prosjek po smjeni</dt>
+          <dt>
+            Prosjek po smjeni
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.prosjek"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </dt>
           <dd>{{ hhmm(s.prosjekSatiPoSmjeni) }} <small>h</small></dd>
         </div>
         <div>
-          <dt>Efektivno</dt>
+          <dt>
+            Efektivno
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.efektivno"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </dt>
           <dd>{{ hhmm(s.efektivniSati) }} <small>h</small></dd>
         </div>
       </dl>
@@ -111,6 +171,16 @@
         <div class="st-rank-text">
           <span>
             Više sati od <strong>{{ r.percentil }} %</strong> vozača
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.rang"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
           </span>
           <span class="st-muted">{{ r.pozicija }}. od {{ r.od }}</span>
         </div>
@@ -127,7 +197,19 @@
     <!-- GRAF -->
     <section class="st-card" *ngIf="trend.length > 1">
       <header class="st-card-head">
-        <h2>Sati po {{ tip === "mjesec" ? "mjesecima" : "tjednima" }}</h2>
+        <h2>
+          Sati po {{ tip === "mjesec" ? "mjesecima" : "tjednima" }}
+          <button
+            type="button"
+            class="st-info"
+            tabindex="0"
+            popoverTrigger="hover focus"
+            [appPopover]="info.graf"
+            aria-label="Objašnjenje"
+          >
+            i
+          </button>
+        </h2>
         <span class="st-muted" *ngIf="imaNepotpunih">
           <i class="st-key"></i> u tijeku
         </span>
@@ -141,15 +223,14 @@
         </div>
 
         <div class="st-bars">
-          <button
-            type="button"
+          <div
             class="st-col"
+            tabindex="0"
             *ngFor="let p of trend; let first = first; let last = last"
             [class.sel]="p === s"
             [class.partial]="!p.potpun"
             [class.edge-l]="first"
             [class.edge-r]="last"
-            (click)="selectPeriod(p)"
             [attr.aria-label]="
               nazivPerioda(p) + ': ' + hhmm(p.ukupniSati) + ' h'
             "
@@ -157,12 +238,16 @@
             <span class="st-tip">
               <strong>{{ hhmm(p.ukupniSati) }} h</strong>
               <span>{{ nazivPerioda(p) }}</span>
+              <span>
+                {{ p.radniDani }} radnih {{ dana(p.radniDani) }}
+                <ng-container *ngIf="!p.potpun"> · u tijeku</ng-container>
+              </span>
             </span>
             <span class="st-bar-area">
               <span class="st-bar" [style.height.%]="visinaStupca(p)"></span>
             </span>
             <span class="st-x">{{ kratkiNaziv(p) }}</span>
-          </button>
+          </div>
         </div>
       </div>
     </section>
@@ -171,7 +256,19 @@
       <!-- SMJENE -->
       <section class="st-card">
         <header class="st-card-head">
-          <h2>Smjene</h2>
+          <h2>
+            Smjene
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.smjene"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </h2>
           <span class="st-muted">{{ s.radniDani }} ukupno</span>
         </header>
         <ul class="st-rows">
@@ -191,13 +288,35 @@
         <p class="st-foot" *ngIf="s.smjene?.dvokratne">
           Od toga dvokratnih (pauza 2 h ili više):
           <strong>{{ s.smjene.dvokratne }}</strong>
+          <button
+            type="button"
+            class="st-info"
+            tabindex="0"
+            popoverTrigger="hover focus"
+            [appPopover]="info.dvokratne"
+            aria-label="Objašnjenje"
+          >
+            i
+          </button>
         </p>
       </section>
 
       <!-- RASPODJELA DANA -->
       <section class="st-card">
         <header class="st-card-head">
-          <h2>Raspodjela dana</h2>
+          <h2>
+            Raspodjela dana
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.raspodjela"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </h2>
           <span class="st-muted">{{ s.daniSaPodacima }} ukupno</span>
         </header>
         <ul class="st-rows">
@@ -218,43 +337,127 @@
         <header class="st-card-head"><h2>Detalji</h2></header>
         <dl class="st-list">
           <div *ngIf="s.najranijiNastup">
-            <dt>Najraniji početak</dt>
+            <dt>
+              Najraniji početak
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.najraniji"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd>
               {{ s.najranijiNastup.vrijeme }}
               <small>{{ datum(s.najranijiNastup.datum) }}</small>
             </dd>
           </div>
           <div *ngIf="s.najkasnijiKraj">
-            <dt>Najkasniji završetak</dt>
+            <dt>
+              Najkasniji završetak
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.najkasniji"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd>
               {{ s.najkasnijiKraj.vrijeme }}
               <small>{{ datum(s.najkasnijiKraj.datum) }}</small>
             </dd>
           </div>
           <div *ngIf="s.najkraciOdmor">
-            <dt>Najkraći odmor između smjena</dt>
+            <dt>
+              Najkraći odmor
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.odmor"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd [class.warn]="s.najkraciOdmor.sati < 12">
               {{ hhmm(s.najkraciOdmor.sati) }} h
               <small>{{ datum(s.najkraciOdmor.datum) }}</small>
             </dd>
           </div>
           <div *ngIf="s.odmoriIspod12h > 0">
-            <dt>Odmora kraćih od 12 h</dt>
+            <dt>
+              Odmora kraćih od 12 h
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.odmor12"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd class="warn">{{ s.odmoriIspod12h }}</dd>
           </div>
           <div>
-            <dt>Najduži niz radnih dana</dt>
+            <dt>
+              Najduži niz radnih dana
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.niz"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd>{{ s.najduziNiz }}</dd>
           </div>
           <div>
-            <dt>Rad vikendom</dt>
+            <dt>
+              Rad vikendom
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.vikend"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd>
               {{ s.radniVikendDani }} {{ dana(s.radniVikendDani) }}
               <small>nedjelja: {{ s.radneNedjelje }}</small>
             </dd>
           </div>
           <div *ngIf="s.nocniSati > 0">
-            <dt>Noćni rad</dt>
+            <dt>
+              Noćni rad <small>22:00 – 06:00</small>
+              <button
+                type="button"
+                class="st-info"
+                tabindex="0"
+                popoverTrigger="hover focus"
+                [appPopover]="info.nocni"
+                aria-label="Objašnjenje"
+              >
+                i
+              </button>
+            </dt>
             <dd>{{ hhmm(s.nocniSati) }} h</dd>
           </div>
         </dl>
@@ -263,7 +466,19 @@
       <!-- LINIJE -->
       <section class="st-card" *ngIf="linije.length">
         <header class="st-card-head">
-          <h2>Linije</h2>
+          <h2>
+            Linije
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.linije"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </h2>
           <span class="st-muted">{{ s.brojLinija }} različitih</span>
         </header>
         <table class="st-table">
@@ -297,7 +512,19 @@
       <!-- KOLEGE -->
       <section class="st-card" *ngIf="s.kolege?.length">
         <header class="st-card-head">
-          <h2>Najčešće na istoj liniji</h2>
+          <h2>
+            Najčešće na istoj liniji
+            <button
+              type="button"
+              class="st-info"
+              tabindex="0"
+              popoverTrigger="hover focus"
+              [appPopover]="info.kolege"
+              aria-label="Objašnjenje"
+            >
+              i
+            </button>
+          </h2>
         </header>
         <table class="st-table">
           <thead>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DriverStatsService } from '../../../services/driver-stats.service';
+import { BootstrapPopoverDirective } from '../../../shared/bootstrap-popover.directive';
 
 const MJESECI = [
   'Siječanj',
@@ -20,6 +21,40 @@ const MJESECI = [
 // Broj perioda prikazanih u grafu trenda
 const TREND_DULJINA = 12;
 
+// Objašnjenja uz pokazatelje (popover na hover / dodir)
+const OBJASNJENJA = {
+  ukupno:
+    'Zbroj <strong>ukupnih sati</strong> svih tvojih službi u periodu, prema voznom redu. Uz samu vožnju uključuje i vrijeme koje služba nosi izvan vožnje (npr. preuzimanje vozila, pauze).',
+  efektivno:
+    'Zbroj <strong>efektivnih sati</strong> – trajanje službe od početka do kraja, bez pauza između dijelova dvokratne službe.',
+  radni: 'Dani na koje ti je u disponentu upisan broj službe.',
+  slobodni: 'Dani označeni kao slobodni: <strong>O, Oz, Og, Ob</strong>…',
+  prosjek: 'Ukupni sati podijeljeni s brojem odrađenih smjena.',
+  rang: 'Usporedba ukupnih sati sa svim vozačima koji su u ovom periodu radili barem jedan dan. <strong>1. mjesto</strong> = najviše sati.',
+  graf: 'Ukupni sati po periodima. Prijeđi mišem ili dodirni stupac za detalje; period mijenjaš strelicama gore. Prugasti stupac je period koji još traje.',
+  smjene:
+    'Svaka odrađena služba svrstana je prema vremenu početka:<br><strong>Jutarnja</strong> – prije 12:00<br><strong>Popodnevna</strong> – 12:00 do 20:00<br><strong>Noćna</strong> – početak nakon 20:00 ili završetak iza ponoći',
+  dvokratne:
+    'Služba u dva dijela s pauzom od <strong>barem 2 sata</strong> između njih. Kraće pauze smatraju se nastavkom iste smjene.',
+  raspodjela:
+    'Sve oznake iz disponenta za ovaj period: radni dani, slobodni dani i odsustva (npr. <strong>I-GO</strong>, <strong>I-BO</strong>) točno kako su upisane.',
+  najraniji: 'Najranije vrijeme početka službe u periodu.',
+  najkasniji:
+    'Najkasnije vrijeme završetka službe. Ako služba završava iza ponoći, prikazan je datum kad je počela.',
+  odmor:
+    'Najkraće vrijeme od kraja jedne službe do početka službe sljedećeg dana. Datum je dan kad je počela sljedeća služba. Zakonski minimum dnevnog odmora je <strong>12 sati</strong>.',
+  odmor12:
+    'Koliko je puta između dvije službe u uzastopnim danima bilo manje od 12 sati odmora.',
+  niz: 'Najviše uzastopnih kalendarskih dana sa službom.',
+  vikend: 'Broj odrađenih službi subotom i nedjeljom.',
+  nocni:
+    'Sati rada između <strong>22:00 i 06:00</strong>, prema voznom redu. Npr. služba koja počinje u 04:35 nosi 1:25 h noćnog rada.',
+  linije:
+    '<strong>Dana</strong> – broj dana na kojima si vozio liniju.<br><strong>Sati</strong> – ukupni sati tih službi (podijeljeni ako služba pokriva više linija).',
+  kolege:
+    'Vozači koji su istog dana vozili istu liniju kao ti. Pričuva se ne računa.',
+};
+
 interface Redak {
   naziv: string;
   opis?: string;
@@ -30,7 +65,7 @@ interface Redak {
 @Component({
   selector: 'app-driver-stats',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BootstrapPopoverDirective],
   templateUrl: './driver-stats.component.html',
   styleUrls: ['./driver-stats.component.scss'],
 })
@@ -40,6 +75,13 @@ export class DriverStatsComponent implements OnInit {
   index = 0;
   isLoading = false;
   error: string | null = null;
+  // omotano u .st-pop (stil u custom-bootstrap.scss) da ne nasljeđuje stil oznaka iz on-duty-card
+  readonly info = Object.fromEntries(
+    Object.entries(OBJASNJENJA).map(([k, v]) => [
+      k,
+      `<span class="st-pop">${v}</span>`,
+    ]),
+  ) as Record<keyof typeof OBJASNJENJA, string>;
 
   constructor(private statsService: DriverStatsService) {}
 
@@ -84,10 +126,6 @@ export class DriverStatsComponent implements OnInit {
   move(korak: number) {
     const novi = this.index + korak;
     if (novi >= 0 && novi < this.periodi.length) this.index = novi;
-  }
-
-  selectPeriod(p: any) {
-    this.index = this.periodi.indexOf(p);
   }
 
   // ---------- formatiranje ----------
