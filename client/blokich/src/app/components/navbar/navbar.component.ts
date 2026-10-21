@@ -11,9 +11,9 @@ import { Router } from '@angular/router';
 })
 export class NavbarComponent implements OnInit {
   @Input() role: 'vozac' | 'admin' = 'vozac';
-  @Input() view!: 'raspored' | 'vozaci' | 'smjena' | 'sluzba';
+  @Input() view!: 'raspored' | 'vozaci' | 'smjena' | 'sluzba' | 'statistika';
   @Output() switchView = new EventEmitter<
-    'raspored' | 'vozaci' | 'smjena' | 'sluzba'
+    'raspored' | 'vozaci' | 'smjena' | 'sluzba' | 'statistika'
   >();
 
   imePrezime: string | null = sessionStorage.getItem('imePrezime');
@@ -41,7 +41,9 @@ export class NavbarComponent implements OnInit {
     this.role = adminToken ? 'admin' : 'vozac';
   }
 
-  onViewChange(newView: 'raspored' | 'vozaci' | 'smjena' | 'sluzba'): void {
+  onViewChange(
+    newView: 'raspored' | 'vozaci' | 'smjena' | 'sluzba' | 'statistika',
+  ): void {
     if (this.view !== newView) {
       this.switchView.emit(newView);
     }

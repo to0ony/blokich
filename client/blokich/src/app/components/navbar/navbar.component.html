@@ -46,6 +46,13 @@
           >
             Vozači službe
           </button>
+          <button
+            class="ldc-nav-item"
+            [class.active]="view === 'statistika'"
+            (click)="onViewChange('statistika')"
+          >
+            Statistika
+          </button>
         </div>
 
         <div class="ldc-user-section">
