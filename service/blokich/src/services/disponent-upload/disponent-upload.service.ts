@@ -11,6 +11,7 @@ import { Disponent } from '../../schemas/disponent.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
+import { VozacStatsService } from '../vozac-stats/vozac-stats.service';
 
 @Injectable()
 export class DisponentUploadService {
@@ -22,6 +23,7 @@ export class DisponentUploadService {
     @InjectModel(Godisnji.name)
     private readonly godisnjiModel: Model<Godisnji>,
     private readonly pdfProcessingService: PdfProcessingService,
+    private readonly vozacStatsService: VozacStatsService,
   ) {}
 
   private async addNewDriversToGodisnji(rawSluzBrojevi: string[]) {
@@ -99,10 +101,22 @@ export class DisponentUploadService {
         verzija_sluzbe: verzijaSluzbi?.verzija || null,
       });
 
+      // Greška u statistici ne smije srušiti upload disponenta
+      let statistika: number | null = null;
+      try {
+        statistika = await this.vozacStatsService.preracunajTjedan(
+          parsed.godina,
+          parsed.brojTjedna,
+        );
+      } catch (err) {
+        console.error('Greška pri izračunu statistike:', err);
+      }
+
       return {
         poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
         verzija: verzijaSluzbi?.verzija || null,
         id: doc._id,
+        statistika,
       };
     } catch (error) {
       console.error('Greška:', error);
