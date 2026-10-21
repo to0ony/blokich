@@ -1,276 +1,331 @@
-<div class="apple-container">
-  <header class="apple-header">
-    <h1 class="apple-title">Statistika</h1>
-    <p class="apple-subtitle">Tvoje smjene, sati i linije kroz vrijeme</p>
+<div class="st-page">
+  <!-- ZAGLAVLJE + ODABIR PERIODA -->
+  <header class="st-head">
+    <div>
+      <h1 class="st-title">Statistika</h1>
+      <p class="st-lead" *ngIf="odabrani && !isLoading">
+        {{ rasponDatuma(odabrani) }}
+        <span class="st-pill" *ngIf="!odabrani.potpun">u tijeku</span>
+      </p>
+    </div>
+
+    <div class="st-toolbar">
+      <div class="st-seg" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [class.on]="tip === 'mjesec'"
+          [attr.aria-selected]="tip === 'mjesec'"
+          (click)="changeTip('mjesec')"
+        >
+          Mjesečno
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.on]="tip === 'tjedan'"
+          [attr.aria-selected]="tip === 'tjedan'"
+          (click)="changeTip('tjedan')"
+        >
+          Tjedno
+        </button>
+      </div>
+
+      <div class="st-period" *ngIf="odabrani && !isLoading">
+        <button
+          type="button"
+          class="st-arrow"
+          (click)="move(1)"
+          [disabled]="index >= periodi.length - 1"
+          aria-label="Prethodni period"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <span class="st-period-name">{{ nazivPerioda(odabrani) }}</span>
+        <button
+          type="button"
+          class="st-arrow"
+          (click)="move(-1)"
+          [disabled]="index === 0"
+          aria-label="Sljedeći period"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <div class="apple-filter-card">
-    <div class="segmented-control" [class.is-tjedan]="tip === 'tjedan'">
-      <button
-        type="button"
-        [class.active]="tip === 'mjesec'"
-        (click)="changeTip('mjesec')"
-      >
-        Mjesečno
-      </button>
-      <button
-        type="button"
-        [class.active]="tip === 'tjedan'"
-        (click)="changeTip('tjedan')"
-      >
-        Tjedno
-      </button>
-      <div class="selection-bg"></div>
-    </div>
-
-    <div class="period-nav" *ngIf="odabrani && !isLoading">
-      <button
-        type="button"
-        class="nav-arrow"
-        (click)="move(1)"
-        [disabled]="index >= periodi.length - 1"
-        aria-label="Prethodni period"
-      >
-        ‹
-      </button>
-      <div class="period-label">
-        <span class="period-name">{{ nazivPerioda(odabrani) }}</span>
-        <span class="period-range">
-          {{ rasponDatuma(odabrani) }}
-          <span class="badge-live" *ngIf="!odabrani.potpun">u tijeku</span>
-        </span>
-      </div>
-      <button
-        type="button"
-        class="nav-arrow"
-        (click)="move(-1)"
-        [disabled]="index === 0"
-        aria-label="Sljedeći period"
-      >
-        ›
-      </button>
-    </div>
+  <div *ngIf="isLoading" class="st-state">
+    <div class="st-spinner"></div>
   </div>
 
-  <div *ngIf="isLoading" class="apple-empty-state">
-    <div class="apple-spinner dark"></div>
+  <div *ngIf="!isLoading && !odabrani" class="st-state">
+    <p class="st-state-title">Nema podataka</p>
+    <p>{{ error || "Za tvoj službeni broj još nema statistike." }}</p>
   </div>
 
-  <div *ngIf="!isLoading && !odabrani" class="apple-empty-state">
-    <div class="empty-icon">📊</div>
-    <p>{{ error || "Još nema statistike za tvoj službeni broj." }}</p>
-  </div>
-
-  <div class="results-area" *ngIf="!isLoading && odabrani as s">
-    <!-- GLAVNE BROJKE -->
-    <section class="stat-grid hero">
-      <div class="stat-tile primary">
-        <span class="stat-label">Ukupno sati</span>
-        <span class="stat-value">{{ sati(s.ukupniSati) }}</span>
+  <ng-container *ngIf="!isLoading && odabrani as s">
+    <!-- SAŽETAK -->
+    <section class="st-card st-summary">
+      <div class="st-summary-main">
+        <span class="st-label">Ukupno sati</span>
+        <div class="st-big">
+          {{ hhmm(s.ukupniSati) }}<span class="st-unit">h</span>
+        </div>
         <span
-          class="stat-delta"
+          class="st-delta"
           *ngIf="razlikaSati !== null"
           [class.up]="razlikaSati > 0"
           [class.down]="razlikaSati < 0"
         >
-          {{ razlikaSati > 0 ? "▲" : razlikaSati < 0 ? "▼" : "•" }}
-          {{ razlikaSati > 0 ? "+" : razlikaSati < 0 ? "−" : ""
-          }}{{ sati(abs(razlikaSati)) }} u odnosu na prethodni
+          {{ razlikaSati > 0 ? "+" : razlikaSati < 0 ? "−" : "±"
+          }}{{ hhmm(abs(razlikaSati)) }} h u odnosu na
+          {{ nazivPerioda(prethodni) }}
         </span>
       </div>
-      <div class="stat-tile">
-        <span class="stat-label">Radni dani</span>
-        <span class="stat-value">{{ s.radniDani }}</span>
-        <span class="stat-sub">od {{ s.daniSaPodacima }} dana</span>
-      </div>
-      <div class="stat-tile">
-        <span class="stat-label">Slobodni dani</span>
-        <span class="stat-value">{{ s.slobodniDani }}</span>
-      </div>
-      <div class="stat-tile">
-        <span class="stat-label">Prosjek po smjeni</span>
-        <span class="stat-value">{{ satiKratko(s.prosjekSatiPoSmjeni) }}</span>
-        <span class="stat-sub"
-          >efektivno {{ satiKratko(s.efektivniSati) }}</span
+
+      <dl class="st-kpis">
+        <div>
+          <dt>Radni dani</dt>
+          <dd>{{ s.radniDani }}</dd>
+        </div>
+        <div>
+          <dt>Slobodni dani</dt>
+          <dd>{{ s.slobodniDani }}</dd>
+        </div>
+        <div>
+          <dt>Prosjek po smjeni</dt>
+          <dd>{{ hhmm(s.prosjekSatiPoSmjeni) }} <small>h</small></dd>
+        </div>
+        <div>
+          <dt>Efektivno</dt>
+          <dd>{{ hhmm(s.efektivniSati) }} <small>h</small></dd>
+        </div>
+      </dl>
+
+      <div class="st-rank" *ngIf="s.rang?.ukupniSati as r">
+        <div class="st-rank-text">
+          <span>
+            Više sati od <strong>{{ r.percentil }} %</strong> vozača
+          </span>
+          <span class="st-muted">{{ r.pozicija }}. od {{ r.od }}</span>
+        </div>
+        <div
+          class="st-track"
+          role="img"
+          [attr.aria-label]="'Više sati od ' + r.percentil + ' % vozača'"
         >
+          <div class="st-fill" [style.width.%]="r.percentil"></div>
+        </div>
       </div>
     </section>
 
-    <!-- RANG -->
-    <section class="apple-card rank-card" *ngIf="s.rang?.ukupniSati as r">
-      <div class="rank-main">
-        <span class="rank-pct">{{ r.percentil }} %</span>
-        <span class="rank-text">
-          vozača je ovaj period odradilo manje sati od tebe
+    <!-- GRAF -->
+    <section class="st-card" *ngIf="trend.length > 1">
+      <header class="st-card-head">
+        <h2>Sati po {{ tip === "mjesec" ? "mjesecima" : "tjednima" }}</h2>
+        <span class="st-muted" *ngIf="imaNepotpunih">
+          <i class="st-key"></i> u tijeku
         </span>
-      </div>
-      <div class="rank-bar" role="img" [attr.aria-label]="r.percentil + ' %'">
-        <div class="rank-fill" [style.width.%]="r.percentil"></div>
-      </div>
-      <span class="rank-sub">
-        {{ r.pozicija }}. mjesto od {{ r.od }} vozača po satima
-        <ng-container *ngIf="s.rang?.radniDani as rd">
-          · {{ rd.pozicija }}. po radnim danima
-        </ng-container>
-      </span>
-    </section>
+      </header>
 
-    <!-- TREND -->
-    <section class="apple-card" *ngIf="trend.length > 1">
-      <h2 class="card-title">Sati kroz vrijeme</h2>
-      <div class="trend-chart">
-        <button
-          type="button"
-          class="trend-col"
-          *ngFor="let p of trend"
-          [class.selected]="p === s"
-          (click)="selectPeriod(p)"
-          [attr.aria-label]="nazivPerioda(p) + ': ' + sati(p.ukupniSati)"
-        >
-          <span class="trend-tip">
-            <strong>{{ sati(p.ukupniSati) }}</strong>
-            {{ nazivPerioda(p) }}
-          </span>
-          <span class="trend-bar-wrap">
-            <span class="trend-bar" [style.height.%]="visinaStupca(p)"></span>
-          </span>
-          <span class="trend-label">{{ kratkiNaziv(p) }}</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- SMJENE -->
-    <section class="apple-card">
-      <h2 class="card-title">Smjene</h2>
-      <div class="stat-grid four">
-        <div class="mini-tile">
-          <span class="mini-icon">🌅</span>
-          <span class="mini-value">{{ s.smjene?.jutarnje || 0 }}</span>
-          <span class="mini-label">Jutarnje</span>
-        </div>
-        <div class="mini-tile">
-          <span class="mini-icon">☀️</span>
-          <span class="mini-value">{{ s.smjene?.popodnevne || 0 }}</span>
-          <span class="mini-label">Popodnevne</span>
-        </div>
-        <div class="mini-tile">
-          <span class="mini-icon">🌙</span>
-          <span class="mini-value">{{ s.smjene?.nocne || 0 }}</span>
-          <span class="mini-label">Noćne</span>
-        </div>
-        <div class="mini-tile">
-          <span class="mini-icon">🔁</span>
-          <span class="mini-value">{{ s.smjene?.dvokratne || 0 }}</span>
-          <span class="mini-label">Dvokratne</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- REKORDI -->
-    <section class="apple-card">
-      <h2 class="card-title">Zanimljivosti</h2>
-      <ul class="fact-list">
-        <li *ngIf="s.najranijiNastup">
-          <span class="fact-label">Najraniji početak</span>
-          <span class="fact-value">
-            {{ s.najranijiNastup.vrijeme }}
-            <small>{{ datum(s.najranijiNastup.datum) }}</small>
-          </span>
-        </li>
-        <li *ngIf="s.najkasnijiKraj">
-          <span class="fact-label">Najkasniji završetak</span>
-          <span class="fact-value">
-            {{ s.najkasnijiKraj.vrijeme }}
-            <small>{{ datum(s.najkasnijiKraj.datum) }}</small>
-          </span>
-        </li>
-        <li *ngIf="s.najkraciOdmor">
-          <span class="fact-label">Najkraći odmor između smjena</span>
-          <span class="fact-value" [class.warn]="s.najkraciOdmor.sati < 12">
-            {{ satiKratko(s.najkraciOdmor.sati) }}
-            <small>prije {{ datum(s.najkraciOdmor.datum) }}</small>
-          </span>
-        </li>
-        <li *ngIf="s.odmoriIspod12h > 0">
-          <span class="fact-label">Odmora kraćih od 12 h</span>
-          <span class="fact-value warn">⚠️ {{ s.odmoriIspod12h }}</span>
-        </li>
-        <li>
-          <span class="fact-label">Najduži niz radnih dana</span>
-          <span class="fact-value">{{ s.najduziNiz }}</span>
-        </li>
-        <li>
-          <span class="fact-label">Radni dani vikendom</span>
-          <span class="fact-value">
-            {{ s.radniVikendDani }}
-            <small>od toga nedjelja: {{ s.radneNedjelje }}</small>
-          </span>
-        </li>
-        <li *ngIf="s.nocniSati > 0">
-          <span class="fact-label">Noćni rad</span>
-          <span class="fact-value">{{ sati(s.nocniSati) }}</span>
-        </li>
-      </ul>
-    </section>
-
-    <!-- LINIJE -->
-    <section class="apple-card" *ngIf="s.linije?.length">
-      <h2 class="card-title">
-        Linije
-        <span class="card-title-sub">{{ s.brojLinija }} različitih</span>
-      </h2>
-      <div class="line-list">
-        <div class="line-row" *ngFor="let l of s.linije">
-          <span class="line-badge" [class.text]="l.linija.length > 4">{{
-            l.linija
-          }}</span>
-          <div class="line-bar-wrap">
-            <div
-              class="line-bar"
-              [style.width.%]="(l.dana / linijeMax) * 100"
-            ></div>
+      <div class="st-chart">
+        <div class="st-grid" aria-hidden="true">
+          <div class="st-gridline" *ngFor="let v of osY">
+            <span>{{ v }}</span>
           </div>
-          <span class="line-meta">
-            {{ l.dana }} {{ l.dana === 1 ? "dan" : "dana" }} ·
-            {{ sati(l.sati) }}
-          </span>
+        </div>
+
+        <div class="st-bars">
+          <button
+            type="button"
+            class="st-col"
+            *ngFor="let p of trend; let first = first; let last = last"
+            [class.sel]="p === s"
+            [class.partial]="!p.potpun"
+            [class.edge-l]="first"
+            [class.edge-r]="last"
+            (click)="selectPeriod(p)"
+            [attr.aria-label]="
+              nazivPerioda(p) + ': ' + hhmm(p.ukupniSati) + ' h'
+            "
+          >
+            <span class="st-tip">
+              <strong>{{ hhmm(p.ukupniSati) }} h</strong>
+              <span>{{ nazivPerioda(p) }}</span>
+            </span>
+            <span class="st-bar-area">
+              <span class="st-bar" [style.height.%]="visinaStupca(p)"></span>
+            </span>
+            <span class="st-x">{{ kratkiNaziv(p) }}</span>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- ODSUSTVA -->
-    <section class="apple-card" *ngIf="odsustva.length">
-      <h2 class="card-title">Odsustva</h2>
-      <div class="chip-row">
-        <span class="chip" *ngFor="let o of odsustva">
-          <strong>{{ o.oznaka }}</strong> {{ o.dana }}
-          {{ o.dana === 1 ? "dan" : "dana" }}
-        </span>
-      </div>
-    </section>
+    <div class="st-cols">
+      <!-- SMJENE -->
+      <section class="st-card">
+        <header class="st-card-head">
+          <h2>Smjene</h2>
+          <span class="st-muted">{{ s.radniDani }} ukupno</span>
+        </header>
+        <ul class="st-rows">
+          <li *ngFor="let r of smjene">
+            <div class="st-row-top">
+              <span class="st-row-name">
+                {{ r.naziv }}
+                <small>{{ r.opis }}</small>
+              </span>
+              <span class="st-row-val">{{ r.broj }}</span>
+            </div>
+            <div class="st-track thin">
+              <div class="st-fill" [style.width.%]="r.udio"></div>
+            </div>
+          </li>
+        </ul>
+        <p class="st-foot" *ngIf="s.smjene?.dvokratne">
+          Od toga dvokratnih (pauza 2 h ili više):
+          <strong>{{ s.smjene.dvokratne }}</strong>
+        </p>
+      </section>
 
-    <!-- KOLEGE -->
-    <section class="apple-card" *ngIf="s.kolege?.length">
-      <h2 class="card-title">Najčešće na istoj liniji s tobom</h2>
-      <ul class="colleague-list">
-        <li *ngFor="let k of s.kolege; let i = index">
-          <span class="colleague-rank">{{ i + 1 }}</span>
-          <span class="colleague-name">
-            {{ k.ime_prezime || k.radnik }}
-            <small *ngIf="k.ime_prezime">{{ k.radnik }}</small>
-          </span>
-          <span class="colleague-days">
-            {{ k.zajednickihDana }}
-            {{ k.zajednickihDana === 1 ? "dan" : "dana" }}
-          </span>
-        </li>
-      </ul>
-    </section>
+      <!-- RASPODJELA DANA -->
+      <section class="st-card">
+        <header class="st-card-head">
+          <h2>Raspodjela dana</h2>
+          <span class="st-muted">{{ s.daniSaPodacima }} ukupno</span>
+        </header>
+        <ul class="st-rows">
+          <li *ngFor="let r of raspodjelaDana">
+            <div class="st-row-top">
+              <span class="st-row-name">{{ r.naziv }}</span>
+              <span class="st-row-val">{{ r.broj }}</span>
+            </div>
+            <div class="st-track thin">
+              <div class="st-fill" [style.width.%]="r.udio"></div>
+            </div>
+          </li>
+        </ul>
+      </section>
 
-    <p class="data-note" *ngIf="s.nepoznateSluzbe > 0">
-      ℹ️ Za {{ s.nepoznateSluzbe }}
-      {{ s.nepoznateSluzbe === 1 ? "dan" : "dana" }} služba nije pronađena u
-      voznom redu pa sati za te dane nisu uračunati.
+      <!-- DETALJI -->
+      <section class="st-card">
+        <header class="st-card-head"><h2>Detalji</h2></header>
+        <dl class="st-list">
+          <div *ngIf="s.najranijiNastup">
+            <dt>Najraniji početak</dt>
+            <dd>
+              {{ s.najranijiNastup.vrijeme }}
+              <small>{{ datum(s.najranijiNastup.datum) }}</small>
+            </dd>
+          </div>
+          <div *ngIf="s.najkasnijiKraj">
+            <dt>Najkasniji završetak</dt>
+            <dd>
+              {{ s.najkasnijiKraj.vrijeme }}
+              <small>{{ datum(s.najkasnijiKraj.datum) }}</small>
+            </dd>
+          </div>
+          <div *ngIf="s.najkraciOdmor">
+            <dt>Najkraći odmor između smjena</dt>
+            <dd [class.warn]="s.najkraciOdmor.sati < 12">
+              {{ hhmm(s.najkraciOdmor.sati) }} h
+              <small>{{ datum(s.najkraciOdmor.datum) }}</small>
+            </dd>
+          </div>
+          <div *ngIf="s.odmoriIspod12h > 0">
+            <dt>Odmora kraćih od 12 h</dt>
+            <dd class="warn">{{ s.odmoriIspod12h }}</dd>
+          </div>
+          <div>
+            <dt>Najduži niz radnih dana</dt>
+            <dd>{{ s.najduziNiz }}</dd>
+          </div>
+          <div>
+            <dt>Rad vikendom</dt>
+            <dd>
+              {{ s.radniVikendDani }} {{ dana(s.radniVikendDani) }}
+              <small>nedjelja: {{ s.radneNedjelje }}</small>
+            </dd>
+          </div>
+          <div *ngIf="s.nocniSati > 0">
+            <dt>Noćni rad</dt>
+            <dd>{{ hhmm(s.nocniSati) }} h</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- LINIJE -->
+      <section class="st-card" *ngIf="linije.length">
+        <header class="st-card-head">
+          <h2>Linije</h2>
+          <span class="st-muted">{{ s.brojLinija }} različitih</span>
+        </header>
+        <table class="st-table">
+          <thead>
+            <tr>
+              <th>Linija</th>
+              <th class="w-bar"></th>
+              <th class="num">Dana</th>
+              <th class="num">Sati</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of linije">
+              <td>
+                <span class="st-line" [class.text]="l.naziv.length > 4">{{
+                  l.naziv
+                }}</span>
+              </td>
+              <td class="w-bar">
+                <div class="st-track thin">
+                  <div class="st-fill" [style.width.%]="l.udio"></div>
+                </div>
+              </td>
+              <td class="num">{{ l.broj }}</td>
+              <td class="num">{{ hhmm(l.sati) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- KOLEGE -->
+      <section class="st-card" *ngIf="s.kolege?.length">
+        <header class="st-card-head">
+          <h2>Najčešće na istoj liniji</h2>
+        </header>
+        <table class="st-table">
+          <thead>
+            <tr>
+              <th>Vozač</th>
+              <th class="num">Zajedno</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let k of s.kolege">
+              <td>
+                <span class="st-person">
+                  {{ k.ime_prezime || k.radnik }}
+                  <small *ngIf="k.ime_prezime">{{ k.radnik }}</small>
+                </span>
+              </td>
+              <td class="num">
+                {{ k.zajednickihDana }} {{ dana(k.zajednickihDana) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <p class="st-note" *ngIf="s.nepoznateSluzbe > 0">
+      Za {{ s.nepoznateSluzbe }} {{ dana(s.nepoznateSluzbe) }} služba nije
+      pronađena u voznom redu pa sati za te dane nisu uračunati.
     </p>
-  </div>
+  </ng-container>
 </div>
