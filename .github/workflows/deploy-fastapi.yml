@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Oba deploya rade na istom git repou na serveru – ne smiju istovremeno.
+concurrency:
+  group: deploy-server
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,8 +25,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/blokich/service/blokich/python
-            git pull origin main
+            set -e
+            cd ~/blokich
+            git fetch origin main
+            git reset --hard origin/main
+            echo "Deploying $(git log --oneline -1)"
+            cd service/blokich/python
             source venv/bin/activate
             pip install -r requirements.txt
             pm2 restart blokich-fastapi-app
