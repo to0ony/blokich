@@ -30,22 +30,33 @@
 }
 
 .sl-summary-head {
-  display: flex;
-  align-items: flex-end;
-  gap: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 18px;
   margin-bottom: 14px;
 
+  > * {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   strong {
-    display: block;
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
     color: var(--vz-text);
   }
 }
 
-.sl-big {
-  font-size: 32px !important;
-  letter-spacing: -0.5px;
+/* Broj službe izdvojen u svoju kutiju, linija i V.R. desno kao par */
+.sl-key {
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+  border: 1px solid var(--vz-border);
+  min-width: 96px;
 }
 
 .sl-line {
@@ -80,7 +91,7 @@
 
 .sl-time {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--vz-text);
 }

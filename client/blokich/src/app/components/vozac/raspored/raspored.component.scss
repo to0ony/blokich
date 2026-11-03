@@ -498,16 +498,26 @@
 }
 
 .sd-duty-head {
-  display: flex;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 18px;
   margin-bottom: 12px;
 
   strong {
     display: block;
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--vz-text);
   }
+}
+
+.sd-key {
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+  border: 1px solid var(--vz-border);
+  min-width: 88px;
 }
 
 .sd-label {
@@ -543,7 +553,7 @@
 
 .sd-time {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--vz-text);
   font-variant-numeric: tabular-nums;
 }

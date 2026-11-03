@@ -47,12 +47,12 @@
   <!-- Sažetak službe -->
   <section class="sl-summary">
     <div class="sl-summary-head">
-      <div>
+      <div class="sl-key">
         <span class="vz-label">Služba</span>
-        <strong class="sl-big">{{ rezultat.br_sl }}</strong>
+        <strong>{{ rezultat.br_sl }}</strong>
       </div>
       <a
-        *ngIf="rezultat.linija"
+        *ngIf="rezultat.linija; else bezLinije"
         class="sl-line"
         [href]="rutaUrl(rezultat.linija)"
         target="_blank"
@@ -61,9 +61,15 @@
         <span class="vz-label">Linija</span>
         <strong>{{ rezultat.linija }}</strong>
       </a>
-      <div *ngIf="rezultat.varijanta">
+      <ng-template #bezLinije>
+        <div>
+          <span class="vz-label">Linija</span>
+          <strong>–</strong>
+        </div>
+      </ng-template>
+      <div>
         <span class="vz-label">V.R.</span>
-        <strong>{{ rezultat.varijanta }}</strong>
+        <strong>{{ rezultat.varijanta || "–" }}</strong>
       </div>
     </div>
 
