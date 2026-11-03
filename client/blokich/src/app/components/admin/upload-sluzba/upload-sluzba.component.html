@@ -48,8 +48,9 @@
     class="status-toast"
     *ngIf="uploadStatus"
     [ngClass]="{
-      success: uploadStatus.includes('Uspješno'),
-      error: uploadStatus.includes('greške'),
+      success: statusTip === 'obradjeno',
+      info: statusTip === 'nema_promjene',
+      error: statusTip === 'greska',
     }"
   >
     <span class="dot"></span>

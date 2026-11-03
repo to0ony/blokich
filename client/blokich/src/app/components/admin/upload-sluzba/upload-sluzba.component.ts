@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { UploadService } from '../../../services/upload.service';
+import {
+  UploadService,
+  UploadStatus,
+} from '../../../services/upload.service';
 
 @Component({
   selector: 'app-upload-sluzba',
@@ -12,6 +15,7 @@ import { UploadService } from '../../../services/upload.service';
 export class UploadSluzbaComponent implements OnInit {
   selectedFile: File | null = null;
   uploadStatus: string = '';
+  statusTip: UploadStatus | '' = '';
   lastUploadInfo: any = null;
 
   loading = false;
@@ -35,15 +39,18 @@ export class UploadSluzbaComponent implements OnInit {
 
     this.loading = true;
     this.uploadStatus = '';
+    this.statusTip = '';
 
     this.uploadService.uploadSluzbaPdf(this.selectedFile).subscribe({
       next: (res: any) => {
         this.uploadStatus = res.poruka || 'Uspješan upload!';
+        this.statusTip = res.status || 'obradjeno';
         this.fetchLastUpload();
         this.loading = false;
       },
       error: () => {
         this.uploadStatus = 'Došlo je do greške prilikom uploada.';
+        this.statusTip = 'greska';
         this.loading = false;
       },
     });

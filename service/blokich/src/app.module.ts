@@ -18,6 +18,7 @@ import { VozaciController } from './controllers/vozaci/vozaci.controller';
 import { VozaciModule } from './modules/vozaci/vozaci.module';
 import { VozaciPoSluzbiDanModule } from './modules/vozaci-po-sluzbi-dan/vozaci-po-sluzbi-dan.module';
 import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
+import { ZetSyncModule } from './modules/zet-sync/zet-sync.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
     VozaciModule,
     VozaciPoSluzbiDanModule,
     VozacStatsModule,
+    ZetSyncModule,
   ],
   providers: [AdminService],
 })

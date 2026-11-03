@@ -10,6 +10,7 @@ import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
 import { toZonedTime } from 'date-fns-tz';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
+import { PdfInput, PdfIzvor, sha256 } from 'src/pdf/pdf-input';
 
 @Injectable()
 export class SluzbaUploadService {
@@ -21,8 +22,24 @@ export class SluzbaUploadService {
     private readonly pdfProcessingService: PdfProcessingService,
   ) {}
 
-  async processPdf(file: Express.Multer.File) {
+  async processPdf(file: PdfInput, izvor: PdfIzvor = 'rucno') {
     try {
+      const hash = sha256(file.buffer);
+
+      const zadnji = await this.sluzbaUploadModel
+        .findOne()
+        .sort({ datum_unosa: -1 })
+        .lean();
+
+      if (zadnji?.sha256 === hash) {
+        return {
+          status: 'nema_promjene' as const,
+          poruka: `Ovaj PDF službi je već učitan (verzija ${zadnji.verzija}). Nema promjena.`,
+          verzija: zadnji.verzija,
+          filename: file.originalname,
+        };
+      }
+
       const response = await this.pdfProcessingService.extractSluzba(file);
       const parsed = response.sluzbe;
 
@@ -36,13 +53,17 @@ export class SluzbaUploadService {
       await this.sluzbaUploadModel.create({
         datum_unosa: new Date(),
         broj_ubacenih: parsed.length,
-        filename: file.filename,
         original_filename: file.originalname,
         verzija,
+        sha256: hash,
+        izvor,
       });
 
       return {
+        status: 'obradjeno' as const,
         poruka: `Uspješno spremljeno ${parsed.length} službi. Verzija: ${verzija}`,
+        verzija,
+        filename: file.originalname,
       };
     } catch (error) {
       console.error('Greška pri obradi PDF-a:', error);

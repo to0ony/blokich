@@ -20,5 +20,6 @@ import { VozacStatsModule } from '../vozac-stats/vozac-stats.module';
   ],
   controllers: [DisponentUploadController],
   providers: [DisponentUploadService],
+  exports: [DisponentUploadService],
 })
 export class DisponentUploadModule {}

@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import * as FormData from 'form-data';
+import { PdfInput } from './pdf-input';
 
 @Injectable()
 export class PdfProcessingService {
@@ -17,26 +18,26 @@ export class PdfProcessingService {
       'http://127.0.0.1:8000';
   }
 
-  async extractGodisnji(file: Express.Multer.File): Promise<any> {
+  async extractGodisnji(file: PdfInput): Promise<any> {
     return this.postFile('/extract-godisnji', file);
   }
 
-  async extractDisponent(file: Express.Multer.File): Promise<any> {
+  async extractDisponent(file: PdfInput): Promise<any> {
     return this.postFile('/extract-disponent', file);
   }
 
-  async extractSluzba(file: Express.Multer.File): Promise<any> {
+  async extractSluzba(file: PdfInput): Promise<any> {
     return this.postFile('/extract-sluzba', file);
   }
 
   private async postFile(
     endpoint: string,
-    file: Express.Multer.File,
+    file: PdfInput,
   ): Promise<any> {
     const form = new FormData();
     form.append('file', file.buffer, {
       filename: file.originalname,
-      contentType: file.mimetype,
+      contentType: file.mimetype || 'application/pdf',
     });
 
     const response = await firstValueFrom(

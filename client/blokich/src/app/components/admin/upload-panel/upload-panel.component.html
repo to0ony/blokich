@@ -57,6 +57,51 @@
     <p>Upravljajte bazama službi, disponenta i godišnjih odmora</p>
   </header>
 
+  <section class="zet-sync-card">
+    <div class="zet-sync-top">
+      <div class="zet-sync-text">
+        <h2>Automatski dohvat</h2>
+        <p>
+          Prijavi se na ZET intranet, preuzmi službe i disponent sa stranice
+          AP Podsused i obradi ih. PDF koji je već učitan se preskače.
+        </p>
+      </div>
+      <button
+        class="zet-sync-btn"
+        [disabled]="zetLoading"
+        (click)="syncZetPodsused()"
+      >
+        <span *ngIf="!zetLoading">Povuci podatke s ZET za Podsused</span>
+        <span *ngIf="zetLoading" class="zet-sync-loading">
+          <span class="apple-spinner-small"></span>
+          Povlačim…
+        </span>
+      </button>
+    </div>
+
+    <ul class="zet-sync-results" *ngIf="zetStavke.length">
+      <li *ngFor="let s of zetStavke" [ngClass]="s.status">
+        <span class="dot"></span>
+        <div>
+          <strong>{{ naziviDokumenata[s.dokument] }}</strong>
+          <span class="zet-poruka">{{ s.poruka }}</span>
+          <a
+            *ngIf="s.url"
+            class="zet-file"
+            [href]="s.url"
+            target="_blank"
+            rel="noopener"
+            >{{ s.filename || "PDF" }}</a
+          >
+        </div>
+      </li>
+    </ul>
+
+    <div class="zet-sync-results" *ngIf="zetGreska">
+      <div class="greska single"><span class="dot"></span>{{ zetGreska }}</div>
+    </div>
+  </section>
+
   <div class="upload-stack">
     <div class="stack-item">
       <div class="item-header">

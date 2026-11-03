@@ -126,3 +126,153 @@
     }
   }
 }
+
+.zet-sync-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(0, 122, 255, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.zet-sync-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.zet-sync-text {
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #1d1d1f;
+  }
+  p {
+    font-size: 13px;
+    color: #86868b;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.zet-sync-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  min-width: 260px;
+
+  &:disabled {
+    background: #8fc1ff;
+    cursor: progress;
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  @media (max-width: 768px) {
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+.zet-sync-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.zet-sync-results {
+  list-style: none;
+  margin: 20px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li,
+  .single {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  strong {
+    margin-right: 6px;
+  }
+
+  .zet-file {
+    display: block;
+    margin-top: 2px;
+    color: inherit;
+    opacity: 0.7;
+    word-break: break-all;
+  }
+
+  .obradjeno {
+    background: rgba(52, 199, 89, 0.1);
+    color: #248a3d;
+    .dot {
+      background: #34c759;
+    }
+  }
+  .nema_promjene {
+    background: rgba(0, 122, 255, 0.08);
+    color: #004fb1;
+    .dot {
+      background: #007aff;
+    }
+  }
+  .greska {
+    background: rgba(255, 59, 48, 0.1);
+    color: #d70015;
+    .dot {
+      background: #ff3b30;
+    }
+  }
+}
