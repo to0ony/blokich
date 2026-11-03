@@ -107,8 +107,9 @@ export function jePricuva(s: Sluzba): boolean {
   return !s.linija || /P$/i.test(s.br_sl);
 }
 
+/** Karta linije s vozilima uživo (ZETko). routeId je isti kao broj linije. */
 export function rutaUrl(linija: string): string {
-  return `https://content.citymapper.com/zagreb/bus/autobus-${linija}`;
+  return `https://zet.prometko.cyou/#route/${encodeURIComponent(linija)}`;
 }
 
 export function voznjiRedUrl(linija: string): string {
