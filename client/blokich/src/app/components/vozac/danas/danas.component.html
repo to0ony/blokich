@@ -11,7 +11,9 @@
 <ng-container *ngIf="!rasporedLoading">
   <!-- Ne vozi danas -->
   <div class="vz-empty" *ngIf="!dan?.sluzbe?.length">
-    <span class="vz-empty-icon"><i class="pi pi-sun"></i></span>
+    <span class="vz-empty-icon">
+      <lucide-icon [img]="OdmorIcon" [size]="26" [strokeWidth]="2.2" />
+    </span>
     <strong>Danas ne voziš</strong>
     <span>{{ opisOdsustva(dan?.odsustvo ?? null) }}</span>
   </div>

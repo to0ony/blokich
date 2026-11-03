@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
+import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
 import { DanRasporeda, Kolega, opisOdsustva } from '../vozac.model';
@@ -17,7 +18,14 @@ interface GrupaLinije {
 @Component({
   selector: 'app-danas',
   standalone: true,
-  imports: [CommonModule, SkeletonModule, MessageModule, ButtonModule, KolegaRowComponent],
+  imports: [
+    CommonModule,
+    SkeletonModule,
+    MessageModule,
+    ButtonModule,
+    LucideAngularModule,
+    KolegaRowComponent,
+  ],
   templateUrl: './danas.component.html',
   styleUrl: './danas.component.scss',
 })
@@ -29,6 +37,8 @@ export class DanasComponent implements OnChanges {
   loading = false;
   greska = false;
   private ucitanoZa: string | null = null;
+  /** Ikona odmora kao na tahografu (krevet). */
+  readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
 
   constructor(private lineScheduleService: LineScheduleService) {}

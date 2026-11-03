@@ -14,6 +14,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DrawerModule } from 'primeng/drawer';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
+import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
 import {
@@ -45,6 +46,7 @@ const MJESECI_GEN = [
     DrawerModule,
     SkeletonModule,
     MessageModule,
+    LucideAngularModule,
     KolegaRowComponent,
   ],
   templateUrl: './raspored.component.html',
@@ -60,6 +62,8 @@ export class RasporedComponent implements OnChanges {
   @Output() retry = new EventEmitter<void>();
 
   dani: DanRasporeda[] = [];
+  /** Ikona odmora kao na tahografu (krevet). */
+  readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
   readonly rutaUrl = rutaUrl;
   readonly voznjiRedUrl = voznjiRedUrl;
