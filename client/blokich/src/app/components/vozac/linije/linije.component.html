@@ -74,9 +74,7 @@
     <span>{{ rezultat.voze.length }} vozača</span>
   </h2>
 
-  <div class="ln-list" *ngIf="rezultat.voze.length; else prazno">
-    <app-kolega-row *ngFor="let k of rezultat.voze" [kolega]="k" />
-  </div>
+  <app-kolege-lista *ngIf="rezultat.voze.length; else prazno" [kolege]="rezultat.voze" />
   <ng-template #prazno>
     <div class="vz-empty">
       <span class="vz-empty-icon"><i class="pi pi-search"></i></span>

@@ -1,0 +1,44 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  & + & {
+    margin-top: 6px;
+  }
+}
+
+.kl-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 2px;
+}
+
+.kl-vr {
+  padding: 3px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--p-primary-200);
+  background: var(--p-primary-50);
+  color: var(--p-primary-700);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.kl-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vz-muted);
+}

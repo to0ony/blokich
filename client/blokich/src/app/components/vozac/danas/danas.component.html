@@ -40,8 +40,6 @@
     <h2 class="vz-section-title">
       Linija {{ g.linija }} <span>{{ g.kolege.length }} vozača</span>
     </h2>
-    <div class="dn-list">
-      <app-kolega-row *ngFor="let k of g.kolege" [kolega]="k" />
-    </div>
+    <app-kolege-lista [kolege]="g.kolege" />
   </section>
 </ng-container>

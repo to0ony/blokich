@@ -246,9 +246,7 @@
 
     <p-message *ngIf="kolegeGreska" severity="error" text="Popis vozača nije moguće učitati." />
 
-    <div class="sd-list" *ngIf="!kolegeLoading && kolege.length">
-      <app-kolega-row *ngFor="let k of kolege" [kolega]="k" />
-    </div>
+    <app-kolege-lista *ngIf="!kolegeLoading && kolege.length" [kolege]="kolege" />
 
     <p class="sd-empty" *ngIf="!kolegeLoading && !kolegeGreska && linije(smjenaDan).length && !kolege.length">
       Nema drugih vozača na ovoj liniji.

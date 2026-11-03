@@ -16,7 +16,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
-import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
+import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import {
   DanRasporeda,
   Kolega,
@@ -45,7 +45,7 @@ const MJESECI_GEN = [
     SkeletonModule,
     MessageModule,
     LucideAngularModule,
-    KolegaRowComponent,
+    KolegeListaComponent,
   ],
   templateUrl: './raspored.component.html',
   styleUrl: './raspored.component.scss',

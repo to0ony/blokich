@@ -6,7 +6,7 @@ import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
-import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
+import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import { DanRasporeda, Kolega, opisOdsustva } from '../vozac.model';
 
 interface GrupaLinije {
@@ -24,7 +24,7 @@ interface GrupaLinije {
     MessageModule,
     ButtonModule,
     LucideAngularModule,
-    KolegaRowComponent,
+    KolegeListaComponent,
   ],
   templateUrl: './danas.component.html',
   styleUrl: './danas.component.scss',

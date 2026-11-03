@@ -7,7 +7,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { LineScheduleService } from '../../../services/line-schedule.service';
-import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
+import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import { DANI, DanKey, Kolega, TjedanTip, danasKey } from '../vozac.model';
 
 const ZADNJE_KEY = 'vz-zadnje-linije';
@@ -23,7 +23,7 @@ const ZADNJE_KEY = 'vz-zadnje-linije';
     SelectButtonModule,
     SkeletonModule,
     MessageModule,
-    KolegaRowComponent,
+    KolegeListaComponent,
   ],
   templateUrl: './linije.component.html',
   styleUrl: './linije.component.scss',
