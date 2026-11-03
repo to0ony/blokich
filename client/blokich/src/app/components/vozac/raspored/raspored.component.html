@@ -1,92 +1,89 @@
-<!-- Zaglavlje tjedna -->
-<section class="rs-head">
-  <div class="rs-title">
-    <h1 *ngIf="data; else naslovSkeleton">Tjedan {{ data.tjedan }}</h1>
-    <ng-template #naslovSkeleton>
-      <p-skeleton width="9rem" height="1.8rem" />
-    </ng-template>
-    <span class="rs-range">{{ rasponTjedna }}</span>
+<!-- Danas (samo za tekući tjedan) -->
+<p-skeleton
+  *ngIf="loading && tjedan === 'trenutni'"
+  height="168px"
+  borderRadius="22px"
+/>
+<section
+  class="rs-today"
+  *ngIf="!loading && danas as d"
+  (click)="d.sluzbe.length && otvoriSmjenu(d)"
+>
+  <div class="rs-today-top">
+    <span class="rs-today-label">Danas · {{ d.naziv }} {{ d.datum.format("D.M.") }}</span>
+    <span class="rs-today-sl" *ngIf="d.sluzbe.length">Sl. {{ d.sluzbe[0].br_sl }}</span>
   </div>
-  <p-button
-    icon="pi pi-share-alt"
-    [rounded]="true"
-    [text]="true"
-    severity="secondary"
-    ariaLabel="Podijeli raspored"
-    [disabled]="!data"
-    (onClick)="podijeli()"
-  />
+
+  <ng-container *ngIf="d.sluzbe.length; else danasSlobodno">
+    <div class="rs-today-time" *ngFor="let s of d.sluzbe; let i = index">
+      <span class="t">{{ s.od }}</span>
+      <i class="pi pi-arrow-right"></i>
+      <span class="t">{{ s.do }}</span>
+      <span
+        class="rs-today-line"
+        *ngIf="s.linija && (i === 0 || s.linija !== d.sluzbe[i - 1].linija)"
+        >{{ s.linija }}</span
+      >
+    </div>
+    <div class="rs-today-place">
+      {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
+    </div>
+    <p-button
+      label="Tko još vozi danas"
+      icon="pi pi-users"
+      size="small"
+      styleClass="rs-today-btn"
+      (onClick)="$event.stopPropagation(); otvoriSmjenu(d)"
+      *ngIf="linije(d).length"
+    />
+  </ng-container>
+  <ng-template #danasSlobodno>
+    <div class="rs-today-free">
+      <lucide-icon [img]="OdmorIcon" [size]="28" [strokeWidth]="2.2" />
+      {{ opisOdsustva(d.odsustvo) }}
+    </div>
+  </ng-template>
 </section>
 
-<p-selectbutton
-  class="rs-switch"
-  [options]="tjedanOpcije"
-  optionLabel="label"
-  optionValue="value"
-  optionDisabled="disabled"
-  [allowEmpty]="false"
-  [ngModel]="tjedan"
-  (ngModelChange)="onTjedan($event)"
-/>
-<p class="rs-hint" *ngIf="!naredniDostupan">
-  <i class="pi pi-info-circle"></i> Raspored za sljedeći tjedan objavljuje se
-  petkom poslijepodne.
-</p>
-
-<!-- Greška -->
-<p-message *ngIf="error && !loading" severity="error" styleClass="rs-error">
-  <div class="rs-error-body">
-    <span>{{ error }}</span>
-    <p-button label="Pokušaj ponovno" size="small" (onClick)="retry.emit()" />
-  </div>
-</p-message>
-
-<!-- Učitavanje -->
-<ng-container *ngIf="loading">
-  <div class="rs-strip">
-    <p-skeleton *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" height="58px" borderRadius="14px" />
-  </div>
-  <p-skeleton height="150px" borderRadius="20px" styleClass="rs-sk" />
-  <p-skeleton height="96px" borderRadius="18px" styleClass="rs-sk" />
-  <p-skeleton height="96px" borderRadius="18px" styleClass="rs-sk" />
-</ng-container>
-
-<ng-container *ngIf="!loading && dani.length">
-  <!-- Danas -->
-  <section class="rs-today" *ngIf="danas as d" (click)="d.sluzbe.length && otvoriSmjenu(d)">
-    <div class="rs-today-top">
-      <span class="rs-today-label">Danas · {{ d.naziv }} {{ d.datum.format("D.M.") }}</span>
-      <span class="rs-today-sl" *ngIf="d.sluzbe.length">Sl. {{ d.sluzbe[0].br_sl }}</span>
+<!-- Tjedan: naslov, prekidač i dani u jednoj kartici -->
+<section class="rs-week">
+  <div class="rs-week-head">
+    <div class="rs-week-title">
+      <h1 *ngIf="data && !loading; else naslovSkeleton">Tjedan {{ data.tjedan }}</h1>
+      <ng-template #naslovSkeleton>
+        <p-skeleton width="8rem" height="1.6rem" />
+      </ng-template>
+      <span class="rs-week-sub" *ngIf="dani.length && !loading">
+        {{ rasponTjedna }} · {{ brojRadnihDana }}
+        {{ brojRadnihDana === 1 ? "radni dan" : "radnih dana" }}
+      </span>
     </div>
+    <p-button
+      icon="pi pi-share-alt"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      ariaLabel="Podijeli raspored"
+      [disabled]="!data || loading"
+      (onClick)="podijeli()"
+    />
+  </div>
 
-    <ng-container *ngIf="d.sluzbe.length; else danasSlobodno">
-      <div class="rs-today-time" *ngFor="let s of d.sluzbe">
-        <span class="t">{{ s.od }}</span>
-        <i class="pi pi-arrow-right"></i>
-        <span class="t">{{ s.do }}</span>
-        <span class="rs-today-line" *ngIf="s.linija">{{ s.linija }}</span>
-      </div>
-      <div class="rs-today-place">
-        {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
-      </div>
-      <p-button
-        label="Tko još vozi danas"
-        icon="pi pi-users"
-        size="small"
-        styleClass="rs-today-btn"
-        (onClick)="$event.stopPropagation(); otvoriSmjenu(d)"
-        *ngIf="linije(d).length"
-      />
-    </ng-container>
-    <ng-template #danasSlobodno>
-      <div class="rs-today-free">
-        <lucide-icon [img]="OdmorIcon" [size]="28" [strokeWidth]="2.2" /> {{ opisOdsustva(d.odsustvo) }}
-      </div>
-    </ng-template>
-  </section>
+  <p-selectbutton
+    [options]="tjedanOpcije"
+    optionLabel="label"
+    optionValue="value"
+    optionDisabled="disabled"
+    [allowEmpty]="false"
+    [ngModel]="tjedan"
+    (ngModelChange)="onTjedan($event)"
+  />
 
-  <!-- Traka s danima -->
-  <nav class="rs-strip" aria-label="Dani u tjednu">
+  <div class="rs-strip" *ngIf="loading">
+    <p-skeleton *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" height="62px" borderRadius="12px" />
+  </div>
+
+  <nav class="rs-strip" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
     <button
       *ngFor="let d of dani"
       type="button"
@@ -101,11 +98,22 @@
       <span class="rs-chip-dot"></span>
     </button>
   </nav>
+</section>
 
-  <div class="rs-summary">
-    {{ brojRadnihDana }} radnih · {{ 7 - brojRadnihDana }} slobodnih dana
+<!-- Greška -->
+<p-message *ngIf="error && !loading" severity="error" styleClass="rs-error">
+  <div class="rs-error-body">
+    <span>{{ error }}</span>
+    <p-button label="Pokušaj ponovno" size="small" (onClick)="retry.emit()" />
   </div>
+</p-message>
 
+<ng-container *ngIf="loading">
+  <p-skeleton height="150px" borderRadius="18px" />
+  <p-skeleton height="150px" borderRadius="18px" />
+</ng-container>
+
+<ng-container *ngIf="!loading && dani.length">
   <!-- Dani -->
   <div class="rs-list">
     <article

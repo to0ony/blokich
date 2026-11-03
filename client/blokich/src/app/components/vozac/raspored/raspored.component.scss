@@ -4,44 +4,43 @@
   gap: 14px;
 }
 
-/* Zaglavlje */
-.rs-head {
+/* Tjedan: naslov, prekidač i traka s danima u jednoj kartici */
+.rs-week {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 20px;
+}
+
+.rs-week-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  margin: -4px -8px -4px 0;
 }
 
-.rs-title {
+.rs-week-title {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 
   h1 {
     margin: 0;
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 750;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.4px;
     color: var(--vz-text);
   }
 }
 
-.rs-range {
-  font-size: 14px;
+.rs-week-sub {
+  font-size: 13.5px;
   color: var(--vz-muted);
-}
-
-.rs-switch {
-  display: block;
-}
-
-.rs-hint {
-  margin: -6px 2px 0;
-  font-size: 12.5px;
-  color: var(--vz-muted);
-
-  .pi {
-    font-size: 12px;
-    margin-right: 2px;
-  }
 }
 
 :host ::ng-deep .rs-error {
@@ -55,10 +54,6 @@
   gap: 12px;
   flex-wrap: wrap;
   width: 100%;
-}
-
-:host ::ng-deep .rs-sk {
-  margin-top: 12px;
 }
 
 /* Danas */
@@ -167,9 +162,9 @@
   align-items: center;
   gap: 1px;
   padding: 8px 0 7px;
-  border: 1px solid var(--vz-border);
-  border-radius: 14px;
-  background: var(--vz-surface);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
   color: var(--vz-muted);
   cursor: pointer;
   transition: transform 0.1s;
@@ -220,12 +215,7 @@
   }
 }
 
-.rs-summary {
-  margin-top: -6px;
-  font-size: 12.5px;
-  color: var(--vz-muted);
-  text-align: center;
-}
+
 
 /* Dani */
 .rs-list {
