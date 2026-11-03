@@ -143,12 +143,11 @@
 
       <ng-container *ngIf="d.sluzbe.length">
         <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
-          <!-- Vremenska crta: nastup lijevo, završetak desno -->
+          <!-- Vremenska crta: nastup lijevo, završetak desno, služba i linija u sredini -->
           <div class="rs-line">
-            <div class="rs-end">
-              <span class="rs-time">{{ s.od }}</span>
-              <span class="rs-place">{{ s.nastup_sluzbe }}</span>
-            </div>
+            <span class="chip rs-sl">Služba {{ s.br_sl }}</span>
+
+            <span class="rs-time">{{ s.od }}</span>
             <div class="rs-track">
               <span class="rs-track-line"></span>
               <a
@@ -168,14 +167,10 @@
                 <span class="rs-mid is-res">Pričuva</span>
               </ng-template>
             </div>
-            <div class="rs-end right">
-              <span class="rs-time">{{ s.do }}</span>
-              <span class="rs-place">{{ s.zavrsna_sluzba }}</span>
-            </div>
-          </div>
+            <span class="rs-time right">{{ s.do }}</span>
 
-          <div class="rs-duty-chips">
-            <span class="chip chip-sl">Služba {{ s.br_sl }}</span>
+            <span class="rs-place">{{ s.nastup_sluzbe }}</span>
+            <span class="rs-place right">{{ s.zavrsna_sluzba }}</span>
           </div>
         </div>
 
