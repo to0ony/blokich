@@ -192,52 +192,73 @@
   [header]="smjenaDan ? smjenaDan.naziv + ' · ' + smjenaDan.datum.format('D.M.YYYY.') : ''"
 >
   <ng-container *ngIf="smjenaDan">
-    <section class="sd-duty" *ngFor="let s of smjenaDan.sluzbe">
-      <div class="sd-duty-head">
-        <div class="sd-key">
-          <span class="sd-label">Služba</span>
-          <strong>{{ s.br_sl }}</strong>
-        </div>
-        <div *ngIf="s.linija">
-          <span class="sd-label">Linija</span>
-          <strong>{{ s.linija }}</strong>
-        </div>
-        <div *ngIf="s.varijanta">
-          <span class="sd-label">V.R.</span>
-          <strong>{{ s.varijanta }}</strong>
-        </div>
+    <section class="sd-duty" *ngFor="let s of smjenaDan.sluzbe; let i = index">
+      <div class="sd-part" *ngIf="smjenaDan.sluzbe.length > 1">
+        {{ i + 1 }}. dio službe
       </div>
 
-      <div class="sd-timeline">
-        <div>
+      <!-- Vrijeme: najvažnije, krupno -->
+      <div class="sd-times">
+        <div class="sd-end">
           <span class="sd-label">Nastup</span>
           <span class="sd-time">{{ s.od }}</span>
-          <span class="sd-place">{{ s.nastup_sluzbe }}</span>
+          <span class="sd-place">{{ s.nastup_sluzbe || "–" }}</span>
         </div>
-        <i class="pi pi-arrow-right"></i>
-        <div class="right">
+        <i class="pi pi-arrow-right sd-arrow"></i>
+        <div class="sd-end right">
           <span class="sd-label">Završetak</span>
           <span class="sd-time">{{ s.do }}</span>
-          <span class="sd-place">{{ s.zavrsna_sluzba }}</span>
+          <span class="sd-place">{{ s.zavrsna_sluzba || "–" }}</span>
         </div>
       </div>
 
-      <div class="sd-hours" *ngIf="s.ukupni_sati || s.efektivni_sati">
-        <div><span>Ukupno</span><strong>{{ s.ukupni_sati || "–" }}</strong></div>
-        <div><span>Efektivno</span><strong>{{ s.efektivni_sati || "–" }}</strong></div>
-        <div><span>Noćni rad</span><strong>{{ s.nocni_rad || "–" }}</strong></div>
-        <div><span>Druga smjena</span><strong>{{ s.druga_smjena || "–" }}</strong></div>
-      </div>
+      <!-- Detalji: red po red, oznaka lijevo, vrijednost desno -->
+      <dl class="sd-rows">
+        <div class="sd-row">
+          <dt>Služba</dt>
+          <dd class="sd-strong">{{ s.br_sl }}</dd>
+        </div>
+        <div class="sd-row">
+          <dt>Linija</dt>
+          <dd class="sd-strong">{{ s.linija || "Pričuva" }}</dd>
+        </div>
+        <div class="sd-row" *ngIf="s.varijanta">
+          <dt>Varijanta (V.R.)</dt>
+          <dd class="sd-strong">{{ s.varijanta }}</dd>
+        </div>
+        <div class="sd-row" *ngIf="s.efektivni_sati">
+          <dt>Efektivno vrijeme</dt>
+          <dd>{{ s.efektivni_sati }} h</dd>
+        </div>
+        <div class="sd-row" *ngIf="s.ukupni_sati && !jeNula(s.ukupni_sati)">
+          <dt>Ukupno sati</dt>
+          <dd>{{ s.ukupni_sati }}</dd>
+        </div>
+        <div class="sd-row" *ngIf="!jeNula(s.nocni_rad)">
+          <dt>Noćni rad</dt>
+          <dd>{{ s.nocni_rad }}</dd>
+        </div>
+        <div class="sd-row" *ngIf="!jeNula(s.druga_smjena)">
+          <dt>Druga smjena</dt>
+          <dd>{{ s.druga_smjena }}</dd>
+        </div>
+      </dl>
 
-      <div class="sd-links" *ngIf="s.linija">
-        <a [href]="rutaUrl(s.linija)" target="_blank" rel="noopener">
-          <i class="pi pi-map"></i> Karta uživo
-        </a>
-      </div>
+      <a
+        *ngIf="s.linija"
+        class="sd-map"
+        [href]="rutaUrl(s.linija)"
+        target="_blank"
+        rel="noopener"
+      >
+        <i class="pi pi-map"></i> Karta linije {{ s.linija }} uživo
+        <i class="pi pi-external-link"></i>
+      </a>
     </section>
 
     <h3 class="sd-title" *ngIf="linije(smjenaDan).length">
-      Vozači na liniji {{ linije(smjenaDan).join(", ") }}
+      <span>Na liniji {{ linije(smjenaDan).join(", ") }}</span>
+      <span class="sd-count" *ngIf="!kolegeLoading && kolege.length">{{ kolege.length }} vozača</span>
     </h3>
 
     <div class="sd-list" *ngIf="kolegeLoading">

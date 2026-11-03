@@ -491,33 +491,20 @@
 
 /* Donji panel – okvir je u styles.scss (drawer se renderira u <body>) */
 .sd-duty {
-  padding: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
   border: 1px solid var(--vz-border);
-  border-radius: 16px;
-  margin-bottom: 12px;
+  border-radius: 18px;
+  background: var(--vz-surface);
 }
 
-.sd-duty-head {
-  display: grid;
-  grid-template-columns: auto 1fr 1fr;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 12px;
-
-  strong {
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--vz-text);
-  }
-}
-
-.sd-key {
-  padding: 8px 14px;
-  border-radius: 12px;
-  background: var(--vz-surface-2);
-  border: 1px solid var(--vz-border);
-  min-width: 88px;
+.sd-part {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--p-primary-600);
 }
 
 .sd-label {
@@ -529,90 +516,125 @@
   color: var(--vz-muted);
 }
 
-.sd-timeline {
+/* Vrijeme */
+.sd-times {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--vz-surface-2);
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--vz-border);
+}
 
-  > div {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  .right {
+.sd-end {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  &.right {
+    align-items: flex-end;
     text-align: right;
-  }
-  > .pi {
-    color: var(--vz-muted);
   }
 }
 
 .sd-time {
-  font-size: 22px;
+  font-size: 34px;
   font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.05;
   color: var(--vz-text);
   font-variant-numeric: tabular-nums;
 }
 
 .sd-place {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vz-text);
+}
+
+.sd-arrow {
+  font-size: 18px;
   color: var(--vz-muted);
 }
 
-.sd-hours {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
+/* Detalji red po red */
+.sd-rows {
+  margin: 0;
+}
 
-  > div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 4px;
-    border-radius: 10px;
-    background: var(--vz-surface-2);
-    text-align: center;
+.sd-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--vz-border);
+
+  &:last-child {
+    border-bottom: none;
   }
 
-  span {
-    font-size: 10.5px;
+  dt {
+    font-size: 15px;
+    font-weight: 500;
     color: var(--vz-muted);
   }
-  strong {
-    font-size: 15px;
+
+  dd {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--vz-text);
+    font-variant-numeric: tabular-nums;
   }
 
-  @media (max-width: 380px) {
-    grid-template-columns: repeat(2, 1fr);
+  .sd-strong {
+    font-size: 18px;
+    font-weight: 700;
   }
 }
 
-.sd-links {
+.sd-map {
   display: flex;
-  gap: 16px;
-  margin-top: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--p-primary-50);
+  color: var(--p-primary-700);
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
 
-  a {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--p-primary-600);
-    text-decoration: none;
+  .pi-external-link {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  &:active {
+    background: var(--p-primary-100);
   }
 }
 
 .sd-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   margin: 18px 2px 10px;
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--vz-muted);
+}
+
+.sd-count {
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .sd-list {
