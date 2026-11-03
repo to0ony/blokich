@@ -117,20 +117,37 @@
       [class.is-off]="!d.sluzbe.length"
       [class.is-weekend]="d.key === 'sub' || d.key === 'ned'"
     >
-      <div class="rs-day-date">
-        <span class="rs-day-name">{{ d.kratko }}</span>
-        <span class="rs-day-num">{{ d.datum.date() }}</span>
-        <span class="rs-day-month">{{ d.datum.format("MM.") }}</span>
-      </div>
+      <!-- Zaglavlje dana preko cijele širine -->
+      <header class="rs-day-head">
+        <span class="rs-day-name">{{ d.naziv }}</span>
+        <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
+        <span class="rs-day-badge" *ngIf="d.danas">Danas</span>
+        <span class="rs-day-free" *ngIf="!d.sluzbe.length">
+          {{ opisOdsustva(d.odsustvo) }}
+          <span class="chip" *ngIf="d.odsustvo">{{ d.odsustvo }}</span>
+        </span>
+      </header>
 
-      <div class="rs-day-body" *ngIf="d.sluzbe.length; else slobodno">
+      <ng-container *ngIf="d.sluzbe.length">
         <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
-          <div class="rs-duty-time">
-            {{ s.od }} – {{ s.do }}
-            <span class="rs-duty-dur" *ngIf="trajanje(s)">{{ trajanje(s) }} h</span>
+          <!-- Vremenska crta: nastup lijevo, završetak desno -->
+          <div class="rs-line">
+            <div class="rs-end">
+              <span class="rs-time">{{ s.od }}</span>
+              <span class="rs-place">{{ s.nastup_sluzbe }}</span>
+            </div>
+            <div class="rs-track">
+              <span class="rs-track-line"></span>
+              <span class="rs-dur" *ngIf="trajanje(s)">{{ trajanje(s) }} h</span>
+            </div>
+            <div class="rs-end right">
+              <span class="rs-time">{{ s.do }}</span>
+              <span class="rs-place">{{ s.zavrsna_sluzba }}</span>
+            </div>
           </div>
+
           <div class="rs-duty-chips">
-            <span class="chip chip-sl">Sl. {{ s.br_sl }}</span>
+            <span class="chip chip-sl">Služba {{ s.br_sl }}</span>
             <a
               *ngIf="s.linija"
               class="chip chip-line"
@@ -138,7 +155,7 @@
               target="_blank"
               rel="noopener"
               (click)="$event.stopPropagation()"
-              ><i class="pi pi-directions"></i> {{ s.linija }}</a
+              ><i class="pi pi-map"></i> Linija {{ s.linija }}</a
             >
             <a
               *ngIf="s.linija && s.varijanta"
@@ -151,25 +168,13 @@
             >
             <span class="chip chip-res" *ngIf="!s.linija">Pričuva</span>
           </div>
-          <div class="rs-duty-place" *ngIf="s.nastup_sluzbe || s.zavrsna_sluzba">
-            {{ s.nastup_sluzbe }} → {{ s.zavrsna_sluzba }}
-          </div>
         </div>
 
         <button type="button" class="rs-day-more" (click)="otvoriSmjenu(d)">
-          <i class="pi pi-users"></i> Smjena i detalji
+          <span><i class="pi pi-users"></i> Smjena i detalji</span>
           <i class="pi pi-angle-right"></i>
         </button>
-      </div>
-
-      <ng-template #slobodno>
-        <div class="rs-day-body rs-free">
-          <span>{{ opisOdsustva(d.odsustvo) }}</span>
-          <span class="chip" *ngIf="d.odsustvo">{{ d.odsustvo }}</span>
-        </div>
-      </ng-template>
-
-      <span class="rs-day-badge" *ngIf="d.danas">Danas</span>
+      </ng-container>
     </article>
   </div>
 </ng-container>
