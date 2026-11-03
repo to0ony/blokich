@@ -126,3 +126,14 @@ export function opisOdsustva(oznaka: string | null): string {
   if (/^\d/.test(o)) return 'Služba nije u voznom redu';
   return 'Slobodno';
 }
+
+/**
+ * Inicijali "Ime Prezime" (npr. AM). Imena u bazi su zapisana kao
+ * "Prezime Ime", pa je ime zadnja riječ, a prezime prva.
+ */
+export function inicijali(prezimeIme: string | null | undefined): string {
+  const d = (prezimeIme ?? '').trim().split(/\s+/).filter(Boolean);
+  if (!d.length) return '?';
+  if (d.length === 1) return d[0][0].toUpperCase();
+  return (d[d.length - 1][0] + d[0][0]).toUpperCase();
+}

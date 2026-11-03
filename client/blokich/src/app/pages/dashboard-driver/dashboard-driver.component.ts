@@ -17,6 +17,7 @@ import {
   RasporedOdgovor,
   TjedanTip,
   VozacView,
+  inicijali,
   slozTjedan,
 } from '../../components/vozac/vozac.model';
 
@@ -82,8 +83,7 @@ export class DashboardDriverComponent implements OnInit {
   }
 
   get inicijali(): string {
-    const d = this.imePrezime.trim().split(/\s+/);
-    return ((d[0]?.[0] ?? '') + (d[1]?.[0] ?? '')).toUpperCase() || 'V';
+    return inicijali(this.imePrezime);
   }
 
   ngOnInit(): void {
