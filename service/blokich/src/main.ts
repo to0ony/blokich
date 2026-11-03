@@ -15,6 +15,9 @@ async function bootstrap() {
       'https://blokich.vercel.app',
       'https://sluzbe-git-develop-to0onys-projects.vercel.app',
       'https://blokich-git-develop-to0onys-projects.vercel.app',
+      // Vercel preview deploy bilo kojeg brancha, npr.
+      // https://blokich-git-feature-vozac-redizajn-to0onys-projects.vercel.app
+      /^https:\/\/(blokich|sluzbe)-git-[a-z0-9-]+-to0onys-projects\.vercel\.app$/,
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
