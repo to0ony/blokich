@@ -263,7 +263,10 @@
   font-weight: 750;
   color: var(--vz-text);
 
-  .is-weekend & {
+  .is-sat & {
+    color: #13804b;
+  }
+  .is-sun & {
     color: #d93025;
   }
   .is-today & {

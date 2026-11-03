@@ -249,3 +249,23 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+.secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  .apple-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
+    text-decoration: none;
+  }
+}
+
+.secondary-sep {
+  width: 1px;
+  height: 18px;
+  background: #d1d1d6;
+}

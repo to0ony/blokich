@@ -104,13 +104,19 @@
           <div *ngIf="isLoading" class="apple-spinner"></div>
         </button>
 
-        <button
-          type="button"
-          class="apple-btn-secondary"
-          (click)="toggleSearchForm()"
-        >
-          Pretraga vozača
-        </button>
+        <div class="secondary-actions">
+          <button
+            type="button"
+            class="apple-btn-secondary"
+            (click)="toggleSearchForm()"
+          >
+            Pretraga vozača
+          </button>
+          <span class="secondary-sep"></span>
+          <a class="apple-btn-secondary" routerLink="/sluzba">
+            Vozači službe
+          </a>
+        </div>
       </div>
     </form>
 

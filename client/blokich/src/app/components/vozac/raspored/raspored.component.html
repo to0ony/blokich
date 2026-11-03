@@ -123,7 +123,8 @@
       [class.is-today]="d.danas"
       [class.is-past]="d.prosao"
       [class.is-off]="!d.sluzbe.length"
-      [class.is-weekend]="d.key === 'sub' || d.key === 'ned'"
+      [class.is-sat]="d.key === 'sub'"
+      [class.is-sun]="d.key === 'ned'"
     >
       <!-- Zaglavlje dana preko cijele širine -->
       <header class="rs-day-head">

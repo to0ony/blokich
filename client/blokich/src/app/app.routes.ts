@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from './guards/admin.guard';
 import { DriverGuard } from './guards/driver.guard';
+import { PristupGuard } from './guards/pristup.guard';
 
 export const routes: Routes = [
   // Redirect to login if no path is provided
@@ -20,6 +21,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/login-admin/login-admin.component').then(
         (m) => m.LoginAdminComponent,
+      ),
+  },
+  // Pregled službe s login ekrana (bez prijave službenim brojem)
+  {
+    canActivate: [PristupGuard],
+    path: 'sluzba',
+    loadComponent: () =>
+      import('./pages/pregled-sluzbe/pregled-sluzbe.component').then(
+        (m) => m.PregledSluzbeComponent,
       ),
   },
   // Driver Dashboard page route (lazy – PrimeNG se učitava tek ovdje)

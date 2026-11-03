@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UploadService } from '../../../services/upload.service';
 import { DisponentStatusComponent } from '../../status/disponent-status/disponent-status.component';
 import dayjs from 'dayjs';
@@ -25,6 +25,7 @@ dayjs.extend(isoWeek);
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterLink,
     DisponentStatusComponent,
     VozacSearchFormComponent,
   ],
