@@ -3,13 +3,20 @@
 
   <div class="kr-main">
     <div class="kr-name">
-      {{ kolega.ime_prezime || "Nepoznat vozač" }}
+      <span class="kr-name-text">{{ kolega.ime_prezime || "Nepoznat vozač" }}</span>
+      <span class="kr-num">{{ kolega.sluz_broj }}</span>
       <span class="kr-me" *ngIf="jaSam">Ti</span>
     </div>
 
+    <div class="kr-tel" *ngIf="telefoni.length">
+      <ng-container *ngFor="let t of telefoni; let i = index">
+        <span *ngIf="i > 0" class="kr-ili">ili</span>
+        <a [href]="'tel:' + t">{{ t }}</a>
+      </ng-container>
+    </div>
+
     <div class="kr-meta">
-      <span>#{{ kolega.sluz_broj }}</span>
-      <span *ngIf="kolega.br_sl">· Sl. {{ kolega.br_sl }}</span>
+      <span *ngIf="kolega.br_sl">Sl. {{ kolega.br_sl }}</span>
       <span *ngIf="kolega.linija">· Linija {{ kolega.linija }}</span>
       <span *ngIf="varijanta">· V.R. {{ varijanta }}</span>
     </div>
@@ -21,9 +28,6 @@
       </span>
     </div>
 
-    <div class="kr-info" *ngIf="kolega.kontakt_broj_info">
-      {{ kolega.kontakt_broj_info }}
-    </div>
   </div>
 
   <a

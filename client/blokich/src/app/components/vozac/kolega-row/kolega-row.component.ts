@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Kolega, inicijali } from '../vozac.model';
+import { Kolega, inicijali, telefoni } from '../vozac.model';
 
 /** Jedan vozač u popisu (smjena, linija, služba) – ime, vrijeme, poziv. */
 @Component({
@@ -23,6 +23,10 @@ export class KolegaRowComponent {
 
   get inicijali(): string {
     return inicijali(this.kolega.ime_prezime);
+  }
+
+  get telefoni(): string[] {
+    return telefoni(this.kolega.kontakt_broj, this.kolega.kontakt_broj_info);
   }
 
   get varijanta(): string | undefined {

@@ -133,3 +133,10 @@ export function inicijali(prezimeIme: string | null | undefined): string {
   if (d.length === 1) return d[0][0].toUpperCase();
   return (d[d.length - 1][0] + d[0][0]).toUpperCase();
 }
+
+/** Brojevi telefona bez praznih vrijednosti ("null"/"undefined" iz sessionStorage). */
+export function telefoni(...brojevi: (string | null | undefined)[]): string[] {
+  return brojevi
+    .map((b) => (b ?? '').trim())
+    .filter((b) => b && b !== 'null' && b !== 'undefined');
+}

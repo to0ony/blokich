@@ -19,6 +19,7 @@ import {
   VozacView,
   inicijali,
   slozTjedan,
+  telefoni,
 } from '../../components/vozac/vozac.model';
 
 interface NavStavka {
@@ -52,6 +53,10 @@ export class DashboardDriverComponent implements OnInit {
 
   readonly imePrezime = sessionStorage.getItem('imePrezime') || 'Vozač';
   readonly sluzbeniBroj = sessionStorage.getItem('sluzbeniBroj') || '';
+  readonly telefoni = telefoni(
+    sessionStorage.getItem('kontaktBroj'),
+    sessionStorage.getItem('kontaktBrojInfo'),
+  );
 
   readonly nav: NavStavka[] = [
     { view: 'raspored', label: 'Raspored', icon: 'pi pi-calendar' },

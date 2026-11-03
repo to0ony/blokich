@@ -8,8 +8,12 @@
 
       <button type="button" class="vz-user" (click)="userMenu.toggle($event)">
         <span class="vz-user-text">
-          <span class="vz-user-name">{{ imePrezime }}</span>
-          <span class="vz-user-num">#{{ sluzbeniBroj }}</span>
+          <span class="vz-user-name">
+            {{ imePrezime }} <span class="vz-user-num">{{ sluzbeniBroj }}</span>
+          </span>
+          <span class="vz-user-tel" *ngIf="telefoni.length">
+            {{ telefoni.join(" ili ") }}
+          </span>
         </span>
         <span class="vz-avatar">{{ inicijali }}</span>
       </button>
