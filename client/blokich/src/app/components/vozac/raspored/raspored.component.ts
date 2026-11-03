@@ -162,11 +162,6 @@ export class RasporedComponent implements OnChanges {
       });
   }
 
-  /** Prazno ili 0,00 / 00:00 – ne prikazuj u detaljima. */
-  jeNula(v: string | undefined | null): boolean {
-    return !v || /^[0:,.\s]*$/.test(v);
-  }
-
   podijeli(): void {
     if (!this.dani.length || !this.data) return;
     const ime = sessionStorage.getItem('imePrezime') || 'Vozač';

@@ -491,20 +491,33 @@
 
 /* Donji panel – okvir je u styles.scss (drawer se renderira u <body>) */
 .sd-duty {
-  margin-bottom: 14px;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid var(--vz-border);
-  border-radius: 18px;
-  background: var(--vz-surface);
+  border-radius: 16px;
+  margin-bottom: 12px;
 }
 
-.sd-part {
-  margin-bottom: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: var(--p-primary-600);
+.sd-duty-head {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+
+  strong {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--vz-text);
+  }
+}
+
+.sd-key {
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+  border: 1px solid var(--vz-border);
+  min-width: 88px;
 }
 
 .sd-label {
@@ -516,125 +529,90 @@
   color: var(--vz-muted);
 }
 
-/* Vrijeme */
-.sd-times {
+.sd-timeline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--vz-border);
-}
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
 
-.sd-end {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-
-  &.right {
-    align-items: flex-end;
+  > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .right {
     text-align: right;
+  }
+  > .pi {
+    color: var(--vz-muted);
   }
 }
 
 .sd-time {
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.8px;
-  line-height: 1.05;
   color: var(--vz-text);
   font-variant-numeric: tabular-nums;
 }
 
 .sd-place {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--vz-text);
-}
-
-.sd-arrow {
-  font-size: 18px;
+  font-size: 13px;
   color: var(--vz-muted);
 }
 
-/* Detalji red po red */
-.sd-rows {
-  margin: 0;
-}
+.sd-hours {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
 
-.sd-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--vz-border);
-
-  &:last-child {
-    border-bottom: none;
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: var(--vz-surface-2);
+    text-align: center;
   }
 
-  dt {
-    font-size: 15px;
-    font-weight: 500;
+  span {
+    font-size: 10.5px;
     color: var(--vz-muted);
   }
-
-  dd {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
+  strong {
+    font-size: 15px;
     color: var(--vz-text);
-    font-variant-numeric: tabular-nums;
   }
 
-  .sd-strong {
-    font-size: 18px;
-    font-weight: 700;
+  @media (max-width: 380px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.sd-map {
+.sd-links {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 13px;
-  border-radius: 12px;
-  background: var(--p-primary-50);
-  color: var(--p-primary-700);
-  font-size: 15px;
-  font-weight: 650;
-  text-decoration: none;
+  gap: 16px;
+  margin-top: 12px;
 
-  .pi-external-link {
-    font-size: 11px;
-    opacity: 0.7;
-  }
-
-  &:active {
-    background: var(--p-primary-100);
+  a {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--p-primary-600);
+    text-decoration: none;
   }
 }
 
 .sd-title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   margin: 18px 2px 10px;
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--vz-muted);
-}
-
-.sd-count {
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
 }
 
 .sd-list {
