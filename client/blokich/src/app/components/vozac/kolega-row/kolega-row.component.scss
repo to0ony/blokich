@@ -3,16 +3,24 @@
 }
 
 .kr {
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 16px;
+  overflow: hidden;
+
+  &.is-me {
+    border-color: var(--p-primary-300);
+  }
+}
+
+/* Gornji dio: tko */
+.kr-top {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: var(--vz-surface);
-  border: 1px solid var(--vz-border);
-  border-radius: 16px;
 
-  &.is-me {
-    border-color: var(--p-primary-300);
+  .is-me & {
     background: var(--p-primary-50);
   }
 }
@@ -47,8 +55,6 @@
   font-weight: 650;
   font-size: 15px;
   color: var(--vz-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -63,24 +69,6 @@
   flex-shrink: 0;
 }
 
-.kr-tel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 5px;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  margin-top: 1px;
-
-  a {
-    color: var(--vz-text);
-    text-decoration: none;
-  }
-}
-
-.kr-ili {
-  color: var(--vz-muted);
-}
-
 .kr-me {
   font-size: 11px;
   font-weight: 700;
@@ -90,33 +78,22 @@
   color: #fff;
 }
 
-.kr-meta {
+.kr-tel {
   display: flex;
   flex-wrap: wrap;
-  column-gap: 5px;
-  font-size: 12.5px;
-  color: var(--vz-muted);
-  margin-top: 1px;
+  gap: 0 5px;
+  margin-top: 2px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 
-  span {
-    white-space: nowrap;
+  a {
+    color: var(--vz-text);
+    text-decoration: none;
   }
 }
 
-.kr-time {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-  margin-top: 4px;
-  font-size: 13px;
+.kr-ili {
   color: var(--vz-muted);
-
-  strong {
-    color: var(--vz-text);
-    font-size: 14px;
-    font-variant-numeric: tabular-nums;
-  }
 }
 
 .kr-call {
@@ -138,4 +115,86 @@
   .pi {
     font-size: 17px;
   }
+}
+
+/* Donji pojas: što vozi */
+.kr-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--vz-surface-2);
+  border-top: 1px solid var(--vz-border);
+}
+
+.kr-when {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--vz-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--vz-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.kr-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.kr-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kr-sl {
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  color: var(--vz-text);
+
+  small {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vz-muted);
+  }
+}
+
+.kr-line {
+  background: var(--vz-surface);
+  border: 1px solid var(--p-primary-200);
+  border-radius: 999px;
+  color: var(--p-primary-700);
+
+  .pi {
+    font-size: 11px;
+  }
+}
+
+.kr-vr {
+  padding-left: 6px;
+  border-left: 1px solid var(--p-primary-200);
+  font-weight: 600;
+  color: var(--vz-muted);
 }

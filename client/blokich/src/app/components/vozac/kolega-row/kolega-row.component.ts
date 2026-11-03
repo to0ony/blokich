@@ -29,6 +29,14 @@ export class KolegaRowComponent {
     return telefoni(this.kolega.kontakt_broj, this.kolega.kontakt_broj_info);
   }
 
+  get imaDetalje(): boolean {
+    return (
+      (this.prikaziVrijeme && !!this.kolega.od) ||
+      !!this.kolega.br_sl ||
+      !!this.kolega.linija
+    );
+  }
+
   get varijanta(): string | undefined {
     return this.kolega['V.R'] || this.kolega.varijanta;
   }
