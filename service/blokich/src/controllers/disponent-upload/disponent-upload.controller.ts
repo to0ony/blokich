@@ -12,6 +12,7 @@ import { memoryStorage } from 'multer';
 import { DisponentUploadService } from '../../services/disponent-upload/disponent-upload.service';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { AdminOnly } from 'src/authentication/decorators/admin-only.decorator';
+import { Public } from 'src/authentication/decorators/public.decorator';
 
 @Controller('disponent-upload')
 export class DisponentUploadController {
@@ -44,6 +45,8 @@ export class DisponentUploadController {
     return this.disponentUploadService.processPdf(file);
   }
 
+  // Login stranica prikazuje je li objavljen naredni tjedan.
+  @Public()
   @Get('last-upload')
   async getLastUpload() {
     return this.disponentUploadService.getLastUploadInfo();

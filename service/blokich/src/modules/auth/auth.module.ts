@@ -8,6 +8,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AdminModule } from '../admin/admin.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { PristupService } from '../../authentication/pristup/pristup.service';
+import { PristupGuard } from '../../authentication/pristup/pristup.guard';
 
 @Module({
   imports: [
@@ -28,6 +31,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AdminModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    PristupService,
+    { provide: APP_GUARD, useClass: PristupGuard },
+  ],
 })
 export class AuthModule {}

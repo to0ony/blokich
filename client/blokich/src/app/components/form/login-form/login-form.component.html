@@ -57,6 +57,39 @@
       </div>
     </div>
 
+    <div class="input-group-custom" *ngIf="!otkljucano">
+      <label for="lozinka">Lozinka za pristup</label>
+      <input
+        type="password"
+        id="lozinka"
+        formControlName="lozinka"
+        placeholder="Unesi lozinku"
+        autocomplete="current-password"
+        [class.has-error]="
+          lozinkaGreska ||
+          (loginForm.get('lozinka')?.invalid &&
+            loginForm.get('lozinka')?.touched)
+        "
+        (input)="lozinkaGreska = ''"
+      />
+      <span class="error-text" *ngIf="lozinkaGreska">{{ lozinkaGreska }}</span>
+      <span
+        class="error-text"
+        *ngIf="
+          !lozinkaGreska &&
+          loginForm.get('lozinka')?.invalid &&
+          loginForm.get('lozinka')?.touched
+        "
+      >
+        Obavezno polje.
+      </span>
+      <p class="lozinka-hint">
+        Lozinku dobiješ od kolega. Upisuješ je samo prvi put na ovom uređaju.
+      </p>
+    </div>
+
+    <div class="login-greska" *ngIf="loginGreska">{{ loginGreska }}</div>
+
     <div class="action-buttons">
       <button
         type="submit"
@@ -71,6 +104,8 @@
         type="button"
         class="apple-btn-secondary"
         (click)="toggleSearchForm()"
+        [disabled]="!otkljucano"
+        [title]="otkljucano ? '' : 'Pretraga je dostupna nakon prve prijave'"
       >
         Pretraga vozača
       </button>

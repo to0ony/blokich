@@ -8,8 +8,11 @@ import { ApiService } from './api.service';
 export class AuthService {
   constructor(private api: ApiService) {}
 
-  loginWithEmployeeNumber(sluzbeniBroj: string): Observable<any> {
-    return this.api.post('auth/login', { sluzbeniBroj });
+  loginWithEmployeeNumber(
+    sluzbeniBroj: string,
+    lozinka?: string,
+  ): Observable<any> {
+    return this.api.post('auth/login', { sluzbeniBroj, lozinka });
   }
 
   loginAsAdmin(username: string, password: string): Observable<any> {

@@ -13,6 +13,7 @@ import { DisponentStatusComponent } from '../../status/disponent-status/disponen
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
+import { PristupStorage } from '../../../services/pristup-storage';
 
 dayjs.extend(isoWeek);
 
@@ -35,6 +36,10 @@ export class LoginFormComponent implements OnInit {
   isNextWeekAvailable: boolean = false;
   showSearchForm = false;
   recentNumbers: string[] = [];
+  /** Uređaj je već jednom unio lozinku – polje se ne prikazuje. */
+  otkljucano = PristupStorage.otkljucano;
+  loginGreska = '';
+  lozinkaGreska = '';
 
   @ViewChild(VozacSearchFormComponent)
   vozacSearchFormComponent?: VozacSearchFormComponent;
@@ -51,6 +56,7 @@ export class LoginFormComponent implements OnInit {
 
     this.loginForm = this.fb.group({
       sluzbeniBroj: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+      lozinka: ['', this.otkljucano ? [] : [Validators.required]],
     });
 
     this.uploadService.fetchLastDisponentUpload().subscribe({
@@ -76,7 +82,17 @@ export class LoginFormComponent implements OnInit {
     });
   }
 
+  private zakljucaj() {
+    PristupStorage.clear();
+    this.otkljucano = false;
+    const lozinka = this.loginForm.get('lozinka');
+    lozinka?.setValidators([Validators.required]);
+    lozinka?.setValue('');
+    lozinka?.updateValueAndValidity();
+  }
+
   toggleSearchForm() {
+    if (!this.otkljucano) return;
     this.showSearchForm = !this.showSearchForm;
   }
 
@@ -117,11 +133,20 @@ export class LoginFormComponent implements OnInit {
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
+      this.loginGreska = '';
+      this.lozinkaGreska = '';
       const broj = String(this.loginForm.value.sluzbeniBroj);
       const forSessionBroj = broj.padStart(5, '0');
+      const lozinka = this.otkljucano
+        ? undefined
+        : this.loginForm.value.lozinka || undefined;
 
-      this.authService.loginWithEmployeeNumber(broj).subscribe({
+      this.authService.loginWithEmployeeNumber(broj, lozinka).subscribe({
         next: (res) => {
+          if (res.pristupToken) {
+            PristupStorage.set(res.pristupToken);
+            this.otkljucano = true;
+          }
           this.saveRecentNumber(forSessionBroj);
 
           sessionStorage.setItem('sluzbeniBroj', forSessionBroj);
@@ -138,9 +163,17 @@ export class LoginFormComponent implements OnInit {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error('Login greška:', err);
-          alert('Neispravan broj ili vozač ne postoji.');
           this.isLoading = false;
+          if (err?.error?.code === 'PRISTUP') {
+            // Spremljeni token više ne vrijedi (npr. promijenjena lozinka).
+            if (this.otkljucano) this.zakljucaj();
+            this.lozinkaGreska = err.error.message || 'Pogrešna lozinka.';
+            return;
+          }
+          this.loginGreska =
+            err?.status === 404
+              ? 'Vozač s tim brojem ne postoji.'
+              : 'Prijava nije uspjela. Pokušaj ponovno.';
         },
       });
     }

@@ -1,8 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Iza nginxa: prava IP adresa klijenta iz X-Forwarded-For (rate limit lozinke).
+  app.set('trust proxy', 1);
 
   app.enableCors({
     origin: [
