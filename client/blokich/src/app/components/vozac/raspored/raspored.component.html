@@ -131,12 +131,16 @@
         <span class="rs-day-name">{{ d.naziv }}</span>
         <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
         <span class="rs-day-badge" *ngIf="d.danas">Danas</span>
-        <span class="rs-day-free" *ngIf="!d.sluzbe.length">
-          <lucide-icon [img]="OdmorIcon" [size]="18" [strokeWidth]="2.2" />
-          {{ opisOdsustva(d.odsustvo) }}
-          <span class="chip" *ngIf="d.odsustvo">{{ d.odsustvo }}</span>
-        </span>
+        <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
+          d.odsustvo
+        }}</span>
       </header>
+
+      <!-- Slobodan dan: tekst uvijek centriran, neovisno o oznaci -->
+      <div class="rs-day-free" *ngIf="!d.sluzbe.length">
+        <lucide-icon [img]="OdmorIcon" [size]="20" [strokeWidth]="2.2" />
+        {{ opisOdsustva(d.odsustvo) }}
+      </div>
 
       <ng-container *ngIf="d.sluzbe.length">
         <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
