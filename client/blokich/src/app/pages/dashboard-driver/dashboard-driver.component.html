@@ -1,29 +1,73 @@
-<div class="ldc-app-root">
-  <app-navbar [view]="view" (switchView)="setView($event)"></app-navbar>
+<div class="vz-app">
+  <p-menu #userMenu [model]="menu" [popup]="true" appendTo="body" />
 
-  <main class="ldc-page-container">
-    <div class="ldc-view-wrapper">
-      <app-weekly-schedule
-        *ngIf="
-          view === 'raspored' &&
-          rasporedData &&
-          godina !== null &&
-          brojTjedna !== null
-        "
-        [data]="rasporedData"
-        [godina]="godina"
-        [brojTjedna]="brojTjedna"
-        [naredniTjedanDostupan]="naredniTjedanDostupan"
-        [tjedanAktivan]="tjedanAktivan"
-        (tjedanPromjena)="onWeekChange($event)"
-      ></app-weekly-schedule>
+  <!-- Gornja traka -->
+  <header class="vz-top">
+    <div class="vz-top-inner">
+      <img src="assets/blokich_logo.png" alt="Blokich" class="vz-logo" />
 
-      <app-line-schedule *ngIf="view === 'vozaci'"></app-line-schedule>
-      <app-driver-shift-schedule
-        *ngIf="view === 'smjena'"
-      ></app-driver-shift-schedule>
-      <app-service-schedule *ngIf="view === 'sluzba'"></app-service-schedule>
-      <app-driver-stats *ngIf="view === 'statistika'"></app-driver-stats>
+      <button type="button" class="vz-user" (click)="userMenu.toggle($event)">
+        <span class="vz-user-text">
+          <span class="vz-user-name">{{ imePrezime }}</span>
+          <span class="vz-user-num">#{{ sluzbeniBroj }}</span>
+        </span>
+        <span class="vz-avatar">{{ inicijali }}</span>
+      </button>
     </div>
+
+    <!-- Na širem ekranu navigacija je ovdje, na mobitelu dolje -->
+    <nav class="vz-tabs" aria-label="Glavna navigacija">
+      <button
+        *ngFor="let n of nav"
+        type="button"
+        class="vz-tab"
+        [class.is-active]="view === n.view"
+        [attr.aria-current]="view === n.view ? 'page' : null"
+        (click)="promijeniView(n.view)"
+      >
+        <i [class]="n.icon"></i>
+        <span>{{ n.label }}</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="vz-main">
+    <app-raspored
+      *ngIf="view === 'raspored'"
+      [data]="podaci"
+      [loading]="loading"
+      [error]="error"
+      [tjedan]="tjedan"
+      [naredniDostupan]="naredniDostupan"
+      (tjedanChange)="promijeniTjedan($event)"
+      (retry)="ucitaj()"
+    />
+
+    <app-danas
+      *ngIf="view === 'danas'"
+      [dan]="danas"
+      [rasporedLoading]="danasLoading"
+    />
+
+    <app-linije *ngIf="view === 'linije'" [naredniDostupan]="naredniDostupan" />
+
+    <app-sluzbe *ngIf="view === 'sluzbe'" [naredniDostupan]="naredniDostupan" />
+
+    <app-driver-stats *ngIf="view === 'statistika'" />
   </main>
+
+  <!-- Donja navigacija (mobitel) -->
+  <nav class="vz-bottom" aria-label="Glavna navigacija">
+    <button
+      *ngFor="let n of nav"
+      type="button"
+      class="vz-bottom-item"
+      [class.is-active]="view === n.view"
+      [attr.aria-current]="view === n.view ? 'page' : null"
+      (click)="promijeniView(n.view)"
+    >
+      <i [class]="n.icon"></i>
+      <span>{{ n.label }}</span>
+    </button>
+  </nav>
 </div>

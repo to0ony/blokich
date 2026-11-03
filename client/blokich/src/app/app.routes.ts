@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { DashboardDriverComponent } from './pages/dashboard-driver/dashboard-driver.component';
 import { AdminGuard } from './guards/admin.guard';
 import { DriverGuard } from './guards/driver.guard';
 
@@ -23,20 +22,14 @@ export const routes: Routes = [
         (m) => m.LoginAdminComponent,
       ),
   },
-  // Driver Dashboard page route
+  // Driver Dashboard page route (lazy – PrimeNG se učitava tek ovdje)
   {
     canActivate: [DriverGuard],
     path: 'dashboard',
-    component: DashboardDriverComponent,
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import(
-            './components/schedule/weekly-schedule/weekly-schedule.component'
-          ).then((m) => m.WeeklyScheduleComponent),
-      },
-    ],
+    loadComponent: () =>
+      import('./pages/dashboard-driver/dashboard-driver.component').then(
+        (m) => m.DashboardDriverComponent,
+      ),
   },
   // Admin Dashboard page route
   {

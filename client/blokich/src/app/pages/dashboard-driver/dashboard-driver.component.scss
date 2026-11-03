@@ -1,54 +1,181 @@
 :host {
-  --apple-bg-system: #f2f2f7;
-  --apple-max-width: 800px;
+  display: block;
 }
 
-.ldc-app-root {
+.vz-app {
   min-height: 100vh;
-  background-color: var(--apple-bg-system);
+  min-height: 100dvh;
+  background: var(--vz-bg);
+}
+
+/* Gornja traka */
+.vz-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--vz-border);
+  padding-top: env(safe-area-inset-top);
+}
+
+.vz-top-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 680px;
+  margin: 0 auto;
+  height: 56px;
+  padding: 0 16px;
+}
+
+.vz-logo {
+  height: 24px;
+}
+
+.vz-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 4px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--vz-surface-2);
+  }
+}
+
+.vz-user-text {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+  min-width: 0;
 }
 
-.ldc-page-container {
-  flex: 1;
-  width: 100%;
+.vz-user-name {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--vz-text);
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vz-user-num {
+  font-size: 12px;
+  color: var(--vz-muted);
+}
+
+.vz-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--p-primary-500);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Tabovi gore – samo na širem ekranu */
+.vz-tabs {
+  display: none;
+  justify-content: center;
+  gap: 4px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px 8px;
+
+  @media (min-width: 760px) {
+    display: flex;
+  }
+}
+
+.vz-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--vz-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--vz-surface-2);
+  }
+
+  &.is-active {
+    background: var(--p-primary-50);
+    color: var(--p-primary-700);
+  }
+}
+
+/* Sadržaj */
+.vz-main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px 16px calc(96px + env(safe-area-inset-bottom));
+
+  @media (min-width: 760px) {
+    padding-bottom: 48px;
+  }
+}
+
+/* Donja navigacija */
+.vz-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-top: 1px solid var(--vz-border);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  @media (min-width: 760px) {
+    display: none;
+  }
+}
+
+.vz-bottom-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  // Padding da navbar ne prekriva sadržaj
-  padding-top: 52px;
-  padding-bottom: 12px;
-}
-
-.ldc-view-wrapper {
-  width: 100%;
-  max-width: var(--apple-max-width);
-  padding: 0 16px;
-
-  // Apple "spring" animacija pri promjeni view-a
-  animation: viewFadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes viewFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.98) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@media (min-width: 768px) {
-  .ldc-page-container {
-    padding-top: 52px;
-  }
-}
-
-::-webkit-scrollbar {
-  width: 0px;
+  gap: 3px;
+  padding: 9px 0 8px;
+  border: none;
   background: transparent;
+  color: var(--vz-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  .pi {
+    font-size: 20px;
+    transition: transform 0.15s;
+  }
+
+  &.is-active {
+    color: var(--p-primary-600);
+
+    .pi {
+      transform: translateY(-1px) scale(1.08);
+    }
+  }
 }

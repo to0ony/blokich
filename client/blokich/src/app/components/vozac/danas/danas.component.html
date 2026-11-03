@@ -1,0 +1,45 @@
+<header class="vz-page-head">
+  <h1>Današnja smjena</h1>
+  <p *ngIf="dan">{{ dan.naziv }}, {{ dan.datum.format("D.M.YYYY.") }}</p>
+</header>
+
+<ng-container *ngIf="rasporedLoading">
+  <p-skeleton height="72px" borderRadius="16px" styleClass="dn-sk" />
+  <p-skeleton height="72px" borderRadius="16px" styleClass="dn-sk" />
+</ng-container>
+
+<ng-container *ngIf="!rasporedLoading">
+  <!-- Ne vozi danas -->
+  <div class="vz-empty" *ngIf="!dan?.sluzbe?.length">
+    <span class="vz-empty-icon"><i class="pi pi-sun"></i></span>
+    <strong>Danas ne voziš</strong>
+    <span>{{ opisOdsustva(dan?.odsustvo ?? null) }}</span>
+  </div>
+
+  <!-- Pričuva bez linije -->
+  <div class="vz-empty" *ngIf="dan?.sluzbe?.length && !linije.length">
+    <span class="vz-empty-icon"><i class="pi pi-clock"></i></span>
+    <strong>Danas si u pričuvi</strong>
+    <span>Služba {{ dan?.sluzbe?.[0]?.br_sl }} · {{ dan?.sluzbe?.[0]?.od }} – {{ dan?.sluzbe?.[0]?.do }}</span>
+  </div>
+
+  <div class="dn-list" *ngIf="loading">
+    <p-skeleton *ngFor="let i of [1, 2, 3, 4]" height="72px" borderRadius="16px" />
+  </div>
+
+  <p-message *ngIf="greska" severity="error">
+    <div class="dn-err">
+      Popis vozača nije moguće učitati.
+      <p-button label="Ponovno" size="small" (onClick)="ucitaj(true)" />
+    </div>
+  </p-message>
+
+  <section class="dn-group" *ngFor="let g of grupe">
+    <h2 class="vz-section-title">
+      Linija {{ g.linija }} <span>{{ g.kolege.length }} vozača</span>
+    </h2>
+    <div class="dn-list">
+      <app-kolega-row *ngFor="let k of g.kolege" [kolega]="k" />
+    </div>
+  </section>
+</ng-container>

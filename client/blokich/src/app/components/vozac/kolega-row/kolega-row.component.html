@@ -1,0 +1,37 @@
+<div class="kr" [class.is-me]="jaSam">
+  <div class="kr-avatar">{{ inicijali }}</div>
+
+  <div class="kr-main">
+    <div class="kr-name">
+      {{ kolega.ime_prezime || "Nepoznat vozač" }}
+      <span class="kr-me" *ngIf="jaSam">Ti</span>
+    </div>
+
+    <div class="kr-meta">
+      <span>#{{ kolega.sluz_broj }}</span>
+      <span *ngIf="kolega.br_sl">· Sl. {{ kolega.br_sl }}</span>
+      <span *ngIf="kolega.linija">· Linija {{ kolega.linija }}</span>
+      <span *ngIf="varijanta">· V.R. {{ varijanta }}</span>
+    </div>
+
+    <div class="kr-time" *ngIf="prikaziVrijeme && kolega.od">
+      <strong>{{ kolega.od }} – {{ kolega.do }}</strong>
+      <span *ngIf="kolega.nastup || kolega.zavrsetak">
+        {{ kolega.nastup }} → {{ kolega.zavrsetak }}
+      </span>
+    </div>
+
+    <div class="kr-info" *ngIf="kolega.kontakt_broj_info">
+      {{ kolega.kontakt_broj_info }}
+    </div>
+  </div>
+
+  <a
+    *ngIf="kolega.kontakt_broj && !jaSam"
+    class="kr-call"
+    [href]="'tel:' + kolega.kontakt_broj"
+    [attr.aria-label]="'Nazovi ' + (kolega.ime_prezime || kolega.sluz_broj)"
+  >
+    <i class="pi pi-phone"></i>
+  </a>
+</div>
