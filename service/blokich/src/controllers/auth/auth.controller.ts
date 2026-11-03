@@ -28,9 +28,19 @@ export class AuthController {
   ) {}
 
   /**
-   * Prijava vozača službenim brojem. Uređaj koji još nema pristupni token
-   * mora poslati i zajedničku lozinku (VOZAC_LOZINKA) – tada dobiva token
-   * koji se sprema u preglednik i lozinka više ne treba.
+   * Otključavanje uređaja zajedničkom lozinkom (VOZAC_LOZINKA).
+   * Vraća pristupni token koji se sprema u preglednik i vrijedi ~10 godina.
+   */
+  @Public()
+  @Post('pristup')
+  pristupi(@Body('lozinka') lozinka: string | undefined, @Ip() ip: string) {
+    if (!this.pristup.ukljucen) return { pristupToken: null };
+    return { pristupToken: this.provjeriLozinkuIliBaci(lozinka, ip) };
+  }
+
+  /**
+   * Prijava vozača službenim brojem. Uređaj mora biti otključan
+   * (X-Pristup-Token); radi kompatibilnosti prima i lozinku u tijelu.
    */
   @Public()
   @Post('login')
@@ -43,28 +53,7 @@ export class AuthController {
     let pristupToken: string | undefined;
 
     if (this.pristup.ukljucen && !this.pristup.provjeriToken(postojeciToken)) {
-      if (this.pristup.previseNeuspjelih(ip)) {
-        throw new HttpException(
-          {
-            statusCode: 429,
-            code: 'PRISTUP',
-            message: 'Previše pogrešnih pokušaja. Pokušaj ponovno za 15 minuta.',
-          },
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
-      }
-
-      if (!this.pristup.provjeriLozinku(lozinka)) {
-        if (lozinka) this.pristup.zabiljeziNeuspjeh(ip);
-        throw new UnauthorizedException({
-          statusCode: 401,
-          code: 'PRISTUP',
-          message: lozinka ? 'Pogrešna lozinka.' : 'Unesi lozinku.',
-        });
-      }
-
-      this.pristup.ocistiNeuspjehe(ip);
-      pristupToken = this.pristup.izdajToken();
+      pristupToken = this.provjeriLozinkuIliBaci(lozinka, ip);
     }
 
     const vozac = await this.authService.validateVozac(sluzbeniBroj);
@@ -81,6 +70,35 @@ export class AuthController {
       kontaktBrojInfo: vozac.kontaktBrojInfo,
       pristupToken,
     };
+  }
+
+  /** Provjeri lozinku (uz rate limit po IP-u) i vrati novi pristupni token. */
+  private provjeriLozinkuIliBaci(
+    lozinka: string | undefined,
+    ip: string,
+  ): string {
+    if (this.pristup.previseNeuspjelih(ip)) {
+      throw new HttpException(
+        {
+          statusCode: 429,
+          code: 'PRISTUP',
+          message: 'Previše pogrešnih pokušaja. Pokušaj ponovno za 15 minuta.',
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    if (!this.pristup.provjeriLozinku(lozinka)) {
+      if (lozinka) this.pristup.zabiljeziNeuspjeh(ip);
+      throw new UnauthorizedException({
+        statusCode: 401,
+        code: 'PRISTUP',
+        message: lozinka ? 'Pogrešna lozinka.' : 'Unesi lozinku.',
+      });
+    }
+
+    this.pristup.ocistiNeuspjehe(ip);
+    return this.pristup.izdajToken();
   }
 
   // Novog admina može napraviti samo postojeći admin.

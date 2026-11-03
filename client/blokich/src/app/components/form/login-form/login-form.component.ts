@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
@@ -23,6 +24,7 @@ dayjs.extend(isoWeek);
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     DisponentStatusComponent,
     VozacSearchFormComponent,
   ],
@@ -36,8 +38,9 @@ export class LoginFormComponent implements OnInit {
   isNextWeekAvailable: boolean = false;
   showSearchForm = false;
   recentNumbers: string[] = [];
-  /** Uređaj je već jednom unio lozinku – polje se ne prikazuje. */
+  /** Uređaj je već jednom unio lozinku – ekran s lozinkom se preskače. */
   otkljucano = PristupStorage.otkljucano;
+  lozinka = '';
   loginGreska = '';
   lozinkaGreska = '';
 
@@ -56,7 +59,6 @@ export class LoginFormComponent implements OnInit {
 
     this.loginForm = this.fb.group({
       sluzbeniBroj: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      lozinka: ['', this.otkljucano ? [] : [Validators.required]],
     });
 
     this.uploadService.fetchLastDisponentUpload().subscribe({
@@ -82,17 +84,38 @@ export class LoginFormComponent implements OnInit {
     });
   }
 
-  private zakljucaj() {
+  otkljucaj(): void {
+    if (!this.lozinka || this.isLoading) return;
+    this.isLoading = true;
+    this.lozinkaGreska = '';
+
+    this.authService.otkljucaj(this.lozinka).subscribe({
+      next: (res) => {
+        // Bez VOZAC_LOZINKA server ne izdaje token; oznaka "otvoreno" ne vrijedi
+        // kao token, pa se uređaj sam zaključa čim se lozinka uključi.
+        PristupStorage.set(res.pristupToken || 'otvoreno');
+        this.otkljucano = true;
+        this.lozinka = '';
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.lozinkaGreska =
+          err?.error?.code === 'PRISTUP'
+            ? err.error.message || 'Pogrešna lozinka.'
+            : 'Provjera lozinke nije uspjela. Pokušaj ponovno.';
+      },
+    });
+  }
+
+  private zakljucaj(poruka?: string) {
     PristupStorage.clear();
     this.otkljucano = false;
-    const lozinka = this.loginForm.get('lozinka');
-    lozinka?.setValidators([Validators.required]);
-    lozinka?.setValue('');
-    lozinka?.updateValueAndValidity();
+    this.showSearchForm = false;
+    this.lozinkaGreska = poruka ?? '';
   }
 
   toggleSearchForm() {
-    if (!this.otkljucano) return;
     this.showSearchForm = !this.showSearchForm;
   }
 
@@ -137,16 +160,9 @@ export class LoginFormComponent implements OnInit {
       this.lozinkaGreska = '';
       const broj = String(this.loginForm.value.sluzbeniBroj);
       const forSessionBroj = broj.padStart(5, '0');
-      const lozinka = this.otkljucano
-        ? undefined
-        : this.loginForm.value.lozinka || undefined;
 
-      this.authService.loginWithEmployeeNumber(broj, lozinka).subscribe({
+      this.authService.loginWithEmployeeNumber(broj).subscribe({
         next: (res) => {
-          if (res.pristupToken) {
-            PristupStorage.set(res.pristupToken);
-            this.otkljucano = true;
-          }
           this.saveRecentNumber(forSessionBroj);
 
           sessionStorage.setItem('sluzbeniBroj', forSessionBroj);
@@ -166,8 +182,7 @@ export class LoginFormComponent implements OnInit {
           this.isLoading = false;
           if (err?.error?.code === 'PRISTUP') {
             // Spremljeni token više ne vrijedi (npr. promijenjena lozinka).
-            if (this.otkljucano) this.zakljucaj();
-            this.lozinkaGreska = err.error.message || 'Pogrešna lozinka.';
+            this.zakljucaj('Lozinka je promijenjena – unesi novu.');
             return;
           }
           this.loginGreska =

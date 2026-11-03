@@ -66,6 +66,19 @@ describe('POST /auth/login s lozinkom za pristup', () => {
     expect(drugi.body.pristupToken).toBeUndefined();
   });
 
+  it('POST /auth/pristup: kriva lozinka 401, točna vrati token koji radi za login', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/pristup')
+      .send({ lozinka: 'krivo' })
+      .expect(401);
+    const res = await request(app.getHttpServer())
+      .post('/auth/pristup')
+      .send({ lozinka: 'tajna123' })
+      .expect(201);
+    expect(res.body.pristupToken).toEqual(expect.any(String));
+    await login({ sluzbeniBroj: '00466' }, res.body.pristupToken).expect(201);
+  });
+
   it('točna lozinka, nepostojeći vozač: 404', () =>
     login({ sluzbeniBroj: '99999', lozinka: 'tajna123' }).expect(404));
 

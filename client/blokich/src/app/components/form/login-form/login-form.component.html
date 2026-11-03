@@ -7,112 +7,118 @@
     />
   </div>
 
-  <app-disponent-status
-    *ngIf="isNextWeekAvailable"
-    [show]="isNextWeekAvailable"
-  ></app-disponent-status>
-
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="apple-form">
+  <!-- Zaključan uređaj: samo lozinka -->
+  <form
+    *ngIf="!otkljucano; else prijava"
+    class="apple-form"
+    (ngSubmit)="otkljucaj()"
+  >
     <div class="input-group-custom">
-      <label for="sluzbeniBroj">Službeni broj vozača</label>
-      <input
-        type="number"
-        id="sluzbeniBroj"
-        formControlName="sluzbeniBroj"
-        placeholder="Unesi broj"
-        [class.has-error]="
-          loginForm.get('sluzbeniBroj')?.invalid &&
-          loginForm.get('sluzbeniBroj')?.touched
-        "
-      />
-      <span
-        class="error-text"
-        *ngIf="
-          loginForm.get('sluzbeniBroj')?.invalid &&
-          loginForm.get('sluzbeniBroj')?.touched
-        "
-      >
-        Obavezno polje.
-      </span>
-
-      <div class="recent-numbers-container" *ngIf="recentNumbers.length > 0">
-        <p class="recent-label">Nedavno korišteni:</p>
-        <div class="recent-chips">
-          <div
-            *ngFor="let num of recentNumbers"
-            class="recent-chip"
-            (click)="selectRecentNumber(num)"
-          >
-            <span class="chip-number">{{ num }}</span>
-            <button
-              type="button"
-              class="chip-remove"
-              (click)="removeRecentNumber($event, num)"
-              aria-label="Ukloni broj"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="input-group-custom" *ngIf="!otkljucano">
-      <label for="lozinka">Lozinka za pristup</label>
+      <label for="lozinka">Lozinka</label>
       <input
         type="password"
         id="lozinka"
-        formControlName="lozinka"
+        name="lozinka"
         placeholder="Unesi lozinku"
         autocomplete="current-password"
-        [class.has-error]="
-          lozinkaGreska ||
-          (loginForm.get('lozinka')?.invalid &&
-            loginForm.get('lozinka')?.touched)
-        "
+        autofocus
+        [(ngModel)]="lozinka"
+        [class.has-error]="lozinkaGreska"
         (input)="lozinkaGreska = ''"
       />
       <span class="error-text" *ngIf="lozinkaGreska">{{ lozinkaGreska }}</span>
-      <span
-        class="error-text"
-        *ngIf="
-          !lozinkaGreska &&
-          loginForm.get('lozinka')?.invalid &&
-          loginForm.get('lozinka')?.touched
-        "
-      >
-        Obavezno polje.
-      </span>
     </div>
-
-    <div class="login-greska" *ngIf="loginGreska">{{ loginGreska }}</div>
 
     <div class="action-buttons">
       <button
         type="submit"
         class="apple-btn-primary"
-        [disabled]="loginForm.invalid || isLoading"
+        [disabled]="!lozinka || isLoading"
       >
-        <span *ngIf="!isLoading">Prijavi se</span>
+        <span *ngIf="!isLoading">Nastavi</span>
         <div *ngIf="isLoading" class="apple-spinner"></div>
-      </button>
-
-      <button
-        type="button"
-        class="apple-btn-secondary"
-        (click)="toggleSearchForm()"
-        [disabled]="!otkljucano"
-        [title]="otkljucano ? '' : 'Pretraga je dostupna nakon prve prijave'"
-      >
-        Pretraga vozača
       </button>
     </div>
   </form>
 
-  <div class="search-collapsible" [class.open]="showSearchForm">
-    <app-vozac-search-form
-      *ngIf="showSearchForm"
-      (selectVozac)="onVozacSelected($event)"
-    ></app-vozac-search-form>
-  </div>
+  <ng-template #prijava>
+    <app-disponent-status
+      *ngIf="isNextWeekAvailable"
+      [show]="isNextWeekAvailable"
+    ></app-disponent-status>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="apple-form">
+      <div class="input-group-custom">
+        <label for="sluzbeniBroj">Službeni broj vozača</label>
+        <input
+          type="number"
+          id="sluzbeniBroj"
+          formControlName="sluzbeniBroj"
+          placeholder="Unesi broj"
+          [class.has-error]="
+            loginForm.get('sluzbeniBroj')?.invalid &&
+            loginForm.get('sluzbeniBroj')?.touched
+          "
+        />
+        <span
+          class="error-text"
+          *ngIf="
+            loginForm.get('sluzbeniBroj')?.invalid &&
+            loginForm.get('sluzbeniBroj')?.touched
+          "
+        >
+          Obavezno polje.
+        </span>
+
+        <div class="recent-numbers-container" *ngIf="recentNumbers.length > 0">
+          <p class="recent-label">Nedavno korišteni:</p>
+          <div class="recent-chips">
+            <div
+              *ngFor="let num of recentNumbers"
+              class="recent-chip"
+              (click)="selectRecentNumber(num)"
+            >
+              <span class="chip-number">{{ num }}</span>
+              <button
+                type="button"
+                class="chip-remove"
+                (click)="removeRecentNumber($event, num)"
+                aria-label="Ukloni broj"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-greska" *ngIf="loginGreska">{{ loginGreska }}</div>
+
+      <div class="action-buttons">
+        <button
+          type="submit"
+          class="apple-btn-primary"
+          [disabled]="loginForm.invalid || isLoading"
+        >
+          <span *ngIf="!isLoading">Prijavi se</span>
+          <div *ngIf="isLoading" class="apple-spinner"></div>
+        </button>
+
+        <button
+          type="button"
+          class="apple-btn-secondary"
+          (click)="toggleSearchForm()"
+        >
+          Pretraga vozača
+        </button>
+      </div>
+    </form>
+
+    <div class="search-collapsible" [class.open]="showSearchForm">
+      <app-vozac-search-form
+        *ngIf="showSearchForm"
+        (selectVozac)="onVozacSelected($event)"
+      ></app-vozac-search-form>
+    </div>
+  </ng-template>
 </div>
