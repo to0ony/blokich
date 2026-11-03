@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { DashboardDriverComponent } from './pages/dashboard-driver/dashboard-driver.component';
-import { DashboardAdminComponent } from './pages/dashboard-admin/dashboard-admin.component';
 import { AdminGuard } from './guards/admin.guard';
 import { DriverGuard } from './guards/driver.guard';
 
@@ -43,6 +42,9 @@ export const routes: Routes = [
   {
     canActivate: [AdminGuard],
     path: 'admin',
-    component: DashboardAdminComponent,
+    loadComponent: () =>
+      import('./pages/dashboard-admin/dashboard-admin.component').then(
+        (m) => m.DashboardAdminComponent,
+      ),
   },
 ];

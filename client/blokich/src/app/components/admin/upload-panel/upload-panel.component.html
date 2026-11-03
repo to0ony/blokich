@@ -1,130 +1,205 @@
-<div class="dashboard-wrapper">
-  <section class="admin-notice-grid">
-    <div class="apple-info-card warning">
-      <div class="icon-circle">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-        >
-          <path
-            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-          ></path>
-          <line x1="12" y1="9" x2="12" y2="13"></line>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
-      </div>
-      <div class="card-content">
-        <h3>Preporučeni redoslijed</h3>
-        <p>
-          Prilikom unosa novog disponenta najprije ubacite
-          <strong>novu službu</strong>. Provjerite poklapa li se naziv zadnje
-          službe sa ZET sustavom.
-        </p>
-      </div>
-    </div>
+<p-toast
+  position="bottom-right"
+  [breakpoints]="{
+    '640px': { width: 'calc(100% - 32px)', right: '16px', left: '16px' },
+  }"
+/>
 
-    <div class="apple-info-card info">
-      <div class="icon-circle">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-        >
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-      </div>
-      <div class="card-content">
-        <h3>Status prijenosa</h3>
-        <p>
-          Tijekom uploada nemojte zatvarati stranicu. Pričekajte potvrdu o
-          uspješnom završetku.
-        </p>
-      </div>
+<div class="adm">
+  <!-- Zaglavlje -->
+  <header class="adm-head">
+    <div>
+      <span class="adm-eyebrow">AP Podsused · Administracija</span>
+      <h1>Upravljanje podacima</h1>
+      <p>Uvoz službi, disponenta i godišnjih odmora.</p>
     </div>
-  </section>
-
-  <header class="panel-header">
-    <h1>Panel za upravljanje podacima</h1>
-    <p>Upravljajte bazama službi, disponenta i godišnjih odmora</p>
+    <div class="adm-today">
+      <span class="adm-today-week">Tjedan {{ tekuciTjedan }}</span>
+      <span class="adm-today-date">{{ danasTekst }}</span>
+    </div>
   </header>
 
-  <section class="zet-sync-card">
-    <div class="zet-sync-top">
-      <div class="zet-sync-text">
-        <h2>Automatski dohvat</h2>
-        <p>
-          Prijavi se na ZET intranet, preuzmi službe i disponent sa stranice
-          AP Podsused i obradi ih. PDF koji je već učitan se preskače.
-        </p>
-      </div>
-      <button
-        class="zet-sync-btn"
-        [disabled]="zetLoading"
-        (click)="syncZetPodsused()"
-      >
-        <span *ngIf="!zetLoading">Povuci podatke s ZET za Podsused</span>
-        <span *ngIf="zetLoading" class="zet-sync-loading">
-          <span class="apple-spinner-small"></span>
-          Povlačim…
-        </span>
-      </button>
+  <!-- Stanje podataka -->
+  <section class="adm-section">
+    <div class="adm-section-head">
+      <h2>Stanje podataka</h2>
+      <p-button
+        icon="pi pi-refresh"
+        label="Osvježi"
+        [text]="true"
+        size="small"
+        severity="secondary"
+        (onClick)="ucitajStanje()"
+      />
     </div>
 
-    <ul class="zet-sync-results" *ngIf="zetStavke.length">
-      <li *ngFor="let s of zetStavke" [ngClass]="s.status">
-        <span class="dot"></span>
-        <div>
-          <strong>{{ naziviDokumenata[s.dokument] }}</strong>
-          <span class="zet-poruka">{{ s.poruka }}</span>
-          <a
-            *ngIf="s.url"
-            class="zet-file"
-            [href]="s.url"
-            target="_blank"
-            rel="noopener"
-            >{{ s.filename || "PDF" }}</a
-          >
+    <div class="adm-stats">
+      <!-- Disponent -->
+      <article class="adm-stat">
+        <div class="adm-stat-top">
+          <span class="adm-stat-icon is-blue"><i class="pi pi-calendar"></i></span>
+          <span class="adm-stat-label">Disponent</span>
+          <p-tag
+            *ngIf="!stanjeUcitava"
+            [value]="disponentStanje.tekst"
+            [severity]="disponentStanje.severity"
+          />
         </div>
-      </li>
-    </ul>
+        <ng-container *ngIf="!stanjeUcitava; else statSkeleton">
+          <ng-container *ngIf="disponent; else nemaPodataka">
+            <div class="adm-stat-value">
+              Tjedan {{ disponent.brojTjedna }}
+              <small>/ {{ disponent.godina }}</small>
+            </div>
+            <div class="adm-stat-sub">
+              Uneseno {{ disponent.datum_unosa | date: "d.M.yyyy. 'u' HH:mm" }}
+            </div>
+          </ng-container>
+        </ng-container>
+      </article>
 
-    <div class="zet-sync-results" *ngIf="zetGreska">
-      <div class="greska single"><span class="dot"></span>{{ zetGreska }}</div>
+      <!-- Službe -->
+      <article class="adm-stat">
+        <div class="adm-stat-top">
+          <span class="adm-stat-icon is-green"><i class="pi pi-list"></i></span>
+          <span class="adm-stat-label">Službe</span>
+          <p-tag
+            *ngIf="!stanjeUcitava && sluzba?.verzija"
+            [value]="'v' + sluzba?.verzija"
+            severity="secondary"
+          />
+        </div>
+        <ng-container *ngIf="!stanjeUcitava; else statSkeleton">
+          <ng-container *ngIf="sluzba; else nemaPodataka">
+            <div class="adm-stat-value">
+              {{ sluzba.broj_ubacenih }} <small>službi</small>
+            </div>
+            <div class="adm-stat-sub">
+              Uneseno {{ sluzba.datum_unosa | date: "d.M.yyyy. 'u' HH:mm" }}
+              <span *ngIf="sluzba.izvor === 'zet'" class="adm-src">· ZET</span>
+            </div>
+          </ng-container>
+        </ng-container>
+      </article>
+
+      <!-- Godišnji -->
+      <article class="adm-stat">
+        <div class="adm-stat-top">
+          <span class="adm-stat-icon is-orange"><i class="pi pi-sun"></i></span>
+          <span class="adm-stat-label">Godišnji odmori</span>
+        </div>
+        <ng-container *ngIf="!stanjeUcitava; else statSkeleton">
+          <ng-container *ngIf="godisnji; else nemaPodataka">
+            <div class="adm-stat-value">
+              {{ godisnji.brojVozaca }} <small>vozača</small>
+            </div>
+            <div class="adm-stat-sub">
+              Uneseno {{ godisnji.createdAt | date: "d.M.yyyy. 'u' HH:mm" }}
+            </div>
+          </ng-container>
+        </ng-container>
+      </article>
     </div>
   </section>
 
-  <div class="upload-stack">
-    <div class="stack-item">
-      <div class="item-header">
-        <span class="step-num">01</span>
-        <h2>Službe</h2>
+  <!-- ZET automatski dohvat -->
+  <section class="adm-zet">
+    <div class="adm-zet-main">
+      <span class="adm-zet-icon"><i class="pi pi-cloud-download"></i></span>
+      <div class="adm-zet-text">
+        <h2>Automatski dohvat sa ZET-a</h2>
+        <p>
+          Prijava na ZET intranet, preuzimanje službi i disponenta sa stranice
+          AP Podsused i obrada. PDF koji je već učitan se preskače.
+        </p>
+        <span class="adm-zet-hint" [class.is-active]="cekaSeNoviDisponent">
+          <i class="pi pi-clock"></i>
+          <ng-container *ngIf="cekaSeNoviDisponent; else redovno">
+            ZET je vjerojatno objavio disponent za sljedeći tjedan – povuci ga.
+          </ng-container>
+          <ng-template #redovno>
+            Novi disponent izlazi petkom između 12 i 14 h.
+          </ng-template>
+        </span>
       </div>
-      <app-upload-sluzba></app-upload-sluzba>
+      <p-button
+        styleClass="adm-zet-btn"
+        [label]="zetLoading ? 'Povlačim…' : 'Povuci podatke s ZET za Podsused'"
+        icon="pi pi-download"
+        [loading]="zetLoading"
+        (onClick)="syncZetPodsused()"
+      />
     </div>
 
-    <div class="stack-item">
-      <div class="item-header">
-        <span class="step-num">02</span>
-        <h2>Disponent</h2>
+    <div class="adm-zet-results" *ngIf="zetStavke.length || zetGreska">
+      <div class="adm-zet-results-head" *ngIf="zetVrijeme">
+        Rezultat dohvata · {{ zetVrijeme | date: "HH:mm:ss" }}
       </div>
-      <app-upload-disponent></app-upload-disponent>
+
+      <div *ngFor="let s of zetStavke" class="adm-zet-row">
+        <p-tag [value]="zetStatusTekst(s)" [severity]="zetSeverity(s)" />
+        <div class="adm-zet-row-body">
+          <strong>{{ naziviDokumenata[s.dokument] }}</strong>
+          <span>{{ s.poruka }}</span>
+          <a *ngIf="s.url" [href]="s.url" target="_blank" rel="noopener">
+            <i class="pi pi-external-link"></i> {{ s.filename || "PDF" }}
+          </a>
+        </div>
+      </div>
+
+      <div *ngIf="zetGreska" class="adm-zet-row">
+        <p-tag value="Greška" severity="danger" />
+        <div class="adm-zet-row-body">
+          <span>{{ zetGreska }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ručni uvoz -->
+  <section class="adm-section">
+    <div class="adm-section-head">
+      <h2>Ručni uvoz</h2>
     </div>
 
-    <div class="stack-item">
-      <div class="item-header">
-        <span class="step-num">03</span>
-        <h2>Godišnji odmori</h2>
-      </div>
-      <app-upload-godisnji></app-upload-godisnji>
+    <div class="adm-card">
+      <p-tabs [(value)]="aktivniTab">
+        <p-tablist>
+          <p-tab value="disponent"><i class="pi pi-calendar"></i> Disponent</p-tab>
+          <p-tab value="sluzba"><i class="pi pi-list"></i> Službe</p-tab>
+          <p-tab value="godisnji"><i class="pi pi-sun"></i> Godišnji</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="disponent">
+            <app-manual-upload
+              tip="disponent"
+              (uploaded)="onManualUpload('disponent', $event)"
+            />
+          </p-tabpanel>
+          <p-tabpanel value="sluzba">
+            <app-manual-upload
+              tip="sluzba"
+              (uploaded)="onManualUpload('sluzba', $event)"
+            />
+          </p-tabpanel>
+          <p-tabpanel value="godisnji">
+            <app-manual-upload
+              tip="godisnji"
+              (uploaded)="onManualUpload('godisnji', $event)"
+            />
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </div>
-  </div>
+  </section>
 </div>
+
+<ng-template #statSkeleton>
+  <p-skeleton width="60%" height="1.9rem" styleClass="mb-2" />
+  <p-skeleton width="80%" height="0.9rem" />
+</ng-template>
+
+<ng-template #nemaPodataka>
+  <div class="adm-stat-value is-empty">—</div>
+  <div class="adm-stat-sub">Još nema unesenih podataka</div>
+</ng-template>

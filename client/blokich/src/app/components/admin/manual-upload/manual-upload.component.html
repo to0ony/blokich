@@ -1,0 +1,58 @@
+<div class="mu">
+  <p class="mu-opis">{{ opis.opis }}</p>
+
+  <label
+    *ngIf="!file"
+    class="mu-drop"
+    [class.is-over]="dragOver"
+    [attr.for]="inputId"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragOver = false"
+    (drop)="onDrop($event)"
+  >
+    <span class="mu-drop-icon"><i class="pi pi-file-pdf"></i></span>
+    <span class="mu-drop-title">
+      Povuci PDF ovdje ili <span class="mu-link">odaberi datoteku</span>
+    </span>
+    <span class="mu-drop-hint">npr. {{ opis.primjer }}</span>
+    <input
+      type="file"
+      [id]="inputId"
+      accept=".pdf,application/pdf"
+      (change)="onFileInput($event)"
+      hidden
+    />
+  </label>
+
+  <div *ngIf="file" class="mu-file">
+    <span class="mu-file-icon"><i class="pi pi-file-pdf"></i></span>
+    <div class="mu-file-meta">
+      <span class="mu-file-name" [title]="file.name">{{ file.name }}</span>
+      <span class="mu-file-size">{{ formatSize(file.size) }}</span>
+    </div>
+    <p-button
+      icon="pi pi-times"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      ariaLabel="Ukloni datoteku"
+      [disabled]="loading"
+      (onClick)="clear()"
+    />
+    <p-button
+      [label]="loading ? 'Obrađujem…' : 'Učitaj ' + opis.naslov.toLowerCase()"
+      icon="pi pi-upload"
+      [loading]="loading"
+      (onClick)="upload()"
+    />
+  </div>
+
+  <p-message
+    *ngIf="poruka"
+    [severity]="severity"
+    [closable]="false"
+    styleClass="mu-msg"
+  >
+    {{ poruka }}
+  </p-message>
+</div>

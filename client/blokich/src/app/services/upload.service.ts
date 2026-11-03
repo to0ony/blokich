@@ -40,9 +40,45 @@ export class UploadService {
   syncZetPodsused() {
     return this.api.post<ZetSyncOdgovor>('zet-sync/podsused', {});
   }
+
+  uploadPdf(tip: UploadTip, pdf: File) {
+    const formData = new FormData();
+    formData.append('pdf', pdf);
+    return this.api.post<UploadOdgovor>(`${tip}-upload/upload`, formData);
+  }
+
+  fetchLastUpload<T = any>(tip: UploadTip) {
+    return this.api.get<T>(`${tip}-upload/last-upload`);
+  }
 }
 
+export type UploadTip = 'sluzba' | 'disponent' | 'godisnji';
+
 export type UploadStatus = 'obradjeno' | 'nema_promjene' | 'greska';
+
+export interface UploadOdgovor {
+  poruka: string;
+  status?: UploadStatus;
+}
+
+export interface ZadnjiSluzbaUpload {
+  datum_unosa: string;
+  broj_ubacenih: number;
+  original_filename?: string;
+  verzija?: string;
+  izvor?: 'rucno' | 'zet';
+}
+
+export interface ZadnjiDisponentUpload {
+  datum_unosa: string;
+  brojTjedna: number;
+  godina: number;
+}
+
+export interface ZadnjiGodisnjiUpload {
+  createdAt: string;
+  brojVozaca: number;
+}
 
 export interface ZetSyncStavka {
   dokument: 'sluzba' | 'disponent';
