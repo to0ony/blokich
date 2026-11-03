@@ -92,7 +92,7 @@
 
   .t {
     font-size: 30px;
-    font-weight: 750;
+    font-weight: 700;
     letter-spacing: -0.6px;
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
@@ -276,15 +276,6 @@
   color: var(--vz-muted);
 }
 
-.rs-day-badge {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--p-primary-500);
-  color: #fff;
-}
-
 .chip.rs-day-code {
   margin-left: auto;
   padding: 2px 9px;
@@ -333,7 +324,7 @@
 
 .rs-time {
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.5px;
   line-height: 1.1;
   color: var(--vz-text);
@@ -390,19 +381,45 @@
   }
 }
 
-.rs-dur {
+.rs-mid {
   position: relative;
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 11px;
   border-radius: 999px;
   background: var(--vz-surface);
-  border: 1px solid var(--vz-border);
-  font-size: 12px;
-  font-weight: 650;
-  color: var(--vz-muted);
+  border: 1px solid var(--p-primary-200);
+  color: var(--p-primary-700);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
 
-  .is-off & {
-    background: var(--vz-surface-2);
+  .pi {
+    font-size: 12px;
   }
+  strong {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &:active {
+    background: var(--p-primary-50);
+  }
+
+  &.is-res {
+    border-color: #ffe0b2;
+    color: #a35400;
+    font-weight: 650;
+  }
+}
+
+.rs-mid-vr {
+  padding-left: 6px;
+  border-left: 1px solid var(--p-primary-200);
+  font-weight: 600;
+  color: var(--vz-muted);
 }
 
 .rs-duty-chips {
@@ -428,12 +445,6 @@
   .pi {
     font-size: 11px;
   }
-}
-
-.chip-line {
-  background: var(--p-primary-500);
-  border-color: var(--p-primary-500);
-  color: #fff;
 }
 
 .chip-res {

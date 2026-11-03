@@ -21,13 +21,11 @@ import {
   DanRasporeda,
   Kolega,
   RasporedOdgovor,
-  Sluzba,
   TjedanTip,
   jePricuva,
   opisOdsustva,
   rutaUrl,
   slozTjedan,
-  voznjiRedUrl,
 } from '../vozac.model';
 
 const MJESECI_GEN = [
@@ -66,7 +64,6 @@ export class RasporedComponent implements OnChanges {
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
   readonly rutaUrl = rutaUrl;
-  readonly voznjiRedUrl = voznjiRedUrl;
   readonly jePricuva = jePricuva;
 
   tjedanOpcije = [
@@ -163,10 +160,6 @@ export class RasporedComponent implements OnChanges {
         this.kolegeGreska = true;
         this.kolegeLoading = false;
       });
-  }
-
-  trajanje(s: Sluzba): string | null {
-    return s.efektivni_sati || null;
   }
 
   podijeli(): void {

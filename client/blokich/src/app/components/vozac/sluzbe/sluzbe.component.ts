@@ -9,7 +9,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { ServiceScheduleService } from '../../../services/service-schedule.service';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
-import { DANI, Kolega, TjedanTip, rutaUrl, voznjiRedUrl } from '../vozac.model';
+import { DANI, Kolega, TjedanTip, rutaUrl } from '../vozac.model';
 
 interface SluzbaDan {
   dan: string;
@@ -63,7 +63,6 @@ export class SluzbeComponent {
   loading = false;
   greska = '';
   readonly rutaUrl = rutaUrl;
-  readonly voznjiRedUrl = voznjiRedUrl;
 
   constructor(private serviceScheduleService: ServiceScheduleService) {}
 

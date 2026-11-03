@@ -130,7 +130,6 @@
       <header class="rs-day-head">
         <span class="rs-day-name">{{ d.naziv }}</span>
         <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
-        <span class="rs-day-badge" *ngIf="d.danas">Danas</span>
         <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
           d.odsustvo
         }}</span>
@@ -152,7 +151,22 @@
             </div>
             <div class="rs-track">
               <span class="rs-track-line"></span>
-              <span class="rs-dur" *ngIf="trajanje(s)">{{ trajanje(s) }} h</span>
+              <a
+                *ngIf="s.linija; else pricuva"
+                class="rs-mid"
+                [href]="rutaUrl(s.linija)"
+                target="_blank"
+                rel="noopener"
+                (click)="$event.stopPropagation()"
+                [attr.aria-label]="'Karta linije ' + s.linija"
+              >
+                <i class="pi pi-map"></i>
+                <strong>{{ s.linija }}</strong>
+                <span class="rs-mid-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span>
+              </a>
+              <ng-template #pricuva>
+                <span class="rs-mid is-res">Pričuva</span>
+              </ng-template>
             </div>
             <div class="rs-end right">
               <span class="rs-time">{{ s.do }}</span>
@@ -162,25 +176,6 @@
 
           <div class="rs-duty-chips">
             <span class="chip chip-sl">Služba {{ s.br_sl }}</span>
-            <a
-              *ngIf="s.linija"
-              class="chip chip-line"
-              [href]="rutaUrl(s.linija)"
-              target="_blank"
-              rel="noopener"
-              (click)="$event.stopPropagation()"
-              ><i class="pi pi-map"></i> Linija {{ s.linija }}</a
-            >
-            <a
-              *ngIf="s.linija && s.varijanta"
-              class="chip"
-              [href]="voznjiRedUrl(s.linija)"
-              target="_blank"
-              rel="noopener"
-              (click)="$event.stopPropagation()"
-              >V.R. {{ s.varijanta }}</a
-            >
-            <span class="chip chip-res" *ngIf="!s.linija">Pričuva</span>
           </div>
         </div>
 
@@ -242,9 +237,6 @@
       <div class="sd-links" *ngIf="s.linija">
         <a [href]="rutaUrl(s.linija)" target="_blank" rel="noopener">
           <i class="pi pi-map"></i> Karta uživo
-        </a>
-        <a [href]="voznjiRedUrl(s.linija)" target="_blank" rel="noopener">
-          <i class="pi pi-file-pdf"></i> Vozni red
         </a>
       </div>
     </section>

@@ -61,16 +61,10 @@
         <span class="vz-label">Linija</span>
         <strong>{{ rezultat.linija }}</strong>
       </a>
-      <a
-        *ngIf="rezultat.linija && rezultat.varijanta"
-        class="sl-line"
-        [href]="voznjiRedUrl(rezultat.linija)"
-        target="_blank"
-        rel="noopener"
-      >
+      <div *ngIf="rezultat.varijanta">
         <span class="vz-label">V.R.</span>
         <strong>{{ rezultat.varijanta }}</strong>
-      </a>
+      </div>
     </div>
 
     <div class="sl-times">

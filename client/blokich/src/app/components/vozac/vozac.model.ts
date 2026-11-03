@@ -112,10 +112,6 @@ export function rutaUrl(linija: string): string {
   return `https://zet.prometko.cyou/#route/${encodeURIComponent(linija)}`;
 }
 
-export function voznjiRedUrl(linija: string): string {
-  return `https://www.zet.hr/UserDocsImages/Autobusne%20linije%20-%20rasporedi/${linija}.pdf`;
-}
-
 /** Čitljiv opis oznake odsustva iz disponenta. */
 export function opisOdsustva(oznaka: string | null): string {
   if (!oznaka) return 'Slobodno';
