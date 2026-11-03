@@ -19,5 +19,6 @@ import { PdfModule } from '../pdf/pdf.module';
   ],
   controllers: [SluzbaUploadController],
   providers: [SluzbaUploadService],
+  exports: [SluzbaUploadService],
 })
 export class SluzbaUploadModule {}

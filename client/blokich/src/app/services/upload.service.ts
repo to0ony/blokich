@@ -36,4 +36,22 @@ export class UploadService {
   fetchLastGodisnjiUpload() {
     return this.api.get('godisnji-upload/last-upload');
   }
+
+  syncZetPodsused() {
+    return this.api.post<ZetSyncOdgovor>('zet-sync/podsused', {});
+  }
+}
+
+export type UploadStatus = 'obradjeno' | 'nema_promjene' | 'greska';
+
+export interface ZetSyncStavka {
+  dokument: 'sluzba' | 'disponent';
+  status: UploadStatus;
+  poruka: string;
+  filename?: string;
+  url?: string;
+}
+
+export interface ZetSyncOdgovor {
+  stavke: ZetSyncStavka[];
 }

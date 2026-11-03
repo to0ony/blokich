@@ -17,6 +17,12 @@ export class SluzbaUpload extends Document {
 
   @Prop()
   verzija: string;
+
+  @Prop()
+  sha256?: string;
+
+  @Prop()
+  izvor?: string;
 }
 
 export const SluzbaUploadSchema = SchemaFactory.createForClass(SluzbaUpload);

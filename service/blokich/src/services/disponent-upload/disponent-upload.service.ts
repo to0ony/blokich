@@ -11,6 +11,7 @@ import { Disponent } from '../../schemas/disponent.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
+import { PdfInput, PdfIzvor, sha256 } from 'src/pdf/pdf-input';
 import { VozacStatsService } from '../vozac-stats/vozac-stats.service';
 
 @Injectable()
@@ -74,8 +75,25 @@ export class DisponentUploadService {
     }
   }
 
-  async processPdf(file: Express.Multer.File) {
+  async processPdf(file: PdfInput, izvor: PdfIzvor = 'rucno') {
     try {
+      const hash = sha256(file.buffer);
+
+      const zadnji = await this.disponentModel
+        .findOne({}, 'sha256 godina brojTjedna')
+        .sort({ datum_unosa: -1 })
+        .lean();
+
+      if (zadnji?.sha256 === hash) {
+        return {
+          status: 'nema_promjene' as const,
+          poruka: `Ovaj PDF disponenta je već učitan (tjedan ${zadnji.brojTjedna}/${zadnji.godina}). Nema promjena.`,
+          brojTjedna: zadnji.brojTjedna,
+          godina: zadnji.godina,
+          filename: file.originalname,
+        };
+      }
+
       const parsed = await this.pdfProcessingService.extractDisponent(file);
 
       if (!parsed.godina || !parsed.brojTjedna || !parsed.radnici) {
@@ -99,6 +117,9 @@ export class DisponentUploadService {
         ...parsed,
         datum_unosa: new Date(),
         verzija_sluzbe: verzijaSluzbi?.verzija || null,
+        sha256: hash,
+        izvor,
+        original_filename: file.originalname,
       });
 
       // Greška u statistici ne smije srušiti upload disponenta
@@ -113,7 +134,11 @@ export class DisponentUploadService {
       }
 
       return {
+        status: 'obradjeno' as const,
         poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
+        brojTjedna: parsed.brojTjedna,
+        godina: parsed.godina,
+        filename: file.originalname,
         verzija: verzijaSluzbi?.verzija || null,
         id: doc._id,
         statistika,

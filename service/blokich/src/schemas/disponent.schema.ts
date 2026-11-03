@@ -33,6 +33,15 @@ export class Disponent extends Document {
 
   @Prop()
   verzija_sluzbe: string;
+
+  @Prop()
+  sha256?: string;
+
+  @Prop()
+  izvor?: string;
+
+  @Prop()
+  original_filename?: string;
 }
 
 export const DisponentSchema = SchemaFactory.createForClass(Disponent);

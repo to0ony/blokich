@@ -19,8 +19,8 @@ export class DisponentUploadController {
     private readonly disponentUploadService: DisponentUploadService,
   ) {}
 
-  // @UseGuards(JwtAuthGuard)
-  // @AdminOnly()
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('pdf', {
