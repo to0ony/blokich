@@ -48,4 +48,16 @@
       </span>
     </div>
   </div>
+
+  <!-- Uživo: tanka traka na dnu kartice, sve u jednom redu -->
+  <div class="kr-livebar" *ngIf="uzivo" [class.is-late]="kasni">
+    <span class="kr-live-dot"></span>
+    <strong>{{ kasnjenjeTekst }}</strong>
+    <span class="kr-livebar-sep">·</span>
+    <span>bus {{ uzivo.vozilo }}</span>
+    <ng-container *ngIf="stize">
+      <span class="kr-livebar-sep">·</span>
+      <span>stiže ~{{ stize }}</span>
+    </ng-container>
+  </div>
 </div>

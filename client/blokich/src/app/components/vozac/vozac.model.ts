@@ -140,3 +140,89 @@ export function telefoni(...brojevi: (string | null | undefined)[]): string[] {
     .map((b) => (b ?? '').trim())
     .filter((b) => b && b !== 'null' && b !== 'undefined');
 }
+
+/* ---------- Uživo (ZET GTFS-RT) ---------- */
+
+/** Ključ vozača u popisu (isti vozač može imati dva dijela službe). */
+export function kolegaKljuc(k: Kolega): string {
+  return `${k.sluz_broj}|${k.br_sl ?? ''}|${k.od ?? ''}`;
+}
+
+/** Blok u ZET-ovom feedu: linija + V.R. s dvije znamenke (109 + 2 = 10902). */
+export function blokZa(k: Pick<Kolega, 'linija' | 'varijanta' | 'V.R'>): string | null {
+  const linija = (k.linija ?? '').trim();
+  const vr = (k['V.R'] ?? k.varijanta ?? '').toString().trim();
+  if (!/^\d+$/.test(linija) || !/^\d{1,2}$/.test(vr)) return null;
+  return linija + vr.padStart(2, '0');
+}
+
+function minute(hhmm: string | undefined): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec((hhmm ?? '').trim());
+  return m ? +m[1] * 60 + +m[2] : null;
+}
+
+/**
+ * Je li služba sad u tijeku: od `od` do neposredno prije `do` (i preko
+ * ponoći). U minuti predaje vozi onaj koji preuzima.
+ */
+export function uSmjeniSad(od?: string, doo?: string, sad = new Date()): boolean {
+  const a = minute(od);
+  const b = minute(doo);
+  if (a === null || b === null) return false;
+  const n = sad.getHours() * 60 + sad.getMinutes();
+  return a <= b ? n >= a && n < b : n >= a || n < b;
+}
+
+/**
+ * Tko od kolega trenutno vozi koji blok. Kod predaje smjene (dvije službe
+ * istog V.R. se preklapaju) vozi onaj koji je ranije počeo – do zamjene.
+ */
+export function aktivniPoBloku(kolege: Kolega[], sad = new Date()): Map<string, Kolega> {
+  const mapa = new Map<string, Kolega>();
+  for (const k of kolege) {
+    const blok = blokZa(k);
+    if (!blok || !uSmjeniSad(k.od, k.do, sad)) continue;
+    const postojeci = mapa.get(blok);
+    if (!postojeci || (minute(k.od) ?? 0) < (minute(postojeci.od) ?? 0)) {
+      mapa.set(blok, k);
+    }
+  }
+  return mapa;
+}
+
+/** Vozilo na bloku iz ZET-ovog feeda. */
+export interface VoziloUzivo {
+  vozilo: string;
+  /** Sekunde; negativno = ranije od voznog reda. */
+  kasnjenje: number;
+}
+
+/** "kasni 5 min" / "kasniš 5 min" / "na vremenu" / "2 min ranije". */
+export function opisKasnjenja(sekunde: number, ti = false): string {
+  const min = Math.round(Math.abs(sekunde) / 60);
+  if (min === 0) return 'na vremenu';
+  return sekunde > 0 ? `${ti ? 'kasniš' : 'kasni'} ${min} min` : `${min} min ranije`;
+}
+
+export function kasniZnatno(sekunde: number): boolean {
+  return sekunde >= 90;
+}
+
+/**
+ * Procjena dolaska: vrijeme iz rasporeda + kašnjenje. Ranije od voznog
+ * reda se ne računa – bus na predaju ne stiže prije vremena.
+ */
+export function procjenaDolaska(hhmm: string | undefined, sekunde: number): string | null {
+  const m = minute(hhmm);
+  if (m === null) return null;
+  const t = (m + Math.round(Math.max(0, sekunde) / 60)) % 1440;
+  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+}
+
+/** Za koliko minuta počinje (0 ako je sad), null ako je već prošlo. */
+export function minutaDo(hhmm: string | undefined, sad = new Date()): number | null {
+  const m = minute(hhmm);
+  if (m === null) return null;
+  const n = sad.getHours() * 60 + sad.getMinutes();
+  return m >= n ? m - n : null;
+}

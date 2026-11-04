@@ -3,6 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   Output,
   SimpleChanges,
 } from '@angular/core';
@@ -16,17 +17,37 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
+import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import {
   DanRasporeda,
   Kolega,
   RasporedOdgovor,
   TjedanTip,
+  blokZa,
   jePricuva,
+  kasniZnatno,
+  minutaDo,
+  opisKasnjenja,
   opisOdsustva,
+  procjenaDolaska,
   rutaUrl,
   slozTjedan,
+  uSmjeniSad,
 } from '../vozac.model';
+
+/** Bus koji preuzimam prikazuje se tek 60 min prije mog nastupa. */
+const CEKANJE_MIN = 60;
+const UZIVO_INTERVAL_MS = 30_000;
+
+/** Moj bus uživo: vozim ga sad ili čekam da ga preuzmem. */
+interface MojBus {
+  vrsta: 'vozim' | 'cekam';
+  vozilo: string;
+  kasnjenje: number;
+  /** Za 'cekam': procjena kad bus stiže na moju predaju. */
+  stize: string | null;
+}
 
 const MJESECI_GEN = [
   'siječnja', 'veljače', 'ožujka', 'travnja', 'svibnja', 'lipnja',
@@ -50,7 +71,7 @@ const MJESECI_GEN = [
   templateUrl: './raspored.component.html',
   styleUrl: './raspored.component.scss',
 })
-export class RasporedComponent implements OnChanges {
+export class RasporedComponent implements OnChanges, OnDestroy {
   @Input() data: RasporedOdgovor | null = null;
   @Input() loading = false;
   @Input() error: string | null = null;
@@ -78,12 +99,82 @@ export class RasporedComponent implements OnChanges {
   kolegeLoading = false;
   kolegeGreska = false;
 
-  constructor(private lineScheduleService: LineScheduleService) {}
+  /** Moj bus uživo za karticu "Danas"; null = ništa se ne prikazuje. */
+  mojBus: MojBus | null = null;
+  readonly opisKasnjenja = opisKasnjenja;
+  readonly kasniZnatno = kasniZnatno;
+  private uzivoTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(
+    private lineScheduleService: LineScheduleService,
+    private uzivoService: UzivoService,
+  ) {}
+
+  ngOnDestroy(): void {
+    this.zaustaviUzivo();
+  }
+
+  private zaustaviUzivo(): void {
+    if (this.uzivoTimer) clearInterval(this.uzivoTimer);
+    this.uzivoTimer = null;
+    this.mojBus = null;
+  }
+
+  private pokreniUzivo(): void {
+    this.zaustaviUzivo();
+    if (!this.danas?.sluzbe.some((s) => blokZa(s))) return;
+    this.osvjeziMojBus();
+    this.uzivoTimer = setInterval(() => this.osvjeziMojBus(), UZIVO_INTERVAL_MS);
+  }
+
+  /**
+   * Služba u tijeku → "kasniš X min · bus N".
+   * Inače sljedeća služba unutar 60 min → bus na mom V.R. je onaj koji
+   * preuzimam: "tvoj bus N stiže ~HH:MM".
+   */
+  osvjeziMojBus(): void {
+    if (typeof document !== 'undefined' && document.hidden) return;
+    const sluzbe = this.danas?.sluzbe ?? [];
+
+    const sad = sluzbe.find((s) => blokZa(s) && uSmjeniSad(s.od, s.do));
+    const sljedeca = sad
+      ? undefined
+      : sluzbe
+          .filter((s) => blokZa(s))
+          .map((s) => ({ s, za: minutaDo(s.od) }))
+          .filter((x) => x.za !== null && x.za! <= CEKANJE_MIN)
+          .sort((a, b) => a.za! - b.za!)[0]?.s;
+
+    const cilj = sad ?? sljedeca;
+    const blok = cilj ? blokZa(cilj) : null;
+    if (!cilj || !blok) {
+      this.mojBus = null;
+      return;
+    }
+
+    this.uzivoService.zaBlokove([blok]).subscribe({
+      next: (res) => {
+        const v = res?.blokovi?.[blok];
+        this.mojBus =
+          v && v.vozilo && typeof v.kasnjenje === 'number'
+            ? {
+                vrsta: sad ? 'vozim' : 'cekam',
+                vozilo: v.vozilo,
+                kasnjenje: v.kasnjenje,
+                stize: sad ? null : procjenaDolaska(cilj.od, v.kasnjenje),
+              }
+            : null;
+      },
+      error: () => (this.mojBus = null),
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
       this.dani = this.data ? slozTjedan(this.data) : [];
       if (this.tjedan === 'trenutni') setTimeout(() => this.skrolajNaDanas());
+      if (this.tjedan === 'trenutni' && this.danas) this.pokreniUzivo();
+      else this.zaustaviUzivo();
     }
     if (changes['naredniDostupan']) {
       this.tjedanOpcije = this.tjedanOpcije.map((o) =>

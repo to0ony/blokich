@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -6,8 +6,18 @@ import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
+import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
-import { DanRasporeda, Kolega, opisOdsustva } from '../vozac.model';
+import {
+  DanRasporeda,
+  Kolega,
+  VoziloUzivo,
+  aktivniPoBloku,
+  kolegaKljuc,
+  opisOdsustva,
+} from '../vozac.model';
+
+const UZIVO_INTERVAL_MS = 30_000;
 
 interface GrupaLinije {
   linija: string;
@@ -29,7 +39,7 @@ interface GrupaLinije {
   templateUrl: './danas.component.html',
   styleUrl: './danas.component.scss',
 })
-export class DanasComponent implements OnChanges {
+export class DanasComponent implements OnChanges, OnDestroy {
   @Input() dan: DanRasporeda | undefined;
   @Input() rasporedLoading = false;
 
@@ -41,10 +51,53 @@ export class DanasComponent implements OnChanges {
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
 
-  constructor(private lineScheduleService: LineScheduleService) {}
+  /** Vozilo i kašnjenje vozača koji upravo voze, po ključu vozača. Prazno = ništa se ne prikazuje. */
+  uzivo: Record<string, VoziloUzivo> = {};
+  private uzivoTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(
+    private lineScheduleService: LineScheduleService,
+    private uzivoService: UzivoService,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dan']) this.ucitaj();
+  }
+
+  ngOnDestroy(): void {
+    if (this.uzivoTimer) clearInterval(this.uzivoTimer);
+  }
+
+  /** Tko od kolega sad vozi – zelena točkica i kašnjenje iz ZET-ovog feeda. */
+  osvjeziUzivo(): void {
+    if (typeof document !== 'undefined' && document.hidden) return;
+
+    const aktivni = aktivniPoBloku(this.grupe.flatMap((g) => g.kolege));
+    if (!aktivni.size) {
+      this.uzivo = {};
+      return;
+    }
+
+    this.uzivoService.zaBlokove([...aktivni.keys()]).subscribe({
+      next: (res) => {
+        const novo: Record<string, VoziloUzivo> = {};
+        for (const [blok, k] of aktivni) {
+          const v = res?.blokovi?.[blok];
+          if (v && typeof v.kasnjenje === 'number' && v.vozilo) {
+            novo[kolegaKljuc(k)] = { vozilo: v.vozilo, kasnjenje: v.kasnjenje };
+          }
+        }
+        this.uzivo = novo;
+      },
+      // Bez podataka nema ni točkice – nikad ne prikazujemo zastarjelo stanje.
+      error: () => (this.uzivo = {}),
+    });
+  }
+
+  private pokreniUzivo(): void {
+    if (this.uzivoTimer) clearInterval(this.uzivoTimer);
+    this.osvjeziUzivo();
+    this.uzivoTimer = setInterval(() => this.osvjeziUzivo(), UZIVO_INTERVAL_MS);
   }
 
   get linije(): string[] {
@@ -79,6 +132,7 @@ export class DanasComponent implements OnChanges {
           ),
         }));
         this.loading = false;
+        this.pokreniUzivo();
       })
       .catch(() => {
         this.greska = true;

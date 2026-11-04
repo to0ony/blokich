@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
-import { Kolega } from '../vozac.model';
+import { Kolega, VoziloUzivo, kolegaKljuc } from '../vozac.model';
 
 const GRUPIRAJ_KEY = 'vz-grupiraj-vr';
 
@@ -27,6 +27,13 @@ export class KolegeListaComponent {
   }
   get kolege(): Kolega[] {
     return this._kolege;
+  }
+
+  /** Vozilo i kašnjenje po ključu vozača – samo za one koji upravo voze. */
+  @Input() uzivo: Record<string, VoziloUzivo> = {};
+
+  uzivoZa(k: Kolega): VoziloUzivo | null {
+    return this.uzivo[kolegaKljuc(k)] ?? null;
   }
 
   private _kolege: Kolega[] = [];
