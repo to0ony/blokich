@@ -105,6 +105,9 @@
 }
 
 .rs-today-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-left: auto;
   font-size: 16px;
   font-weight: 700;
@@ -140,6 +143,14 @@
   }
 }
 
+.rs-today-vr {
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
 .rs-live-sub {
   font-weight: 500;
   opacity: 0.85;
@@ -167,6 +178,14 @@
   }
   100% {
     box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+.rs-today-actions {
+  display: flex;
+
+  &.is-right {
+    justify-content: flex-end;
   }
 }
 

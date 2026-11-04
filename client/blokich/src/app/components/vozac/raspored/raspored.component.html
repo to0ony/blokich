@@ -21,8 +21,14 @@
       <span class="t">{{ s.do }}</span>
       <span
         class="rs-today-line"
-        *ngIf="s.linija && (i === 0 || s.linija !== d.sluzbe[i - 1].linija)"
-        >{{ s.linija }}</span
+        *ngIf="
+          s.linija &&
+          (i === 0 ||
+            s.linija !== d.sluzbe[i - 1].linija ||
+            s.varijanta !== d.sluzbe[i - 1].varijanta)
+        "
+        >{{ s.linija
+        }}<span class="rs-today-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span></span
       >
     </div>
     <div class="rs-today-place">
@@ -39,14 +45,16 @@
         <span class="rs-live-sub">({{ opisKasnjenja(b.kasnjenje) }})</span>
       </ng-container>
     </div>
-    <p-button
-      label="Tko još vozi danas"
-      icon="pi pi-users"
-      size="small"
-      styleClass="rs-today-btn"
-      (onClick)="$event.stopPropagation(); otvoriSmjenu(d)"
-      *ngIf="linije(d).length"
-    />
+    <!-- Uz poruku o busu gumb ide na desnu stranu kartice -->
+    <div class="rs-today-actions" [class.is-right]="mojBus" *ngIf="linije(d).length">
+      <p-button
+        label="Tko još vozi danas"
+        icon="pi pi-users"
+        size="small"
+        styleClass="rs-today-btn"
+        (onClick)="$event.stopPropagation(); otvoriSmjenu(d)"
+      />
+    </div>
   </ng-container>
   <ng-template #danasSlobodno>
     <div class="rs-today-free">
