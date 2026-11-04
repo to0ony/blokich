@@ -11,7 +11,7 @@
 
 <!-- Po vremenu -->
 <div class="kl-list" *ngIf="!grupiraj || !imaViseVr">
-  <app-kolega-row *ngFor="let k of kolege" [kolega]="k" [kasnjenje]="kasnjenje(k)" />
+  <app-kolega-row *ngFor="let k of kolege" [kolega]="k" [uzivo]="uzivoZa(k)" />
 </div>
 
 <!-- Po V.R. -->
@@ -22,7 +22,7 @@
       <span class="kl-count">{{ g.kolege.length }} {{ g.kolege.length === 1 ? "vozač" : "vozača" }}</span>
     </h4>
     <div class="kl-list">
-      <app-kolega-row *ngFor="let k of g.kolege" [kolega]="k" [kasnjenje]="kasnjenje(k)" />
+      <app-kolega-row *ngFor="let k of g.kolege" [kolega]="k" [uzivo]="uzivoZa(k)" />
     </div>
   </section>
 </ng-container>

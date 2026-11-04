@@ -1,6 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Kolega, inicijali, telefoni } from '../vozac.model';
+import {
+  Kolega,
+  VoziloUzivo,
+  inicijali,
+  kasniZnatno,
+  opisKasnjenja,
+  procjenaDolaska,
+  telefoni,
+} from '../vozac.model';
 
 /** Jedan vozač u popisu (smjena, linija, služba) – ime, vrijeme, poziv. */
 @Component({
@@ -14,18 +22,20 @@ export class KolegaRowComponent {
   @Input({ required: true }) kolega!: Kolega;
   /** Prikaži vrijeme i mjesta (u pregledu službe po danima nije potrebno). */
   @Input() prikaziVrijeme = true;
-  /** Kašnjenje u sekundama ako vozač upravo vozi (ZET uživo), inače null. */
-  @Input() kasnjenje: number | null = null;
+  /** Vozilo i kašnjenje ako vozač upravo vozi (ZET uživo), inače null. */
+  @Input() uzivo: VoziloUzivo | null = null;
 
   get kasnjenjeTekst(): string {
-    const d = this.kasnjenje ?? 0;
-    const min = Math.round(Math.abs(d) / 60);
-    if (min === 0) return 'na vremenu';
-    return d > 0 ? `kasni ${min} min` : `${min} min ranije`;
+    return opisKasnjenja(this.uzivo?.kasnjenje ?? 0);
   }
 
   get kasni(): boolean {
-    return (this.kasnjenje ?? 0) >= 90;
+    return kasniZnatno(this.uzivo?.kasnjenje ?? 0);
+  }
+
+  /** Kraj službe + kašnjenje ≈ kad stiže na predaju. */
+  get stize(): string | null {
+    return this.uzivo ? procjenaDolaska(this.kolega.do, this.uzivo.kasnjenje) : null;
   }
 
   private readonly mojBroj = sessionStorage.getItem('sluzbeniBroj');

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
-import { Kolega, kolegaKljuc } from '../vozac.model';
+import { Kolega, VoziloUzivo, kolegaKljuc } from '../vozac.model';
 
 const GRUPIRAJ_KEY = 'vz-grupiraj-vr';
 
@@ -29,10 +29,10 @@ export class KolegeListaComponent {
     return this._kolege;
   }
 
-  /** Kašnjenje (s) po ključu vozača – samo za one koji upravo voze. */
-  @Input() uzivo: Record<string, number> = {};
+  /** Vozilo i kašnjenje po ključu vozača – samo za one koji upravo voze. */
+  @Input() uzivo: Record<string, VoziloUzivo> = {};
 
-  kasnjenje(k: Kolega): number | null {
+  uzivoZa(k: Kolega): VoziloUzivo | null {
     return this.uzivo[kolegaKljuc(k)] ?? null;
   }
 

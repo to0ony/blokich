@@ -11,6 +11,7 @@ import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import {
   DanRasporeda,
   Kolega,
+  VoziloUzivo,
   aktivniPoBloku,
   kolegaKljuc,
   opisOdsustva,
@@ -50,8 +51,8 @@ export class DanasComponent implements OnChanges, OnDestroy {
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
 
-  /** Kašnjenje (s) vozača koji upravo voze, po ključu vozača. Prazno = ništa se ne prikazuje. */
-  uzivo: Record<string, number> = {};
+  /** Vozilo i kašnjenje vozača koji upravo voze, po ključu vozača. Prazno = ništa se ne prikazuje. */
+  uzivo: Record<string, VoziloUzivo> = {};
   private uzivoTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -79,10 +80,12 @@ export class DanasComponent implements OnChanges, OnDestroy {
 
     this.uzivoService.zaBlokove([...aktivni.keys()]).subscribe({
       next: (res) => {
-        const novo: Record<string, number> = {};
+        const novo: Record<string, VoziloUzivo> = {};
         for (const [blok, k] of aktivni) {
           const v = res?.blokovi?.[blok];
-          if (v && typeof v.kasnjenje === 'number') novo[kolegaKljuc(k)] = v.kasnjenje;
+          if (v && typeof v.kasnjenje === 'number' && v.vozilo) {
+            novo[kolegaKljuc(k)] = { vozilo: v.vozilo, kasnjenje: v.kasnjenje };
+          }
         }
         this.uzivo = novo;
       },

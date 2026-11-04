@@ -28,6 +28,17 @@
     <div class="rs-today-place">
       {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
     </div>
+    <!-- Moj bus uživo (ZET) – samo kad postoje podaci -->
+    <div class="rs-today-live" *ngIf="mojBus as b" [class.is-late]="kasniZnatno(b.kasnjenje)">
+      <span class="rs-live-dot"></span>
+      <ng-container *ngIf="b.vrsta === 'vozim'">
+        {{ opisKasnjenja(b.kasnjenje, true) }} · bus {{ b.vozilo }}
+      </ng-container>
+      <ng-container *ngIf="b.vrsta === 'cekam'">
+        Tvoj bus {{ b.vozilo }} stiže ~{{ b.stize }}
+        <span class="rs-live-sub">({{ opisKasnjenja(b.kasnjenje) }})</span>
+      </ng-container>
+    </div>
     <p-button
       label="Tko još vozi danas"
       icon="pi pi-users"

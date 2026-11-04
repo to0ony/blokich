@@ -31,8 +31,11 @@
   <!-- Što vozi: vrijeme lijevo, služba i linija desno -->
   <div class="kr-bottom" *ngIf="imaDetalje">
     <div class="kr-when" *ngIf="prikaziVrijeme && kolega.od">
-      <span class="kr-live" *ngIf="kasnjenje !== null" [class.is-late]="kasni">
+      <span class="kr-live" *ngIf="uzivo" [class.is-late]="kasni">
         <span class="kr-live-dot"></span>{{ kasnjenjeTekst }}
+      </span>
+      <span class="kr-eta" *ngIf="uzivo">
+        bus {{ uzivo.vozilo }}<ng-container *ngIf="stize"> · stiže ~{{ stize }}</ng-container>
       </span>
       <strong>{{ kolega.od }} – {{ kolega.do }}</strong>
       <span *ngIf="kolega.nastup || kolega.zavrsetak">

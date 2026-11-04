@@ -121,6 +121,55 @@
   opacity: 0.88;
 }
 
+/* Moj bus uživo na kartici Danas */
+.rs-today-live {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 12px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  font-weight: 650;
+  color: #fff;
+
+  &.is-late {
+    color: #fcd34d;
+  }
+}
+
+.rs-live-sub {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.rs-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+  animation: rs-puls 2s ease-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes rs-puls {
+  0% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
 :host ::ng-deep .rs-today-btn {
   margin-top: 14px;
   background: transparent;
