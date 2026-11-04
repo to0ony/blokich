@@ -1,0 +1,1192 @@
+{
+ "1": {
+  "kratko": "MAN Lion's Intercity",
+  "model": "MAN Lion's Intercity R61 ÜL 360 (ZF)",
+  "tablica": "ZG-7267-KR"
+ },
+ "2": {
+  "kratko": "MAN Lion's Intercity",
+  "model": "MAN Lion's Intercity R61 ÜL 360 (ZF)",
+  "tablica": "ZG-7268-KR"
+ },
+ "3": {
+  "kratko": "MAN Lion's Intercity",
+  "model": "MAN Lion's Intercity R61 ÜL 360 (ZF)",
+  "tablica": "ZG-7269-KR"
+ },
+ "21": {
+  "kratko": "Iveco Crossway",
+  "model": "Iveco Crossway Line 12m (ZF)",
+  "tablica": "ZG-4536-KH"
+ },
+ "22": {
+  "kratko": "Iveco Crossway",
+  "model": "Iveco Crossway Line 12m (ZF)",
+  "tablica": "ZG-4537-KH"
+ },
+ "23": {
+  "kratko": "Iveco Crossway",
+  "model": "Iveco Crossway Line 12m (ZF)",
+  "tablica": "ZG-4538-KH"
+ },
+ "40": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8815-GR"
+ },
+ "41": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8816-GR"
+ },
+ "42": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8817-GR"
+ },
+ "44": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3539-IB"
+ },
+ "45": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-1859-HU"
+ },
+ "46": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8821-GR"
+ },
+ "47": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8822-GR"
+ },
+ "48": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8823-GR"
+ },
+ "49": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8824-GR"
+ },
+ "50": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-5498-HO"
+ },
+ "51": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8826-GR"
+ },
+ "52": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8827-GR"
+ },
+ "53": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": null
+ },
+ "54": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-8829-GR"
+ },
+ "60": {
+  "kratko": "Iveco Crossway",
+  "model": "IVECO CROSSWAY 12m",
+  "tablica": "ZG-6712-GH"
+ },
+ "61": {
+  "kratko": "Iveco Crossway",
+  "model": "IVECO CROSSWAY 12m",
+  "tablica": "ZG-6713-GH"
+ },
+ "63": {
+  "kratko": "MAN Lion's Classic",
+  "model": "MAN SL 283 LION'S CLASSIC",
+  "tablica": "ZG-6457-DL"
+ },
+ "101": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1426 (ZF)",
+  "tablica": "ZG-8924-KK"
+ },
+ "102": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1429 (ZF)",
+  "tablica": "ZG-8925-KK"
+ },
+ "103": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363 - ex Stadtwerke Marburg 92",
+  "tablica": "ZG-2296-LG"
+ },
+ "104": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1163 (ZF)",
+  "tablica": "ZG-8927-KK"
+ },
+ "105": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1164 (ZF)",
+  "tablica": "ZG-8928-KK"
+ },
+ "106": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1422 (ZF)",
+  "tablica": "ZG-8929-KK"
+ },
+ "107": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1424 (ZF)",
+  "tablica": "ZG-8930-KK"
+ },
+ "108": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1425 (ZF)",
+  "tablica": "ZG-8931-KK"
+ },
+ "109": {
+  "kratko": "MAN Lion's City NL 323",
+  "model": "MAN Lion's City NL 323 - ex Dr. Richard Wien 1428 (ZF)",
+  "tablica": "ZG-8932-KK"
+ },
+ "111": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3125-HU"
+ },
+ "112": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3121-HU"
+ },
+ "113": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3124-HU"
+ },
+ "114": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3119-HU"
+ },
+ "115": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3123-HU"
+ },
+ "116": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3122-HU"
+ },
+ "117": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-3120-HU"
+ },
+ "175": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-8619-KO"
+ },
+ "176": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-3854-LH"
+ },
+ "180": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": null
+ },
+ "181": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-9157-KP"
+ },
+ "183": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-8632-DU"
+ },
+ "184": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-4061-KP"
+ },
+ "185": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": null
+ },
+ "186": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-6702-KN"
+ },
+ "187": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-4920-KO"
+ },
+ "188": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": null
+ },
+ "189": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-7609-JZ"
+ },
+ "190": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-9587-JL"
+ },
+ "191": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-5559-KL"
+ },
+ "192": {
+  "kratko": "Mercedes-Benz Citaro G",
+  "model": "MERCEDES BENZ O530G CITARO G Facelift - novi display",
+  "tablica": "ZG-2159-DV"
+ },
+ "232": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1220-HV"
+ },
+ "233": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1224-HV"
+ },
+ "234": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1225-HV"
+ },
+ "235": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1227-HV"
+ },
+ "236": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1223-HV"
+ },
+ "237": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1228-HV"
+ },
+ "238": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1226-HV"
+ },
+ "239": {
+  "kratko": "MAN Lion's City NL 363",
+  "model": "MAN Lion's City NL 363",
+  "tablica": "ZG-1229-HV"
+ },
+ "240": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1250-IE"
+ },
+ "241": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1251-IE"
+ },
+ "242": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1252-IE"
+ },
+ "243": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1253-IE"
+ },
+ "244": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1254-IE"
+ },
+ "271": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-5606-IF"
+ },
+ "272": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-5607-IF"
+ },
+ "273": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-5608-IF"
+ },
+ "274": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-5609-IF"
+ },
+ "275": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1384-IG"
+ },
+ "276": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1385-IG"
+ },
+ "277": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1387-IG"
+ },
+ "278": {
+  "kratko": "Feniksbus FBI 83",
+  "model": "Iveco Feniksbus FBI 83 M (ZF)",
+  "tablica": "ZG-1386-IG"
+ },
+ "301": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-5104-HG"
+ },
+ "302": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-3853-LH"
+ },
+ "306": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-2982-DV"
+ },
+ "314": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-2160-DV"
+ },
+ "318": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": null
+ },
+ "321": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY",
+  "tablica": null
+ },
+ "323": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-5548-DV"
+ },
+ "324": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-5549-DV"
+ },
+ "325": {
+  "kratko": "MAN Lion's City NL 313",
+  "model": "MAN NL 313 LION'S CITY - novi display",
+  "tablica": "ZG-8841-KK"
+ },
+ "369": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": null
+ },
+ "370": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9472-IV"
+ },
+ "371": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9473-IV"
+ },
+ "372": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9474-IV"
+ },
+ "373": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9475-IV"
+ },
+ "374": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9476-IV"
+ },
+ "375": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9477-IV"
+ },
+ "376": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9478-IV"
+ },
+ "377": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9479-IV"
+ },
+ "378": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 360 Lion's City 12C",
+  "tablica": "ZG-9480-IV"
+ },
+ "421": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9301-KL"
+ },
+ "422": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9302-KL"
+ },
+ "423": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": null
+ },
+ "424": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9304-KL"
+ },
+ "425": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9305-KL"
+ },
+ "426": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9306-KL"
+ },
+ "427": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9307-KL"
+ },
+ "428": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9308-KL"
+ },
+ "429": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": null
+ },
+ "430": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-7309-LG"
+ },
+ "431": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9311-KL"
+ },
+ "432": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": null
+ },
+ "433": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9313-KL"
+ },
+ "434": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9314-KL"
+ },
+ "435": {
+  "kratko": "Mercedes-Benz Citaro C2",
+  "model": "Mercedes Benz Citaro C2",
+  "tablica": "ZG-9315-KL"
+ },
+ "485": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2792",
+  "tablica": "ZG-6142-KC"
+ },
+ "486": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2790",
+  "tablica": "ZG-6143-KC"
+ },
+ "487": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2788",
+  "tablica": "ZG-6144-KC"
+ },
+ "488": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2789",
+  "tablica": "ZG-6145-KC"
+ },
+ "489": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2783",
+  "tablica": "ZG-6146-KC"
+ },
+ "490": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2791",
+  "tablica": "ZG-5691-KB"
+ },
+ "491": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2786",
+  "tablica": "ZG-5692-KB"
+ },
+ "492": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2794",
+  "tablica": "ZG-7681-KB"
+ },
+ "493": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2787",
+  "tablica": "ZG-7682-KB"
+ },
+ "494": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2785",
+  "tablica": "ZG-7683-KB"
+ },
+ "495": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2784",
+  "tablica": "ZG-7684-KB"
+ },
+ "496": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2793",
+  "tablica": "ZG-7685-KB"
+ },
+ "497": {
+  "kratko": "MAN Lion's City 12C",
+  "model": "MAN NL 280 Lion's City 12C EfficientHybrid - ex RSVG Troisdorf 2782",
+  "tablica": "ZG-7686-KB"
+ },
+ "501": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8817",
+  "tablica": "ZG-5640-KB"
+ },
+ "502": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8818",
+  "tablica": "ZG-5641-KB"
+ },
+ "503": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8821",
+  "tablica": "ZG-5642-KB"
+ },
+ "504": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8822",
+  "tablica": "ZG-5643-KB"
+ },
+ "505": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8827",
+  "tablica": "ZG-5644-KB"
+ },
+ "506": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8819",
+  "tablica": "ZG-5645-KB"
+ },
+ "507": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8814",
+  "tablica": "ZG-8045-KC"
+ },
+ "508": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8820",
+  "tablica": "ZG-8046-KC"
+ },
+ "509": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8824",
+  "tablica": "ZG-2335-LG"
+ },
+ "510": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8816",
+  "tablica": "ZG-8051-KC"
+ },
+ "511": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8813",
+  "tablica": "ZG-8052-KC"
+ },
+ "512": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8825",
+  "tablica": "ZG-8053-KC"
+ },
+ "513": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8832",
+  "tablica": "ZG-8054-KC"
+ },
+ "514": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8828",
+  "tablica": "ZG-8062-KC"
+ },
+ "515": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8826",
+  "tablica": "ZG-8063-KC"
+ },
+ "516": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8831",
+  "tablica": "ZG-8064-KC"
+ },
+ "517": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8829",
+  "tablica": "ZG-4436-KG"
+ },
+ "518": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8830",
+  "tablica": "ZG-4437-KG"
+ },
+ "519": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8823",
+  "tablica": "ZG-4438-KG"
+ },
+ "520": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8815",
+  "tablica": "ZG-4439-KG"
+ },
+ "521": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8833",
+  "tablica": "ZG-7205-KJ"
+ },
+ "522": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8834",
+  "tablica": "ZG-7206-KJ"
+ },
+ "523": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8835",
+  "tablica": "ZG-7207-KJ"
+ },
+ "524": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8837",
+  "tablica": "ZG-7208-KJ"
+ },
+ "525": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8839",
+  "tablica": "ZG-7209-KJ"
+ },
+ "526": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8836",
+  "tablica": "ZG-7210-KJ"
+ },
+ "527": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8838",
+  "tablica": "ZG-7211-KJ"
+ },
+ "528": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8841 (ZF)",
+  "tablica": "ZG-7212-KJ"
+ },
+ "529": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8842 (ZF)",
+  "tablica": "ZG-7213-KJ"
+ },
+ "530": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G - ex Wiener Linien 8840",
+  "tablica": "ZG-7214-KJ"
+ },
+ "570": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8020-JA"
+ },
+ "571": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8021-JA"
+ },
+ "572": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8022-JA"
+ },
+ "573": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8023-JA"
+ },
+ "574": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8024-JA"
+ },
+ "575": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8025-JA"
+ },
+ "576": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8026-JA"
+ },
+ "577": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8027-JA"
+ },
+ "578": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8028-JA"
+ },
+ "579": {
+  "kratko": "Mercedes-Benz Citaro C2 G",
+  "model": "Mercedes Benz Citaro C2 G",
+  "tablica": "ZG-8029-JA"
+ },
+ "816": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9481-IV"
+ },
+ "817": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9482-IV"
+ },
+ "818": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9483-IV"
+ },
+ "819": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9484-IV"
+ },
+ "820": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9485-IV"
+ },
+ "821": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9486-IV"
+ },
+ "822": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9487-IV"
+ },
+ "823": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9488-IV"
+ },
+ "824": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9489-IV"
+ },
+ "825": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City",
+  "tablica": "ZG-9490-IV"
+ },
+ "871": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City ELEC",
+  "tablica": "ZG-3824-KI"
+ },
+ "872": {
+  "kratko": "Iveco Crossway LE",
+  "model": "Iveco Crossway LE City ELEC",
+  "tablica": "ZG-9036-KL"
+ },
+ "A10": {
+  "kratko": "MAN Lion's Coach",
+  "model": "MAN Lion's Coach R07",
+  "tablica": "ZG-2103-GV"
+ },
+ "3001": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-2069-KO"
+ },
+ "3002": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-2089-KO"
+ },
+ "3003": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4275-LB"
+ },
+ "3004": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4276-LB"
+ },
+ "3005": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4277-LB"
+ },
+ "3006": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4278-LB"
+ },
+ "3007": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4279-LB"
+ },
+ "3008": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4280-LB"
+ },
+ "3009": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4281-LB"
+ },
+ "3010": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4282-LB"
+ },
+ "3011": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4283-LB"
+ },
+ "3012": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4284-LB"
+ },
+ "3013": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4285-LB"
+ },
+ "3014": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4286-LB"
+ },
+ "3015": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4287-LB"
+ },
+ "3016": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4288-LB"
+ },
+ "3017": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4289-LB"
+ },
+ "3018": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4290-LB"
+ },
+ "3019": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4291-LB"
+ },
+ "3020": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4292-LB"
+ },
+ "3021": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4293-LB"
+ },
+ "3022": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4294-LB"
+ },
+ "3023": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4295-LB"
+ },
+ "3024": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4296-LB"
+ },
+ "3025": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4297-LB"
+ },
+ "3026": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4298-LB"
+ },
+ "3027": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4299-LB"
+ },
+ "3028": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4300-LB"
+ },
+ "3029": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4301-LB"
+ },
+ "3030": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4302-LB"
+ },
+ "3031": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4303-LB"
+ },
+ "3032": {
+  "kratko": "MAN Lion's City 12E",
+  "model": "MAN Lion's City 12E NL326",
+  "tablica": "ZG-4304-LB"
+ },
+ "3501": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4249-LB"
+ },
+ "3502": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4250-LB"
+ },
+ "3503": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4251-LB"
+ },
+ "3504": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4252-LB"
+ },
+ "3505": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4253-LB"
+ },
+ "3506": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4254-LB"
+ },
+ "3507": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4255-LB"
+ },
+ "3508": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4256-LB"
+ },
+ "3509": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4257-LB"
+ },
+ "3510": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4258-LB"
+ },
+ "3511": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4259-LB"
+ },
+ "3512": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4260-LB"
+ },
+ "3513": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4261-LB"
+ },
+ "3514": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4262-LB"
+ },
+ "3515": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4263-LB"
+ },
+ "3516": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4264-LB"
+ },
+ "3517": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4265-LB"
+ },
+ "3518": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4266-LB"
+ },
+ "3519": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4267-LB"
+ },
+ "3520": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4268-LB"
+ },
+ "3521": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4269-LB"
+ },
+ "3522": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4270-LB"
+ },
+ "3523": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4271-LB"
+ },
+ "3524": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4272-LB"
+ },
+ "3525": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4273-LB"
+ },
+ "3526": {
+  "kratko": "MAN Lion's City 18E",
+  "model": "MAN Lion's City 18E NG544",
+  "tablica": "ZG-4274-LB"
+ },
+ "3901": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2637-LF"
+ },
+ "3902": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2638-LF"
+ },
+ "3903": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2639-LF"
+ },
+ "3904": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2640-LF"
+ },
+ "3905": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2641-LF"
+ },
+ "3906": {
+  "kratko": "Feniksbus FBI 83 (električni)",
+  "model": "Feniksbus Iveco FBI 83 M-E",
+  "tablica": "ZG-2642-LF"
+ }
+}

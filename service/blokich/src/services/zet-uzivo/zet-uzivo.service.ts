@@ -3,6 +3,10 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+import * as vozniParkPodsused from '../../vozni-park/podsused.json';
+
+/** Garažni broj -> kratko ime modela (izvor: autobusi.org, vidi scripts/vozni-park). */
+const VOZNI_PARK: Record<string, { kratko: string }> = vozniParkPodsused as any;
 
 /** Vozilo koje trenutno vozi na bloku (linija + V.R.). */
 export interface BlokUzivo {
@@ -10,6 +14,8 @@ export interface BlokUzivo {
   vozilo: string;
   /** Kašnjenje u sekundama (negativno = ranije od voznog reda). */
   kasnjenje: number;
+  /** Model vozila, samo ako je poznat (vozni park AP Podsused). */
+  model?: string;
 }
 
 export interface UzivoStanje {
@@ -47,7 +53,10 @@ export class ZetUzivoService {
     const stanje = await this.stanje();
     const odabrani: Record<string, BlokUzivo> = {};
     for (const b of blokovi) {
-      if (stanje.blokovi[b]) odabrani[b] = stanje.blokovi[b];
+      const v = stanje.blokovi[b];
+      if (!v) continue;
+      const model = VOZNI_PARK[v.vozilo]?.kratko;
+      odabrani[b] = model ? { ...v, model } : v;
     }
     return { vrijeme: stanje.vrijeme, blokovi: odabrani };
   }
