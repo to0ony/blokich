@@ -140,3 +140,49 @@ export function telefoni(...brojevi: (string | null | undefined)[]): string[] {
     .map((b) => (b ?? '').trim())
     .filter((b) => b && b !== 'null' && b !== 'undefined');
 }
+
+/* ---------- Uživo (ZET GTFS-RT) ---------- */
+
+/** Ključ vozača u popisu (isti vozač može imati dva dijela službe). */
+export function kolegaKljuc(k: Kolega): string {
+  return `${k.sluz_broj}|${k.br_sl ?? ''}|${k.od ?? ''}`;
+}
+
+/** Blok u ZET-ovom feedu: linija + V.R. s dvije znamenke (109 + 2 = 10902). */
+export function blokZa(k: Kolega): string | null {
+  const linija = (k.linija ?? '').trim();
+  const vr = (k['V.R'] ?? k.varijanta ?? '').toString().trim();
+  if (!/^\d+$/.test(linija) || !/^\d{1,2}$/.test(vr)) return null;
+  return linija + vr.padStart(2, '0');
+}
+
+function minute(hhmm: string | undefined): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec((hhmm ?? '').trim());
+  return m ? +m[1] * 60 + +m[2] : null;
+}
+
+/** Je li služba (od–do, ista ili preko ponoći) sad u tijeku. */
+export function uSmjeniSad(od?: string, doo?: string, sad = new Date()): boolean {
+  const a = minute(od);
+  const b = minute(doo);
+  if (a === null || b === null) return false;
+  const n = sad.getHours() * 60 + sad.getMinutes();
+  return a <= b ? n >= a && n <= b : n >= a || n <= b;
+}
+
+/**
+ * Tko od kolega trenutno vozi koji blok. Kod predaje smjene (dvije službe
+ * istog V.R. se preklapaju) vozi onaj koji je ranije počeo – do zamjene.
+ */
+export function aktivniPoBloku(kolege: Kolega[], sad = new Date()): Map<string, Kolega> {
+  const mapa = new Map<string, Kolega>();
+  for (const k of kolege) {
+    const blok = blokZa(k);
+    if (!blok || !uSmjeniSad(k.od, k.do, sad)) continue;
+    const postojeci = mapa.get(blok);
+    if (!postojeci || (minute(k.od) ?? 0) < (minute(postojeci.od) ?? 0)) {
+      mapa.set(blok, k);
+    }
+  }
+  return mapa;
+}

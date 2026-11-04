@@ -14,6 +14,19 @@ export class KolegaRowComponent {
   @Input({ required: true }) kolega!: Kolega;
   /** Prikaži vrijeme i mjesta (u pregledu službe po danima nije potrebno). */
   @Input() prikaziVrijeme = true;
+  /** Kašnjenje u sekundama ako vozač upravo vozi (ZET uživo), inače null. */
+  @Input() kasnjenje: number | null = null;
+
+  get kasnjenjeTekst(): string {
+    const d = this.kasnjenje ?? 0;
+    const min = Math.round(Math.abs(d) / 60);
+    if (min === 0) return 'na vremenu';
+    return d > 0 ? `kasni ${min} min` : `${min} min ranije`;
+  }
+
+  get kasni(): boolean {
+    return (this.kasnjenje ?? 0) >= 90;
+  }
 
   private readonly mojBroj = sessionStorage.getItem('sluzbeniBroj');
 
