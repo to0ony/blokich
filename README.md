@@ -1,35 +1,84 @@
-![Logo](https://i.imgur.com/GS2tBvQ.png "Logo")
+<p align="center">
+  <img src="https://i.imgur.com/GS2tBvQ.png" alt="Blokich" width="260" />
+</p>
 
-[![Deploy FastAPI](https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml/badge.svg)](https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml) [![Deploy NestJS](https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml/badge.svg)](https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml) 
+<p align="center">
+  Raspored, smjene i kolege na jednom mjestu – web aplikacija za vozače autobusa ZET-a (AP Podsused).
+</p>
 
-![](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white) ![SASS](https://img.shields.io/badge/SASS-hotpink.svg?style=for-the-badge&logo=SASS&logoColor=white) ![](https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white) ![](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
-
-Web aplikacija namijenjena vozačima javnog prijevoza u Zagrebu - ZET.
+<p align="center">
+  <a href="https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml"><img src="https://github.com/to0ony/blokich/actions/workflows/deploy-nestjs.yml/badge.svg" alt="Deploy NestJS" /></a>
+  <a href="https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml"><img src="https://github.com/to0ony/blokich/actions/workflows/deploy-fastapi.yml/badge.svg" alt="Deploy FastAPI" /></a>
+  <img src="https://img.shields.io/badge/Angular_19-DD0031?logo=angular&logoColor=white" alt="Angular" />
+  <img src="https://img.shields.io/badge/PrimeNG-0484f1" alt="PrimeNG" />
+  <img src="https://img.shields.io/badge/NestJS-E0234E?logo=nestjs&logoColor=white" alt="NestJS" />
+  <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white" alt="MongoDB" />
+</p>
 
 ## Značajke
 
-- Ručni unos pdf datoteka sa ZETovih stranica
-- Automatiziran proces obrade podataka disponenata i službi uz korištenje python skripte
-- Prikaz vozačevog rasporeda vožnje za aktualni i naredni tjedan
-- Prikaz vozačeve današnje smjene uz podatke o ostalim vozačima s kojima dijeli smjenu
-- Prikaz svih vozača određene linije za određeni dan u tjednu (aktualnom ili narednom)
-- Prikaz svih vozača uz ispis odgovoarajućih službenih brojeva
-- Prikaz voznog reda linije i rute na mapi
+**Za vozače**
+- 📅 Tjedni raspored (aktualni i sljedeći tjedan) s karticom **Danas** na vrhu
+- 🟢 **Uživo** iz ZET-ovog GTFS-RT feeda – tko od kolega sad vozi, kašnjenje, broj busa i procjena dolaska na predaju; „tvoj bus stiže ~13:05“ sat prije nastupa
+- 👥 Današnja smjena i vozači po liniji – s pozivom jednim dodirom i grupiranjem po V.R.
+- 🔎 Pregled službe, uključujući dvokratne službe na više linija
+- 📊 Statistika rada po tjednu i mjesecu
+- 📱 Mobile-first, zajednička lozinka za pristup koja se upisuje samo jednom po uređaju
 
-## U planu
-
-- Prikaz svih aktualnih službi
-- Integracija [openholidaysapi](https://www.openholidaysapi.org/en/sources/#croatia "API") za prikaz neradnih dana unutar rasporeda vožnji
-
+**Za administratora**
+- ☁️ Jedan klik povlači službe i disponent s ZET intraneta i obrađuje ih
+- 📄 Ručni uvoz PDF-ova (drag & drop), duplikati se prepoznaju po hashu
 
 ## Screenshots
 
-<div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-  <img src="https://i.postimg.cc/W1KdKZkG/blokich-vercel-app-login(i-Phone-14-Pro-Max)-portrait.png" alt="screenshot 2" width="200" />
-  <img src="https://i.postimg.cc/jSCWZcLv/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(1)-portrait.png" alt="screenshot 1" width="200" />
-  <img src="https://i.postimg.cc/7Zc5cz2S/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(2)-portrait.png" alt="screenshot 3" width="200" />
-  <img src="https://i.postimg.cc/Z509VHC7/blokich-vercel-app-login(i-Phone-14-Pro-Max)-(3)-portrait.png" alt="screenshot 3" width="200" />
+| Prijava | Raspored | Smjena | Uživo | Služba |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/login.png" width="160" /> | <img src="docs/screenshots/raspored.png" width="160" /> | <img src="docs/screenshots/smjena.png" width="160" /> | <img src="docs/screenshots/danas-uzivo.png" width="160" /> | <img src="docs/screenshots/sluzba.png" width="160" /> |
 
-</div>
+<img src="docs/screenshots/admin.png" alt="Admin" width="820" />
 
-Ovaj projekt je licenciran pod [MIT licencom](LICENSE).
+<sub>Prikazani podaci i imena su izmišljeni.</sub>
+
+## Arhitektura
+
+```
+client/blokich          Angular 19 + PrimeNG          → Vercel
+service/blokich         NestJS API + MongoDB          → Hetzner (pm2)
+service/blokich/python  FastAPI – parsiranje PDF-ova  → Hetzner (pm2)
+```
+
+Vanjski izvori: ZET intranet (PDF službi i disponenta) i ZET GTFS-Realtime feed (vozila uživo).
+Spajanje s feedom: blok = linija + V.R. s dvije znamenke (`109` + `2` → `10902`).
+
+## Pokretanje
+
+```bash
+# API
+cd service/blokich && npm ci && npm run start:dev
+
+# PDF parser
+cd service/blokich/python && pip install -r requirements.txt && uvicorn main:app --port 8000
+
+# Frontend
+cd client/blokich && npm ci && npm start
+```
+
+### Env varijable (`service/blokich/.env`)
+
+| Varijabla | Opis |
+|---|---|
+| `MONGO_URI` | MongoDB konekcija |
+| `JWT_SECRET`, `JWT_EXPIRATION_TIME` | Admin prijava |
+| `VOZAC_LOZINKA` | Zajednička lozinka za vozače (bez nje je aplikacija otvorena) |
+| `ZET_INTERNO_PASSWORD` | Lozinka ZET intraneta za automatski dohvat PDF-ova |
+| `PYTHON_API_BASE_URL` | Adresa PDF parsera (zadano `http://127.0.0.1:8000`) |
+| `ZET_GTFS_RT_URL` | GTFS-RT feed (zadano `https://www.zet.hr/gtfs-rt-protobuf`) |
+
+## Deploy
+
+Push na `main` pokreće GitHub Actions koji na serveru napravi `git reset` na `origin/main`, `npm ci`, build i `pm2 restart`. Frontend deploya Vercel, a preview svakog brancha ima pristup API-ju.
+
+---
+
+Licencirano pod [MIT licencom](LICENSE).
