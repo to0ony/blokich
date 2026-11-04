@@ -84,7 +84,7 @@ export class DanasComponent implements OnChanges, OnDestroy {
         for (const [blok, k] of aktivni) {
           const v = res?.blokovi?.[blok];
           if (v && typeof v.kasnjenje === 'number' && v.vozilo) {
-            novo[kolegaKljuc(k)] = { vozilo: v.vozilo, kasnjenje: v.kasnjenje };
+            novo[kolegaKljuc(k)] = { vozilo: v.vozilo, kasnjenje: v.kasnjenje, model: v.model };
           }
         }
         this.uzivo = novo;

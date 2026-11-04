@@ -202,8 +202,8 @@
 /* Uživo: tanka traka na dnu kartice (ZET feed) */
 .kr-livebar {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 1px;
   padding: 6px 14px;
   border-top: 1px solid #c9ecd6;
   background: #effaf3;
@@ -222,6 +222,21 @@
     background: #fff7ea;
     color: #b45309;
   }
+}
+
+.kr-livebar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kr-livebar-model {
+  padding-left: 13px;
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kr-livebar-sep {

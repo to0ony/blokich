@@ -6,7 +6,17 @@ import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import * as vozniParkPodsused from '../../vozni-park/podsused.json';
 
 /** Garažni broj -> kratko ime modela (izvor: autobusi.org, vidi scripts/vozni-park). */
-const VOZNI_PARK: Record<string, { kratko: string }> = vozniParkPodsused as any;
+const VOZNI_PARK: Record<string, { kratko: string; model: string; tablica: string | null }> =
+  vozniParkPodsused as any;
+
+/** Bus iz voznog parka AP Podsused sa stanjem uživo (ako vozi). */
+export interface VoziloParka {
+  broj: string;
+  kratko: string;
+  model: string;
+  tablica: string | null;
+  uzivo: { linija: string; vr: string; kasnjenje: number } | null;
+}
 
 /** Vozilo koje trenutno vozi na bloku (linija + V.R.). */
 export interface BlokUzivo {
@@ -16,6 +26,8 @@ export interface BlokUzivo {
   kasnjenje: number;
   /** Model vozila, samo ako je poznat (vozni park AP Podsused). */
   model?: string;
+  /** Linija koju vožnja stvarno vozi (route_id) – blok ponekad vozi drugu liniju. */
+  ruta?: string;
 }
 
 export interface UzivoStanje {
@@ -59,6 +71,35 @@ export class ZetUzivoService {
       odabrani[b] = model ? { ...v, model } : v;
     }
     return { vrijeme: stanje.vrijeme, blokovi: odabrani };
+  }
+
+  /** Svi busevi AP Podsused; za one koji su sad u feedu i linija, V.R. i kašnjenje. */
+  async vozniPark(): Promise<{ vrijeme: string | null; vozila: VoziloParka[] }> {
+    const stanje = await this.stanje();
+    const poVozilu = new Map<string, { blok: string; v: BlokUzivo }>();
+    for (const [blok, v] of Object.entries(stanje.blokovi)) {
+      poVozilu.set(v.vozilo, { blok, v });
+    }
+
+    const vozila = Object.entries(VOZNI_PARK)
+      .filter(([broj]) => broj !== 'default')
+      .map(([broj, p]) => {
+        const u = poVozilu.get(broj);
+        return {
+          broj,
+          kratko: p.kratko,
+          model: p.model,
+          tablica: p.tablica,
+          uzivo: u
+            ? {
+                linija: u.v.ruta || u.blok.slice(0, -2),
+                vr: String(Number(u.blok.slice(-2))),
+                kasnjenje: u.v.kasnjenje,
+              }
+            : null,
+        };
+      });
+    return { vrijeme: stanje.vrijeme, vozila };
   }
 
   /** Feed se dohvaća najviše jednom u 20 s, bez obzira na broj vozača. */
@@ -126,7 +167,8 @@ export class ZetUzivoService {
       if (!blok || !/^\d+$/.test(blok) || kasnjenje === undefined) continue;
 
       if (blokovi[blok]) dvostruki.add(blok);
-      blokovi[blok] = { vozilo, kasnjenje };
+      const ruta: string | undefined = v.trip?.routeId || tripId.split('_')[3];
+      blokovi[blok] = ruta ? { vozilo, kasnjenje, ruta } : { vozilo, kasnjenje };
     }
 
     // Dva vozila na istom bloku = nejasno, ne prikazuj ništa.

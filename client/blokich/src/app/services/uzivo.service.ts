@@ -4,7 +4,7 @@ import { ApiService } from './api.service';
 
 export interface UzivoOdgovor {
   vrijeme: string | null;
-  blokovi: Record<string, { vozilo: string; kasnjenje: number }>;
+  blokovi: Record<string, { vozilo: string; kasnjenje: number; model?: string }>;
 }
 
 @Injectable({ providedIn: 'root' })

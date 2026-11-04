@@ -23,7 +23,7 @@ describe('ZetUzivoService.obradi', () => {
       feed([vozilo('0_1_10910_109_10258', '3514'), kasnjenje('0_1_10910_109_10258', 355)]),
       SAD,
     );
-    expect(r.blokovi).toEqual({ '10910': { vozilo: '3514', kasnjenje: 355 } });
+    expect(r.blokovi).toEqual({ '10910': { vozilo: '3514', kasnjenje: 355, ruta: '109' } });
   });
 
   it('koristi departure kad nema arrival', () => {

@@ -33,10 +33,12 @@
       <span class="rs-live-dot"></span>
       <ng-container *ngIf="b.vrsta === 'vozim'">
         {{ opisKasnjenja(b.kasnjenje, true) }} · bus {{ b.vozilo }}
+        <span class="rs-live-sub" *ngIf="b.model">· {{ b.model }}</span>
       </ng-container>
       <ng-container *ngIf="b.vrsta === 'cekam'">
         Tvoj bus {{ b.vozilo }} stiže ~{{ b.stize }}
         <span class="rs-live-sub">({{ opisKasnjenja(b.kasnjenje) }})</span>
+        <span class="rs-live-sub rs-live-model" *ngIf="b.model">{{ b.model }}</span>
       </ng-container>
     </div>
     <!-- Uz poruku o busu gumb ide na desnu stranu kartice -->
