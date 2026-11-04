@@ -1,0 +1,88 @@
+<div class="vz-app vp">
+  <header class="vp-top">
+    <div class="vp-top-inner">
+      <a routerLink="/login" class="vp-back" aria-label="Natrag na prijavu">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <img src="assets/blokich_logo.png" alt="Blokich" class="vp-logo" />
+      <span class="vp-spacer"></span>
+    </div>
+  </header>
+
+  <main class="vp-main">
+    <header class="vz-page-head">
+      <h1>Vozni park</h1>
+      <p>AP Podsused · tko je trenutno na liniji</p>
+    </header>
+
+    <section class="vp-summary" *ngIf="!loading && vozila.length">
+      <div class="vp-stat">
+        <span class="vp-dot"></span>
+        <strong>{{ naLiniji }}</strong> na liniji
+      </div>
+      <div class="vp-stat muted"><strong>{{ vozila.length }}</strong> ukupno</div>
+    </section>
+
+    <div class="vp-tools">
+      <input
+        pInputText
+        type="search"
+        placeholder="Broj, model, tablica ili linija"
+        autocomplete="off"
+        class="vp-search"
+        [(ngModel)]="trazi"
+      />
+      <p-selectbutton
+        [options]="filteri"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        [(ngModel)]="samoNaLiniji"
+      />
+    </div>
+
+    <ng-container *ngIf="loading">
+      <p-skeleton *ngFor="let i of [1, 2, 3]" height="180px" borderRadius="20px" styleClass="vp-sk" />
+    </ng-container>
+
+    <p-message *ngIf="greska" severity="error" text="Vozni park nije moguće učitati." />
+
+    <section class="vp-group" *ngFor="let g of grupe">
+      <header class="vp-group-head">
+        <app-marka [model]="g.model" />
+        <div class="vp-group-title">
+          <strong>{{ g.model }}</strong>
+          <span>{{ g.vozila.length }} kom<ng-container *ngIf="g.naLiniji"> · {{ g.naLiniji }} na liniji</ng-container></span>
+        </div>
+      </header>
+
+      <ul class="vp-list">
+        <li *ngFor="let v of g.vozila" class="vp-row" [class.is-live]="v.uzivo">
+          <div class="vp-id">
+            <strong>{{ v.broj }}</strong>
+            <span>{{ v.tablica || "neregistriran" }}</span>
+          </div>
+
+          <div class="vp-state" *ngIf="v.uzivo as u; else neVozi">
+            <span class="vp-line">
+              <span class="vp-dot"></span>
+              Linija {{ u.linija }}<span class="vp-vr">V.R. {{ u.vr }}</span>
+            </span>
+            <span class="vp-delay" [class.is-late]="kasniZnatno(u.kasnjenje)">{{ opisKasnjenja(u.kasnjenje) }}</span>
+          </div>
+          <ng-template #neVozi>
+            <span class="vp-off">nije na liniji</span>
+          </ng-template>
+        </li>
+      </ul>
+    </section>
+
+    <div class="vz-empty" *ngIf="!loading && !greska && !grupe.length">
+      <span class="vz-empty-icon"><i class="pi pi-search"></i></span>
+      <strong>Nema rezultata</strong>
+      <span>Pokušaj s drugim brojem ili modelom.</span>
+    </div>
+
+    <p class="vp-source">Popis vozila: autobusi.org · stanje uživo: ZET</p>
+  </main>
+</div>

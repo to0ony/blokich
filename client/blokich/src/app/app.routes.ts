@@ -32,6 +32,15 @@ export const routes: Routes = [
         (m) => m.PregledSluzbeComponent,
       ),
   },
+  // Vozni park s login ekrana (otključan uređaj)
+  {
+    canActivate: [PristupGuard],
+    path: 'vozni-park',
+    loadComponent: () =>
+      import('./pages/vozni-park/vozni-park.component').then(
+        (m) => m.VozniParkComponent,
+      ),
+  },
   // Driver Dashboard page route (lazy – PrimeNG se učitava tek ovdje)
   {
     canActivate: [DriverGuard],

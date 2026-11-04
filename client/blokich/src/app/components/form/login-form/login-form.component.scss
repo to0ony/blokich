@@ -163,6 +163,10 @@
   }
 }
 
+.lg-link-wide {
+  grid-column: 1 / -1;
+}
+
 /* Diskretan ulaz za administratora */
 .lg-admin {
   display: inline-flex;
