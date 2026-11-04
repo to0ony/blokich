@@ -1,39 +1,51 @@
-<div class="apple-admin-card">
-  <div class="apple-brand-header">
-    <h2 class="apple-title">Blokich Admin</h2>
+<div class="al">
+  <div class="al-brand">
+    <img src="assets/blokich_logo.png" alt="Blokich" class="al-logo" />
+    <span class="al-badge"><i class="pi pi-lock"></i> Administracija</span>
   </div>
 
-  <form (ngSubmit)="login()" class="apple-form">
-    <div class="input-group-custom">
-      <label for="username">Korisničko ime</label>
-      <div class="input-wrapper">
-        <input
-          id="username"
-          [(ngModel)]="username"
-          name="username"
-          type="text"
-          required
-        />
-      </div>
-    </div>
+  <form class="al-card" (ngSubmit)="login()">
+    <label class="vz-label" for="username">Korisničko ime</label>
+    <input
+      pInputText
+      id="username"
+      name="username"
+      type="text"
+      autocomplete="username"
+      autocapitalize="off"
+      class="al-input"
+      required
+      [(ngModel)]="username"
+      (input)="error = ''"
+    />
 
-    <div class="input-group-custom">
-      <label for="password">Lozinka</label>
-      <div class="input-wrapper">
-        <input
-          id="password"
-          [(ngModel)]="password"
-          name="password"
-          type="password"
-          required
-        />
-      </div>
-    </div>
+    <label class="vz-label al-gap" for="password">Lozinka</label>
+    <input
+      pInputText
+      id="password"
+      name="password"
+      type="password"
+      autocomplete="current-password"
+      class="al-input"
+      required
+      [(ngModel)]="password"
+      (input)="error = ''"
+    />
 
-    <button type="submit" class="apple-btn-primary">Prijavi se</button>
+    <span class="al-error" *ngIf="error">
+      <i class="pi pi-exclamation-circle"></i> {{ error }}
+    </span>
 
-    <div *ngIf="error" class="apple-error-box">
-      <span>{{ error }}</span>
-    </div>
+    <p-button
+      type="submit"
+      label="Prijavi se"
+      styleClass="al-btn"
+      [loading]="loading"
+      [disabled]="!username || !password"
+    />
   </form>
+
+  <a class="al-back" routerLink="/login">
+    <i class="pi pi-arrow-left"></i> Prijava vozača
+  </a>
 </div>

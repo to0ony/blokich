@@ -1,145 +1,108 @@
-.apple-admin-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px); // iOS efekt zamućenog stakla
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 28px;
-  padding: 40px;
+:host {
+  display: block;
   width: 100%;
-  max-width: 400px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.08),
-    0 0 1px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  z-index: 10;
 }
 
-.apple-brand-header {
-  text-align: center;
-  margin-bottom: 32px;
-
-  .admin-icon {
-    width: 60px;
-    height: 60px;
-    background: #007aff;
-    color: white;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-    box-shadow: 0 8px 16px rgba(0, 122, 255, 0.2);
-  }
-
-  .apple-title {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: #1d1d1f;
-    margin: 0;
-  }
-
-  .apple-subtitle {
-    font-size: 14px;
-    color: #86868b;
-    margin-top: 6px;
-  }
-}
-
-.apple-form {
+.al {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
-.input-group-custom {
+.al-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.al-logo {
+  height: 40px;
+}
+
+.al-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--vz-border);
+  background: var(--vz-surface);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--vz-muted);
+
+  .pi {
+    font-size: 11px;
+  }
+}
+
+.al-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1d1d1f;
-    margin-left: 4px;
-  }
-
-  input {
-    width: 100%;
-    height: 46px;
-    background: rgba(118, 118, 128, 0.12);
-    border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 0 16px;
-    font-size: 16px;
-    color: #1c1c1e;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:focus {
-      outline: none;
-      background: #ffffff;
-      border-color: #007aff;
-      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-    }
-  }
+  padding: 20px;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 20px;
 }
 
-.apple-btn-primary {
+.al-gap {
+  margin-top: 6px;
+}
+
+.al-input {
   width: 100%;
-  height: 50px;
-  background: #007aff;
-  color: #ffffff;
-  border: none;
-  border-radius: 14px;
   font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #0071e3;
-    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
+  padding: 12px 14px;
 }
 
-.apple-error-box {
+.al-error {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 59, 48, 0.1);
-  color: #ff3b30;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 13px;
   font-weight: 500;
-  margin-top: 10px;
-  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  color: #d70015;
 
-  svg {
-    flex-shrink: 0;
+  .pi {
+    font-size: 13px;
   }
 }
 
-@keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
+:host ::ng-deep .al-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 650;
+  border-radius: 12px;
+}
+
+.al-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  margin-top: 18px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--vz-muted);
+  opacity: 0.75;
+  text-decoration: none;
+
+  .pi {
+    font-size: 11px;
   }
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
+
+  &:hover {
+    opacity: 1;
+    background: var(--vz-surface-2);
   }
 }
