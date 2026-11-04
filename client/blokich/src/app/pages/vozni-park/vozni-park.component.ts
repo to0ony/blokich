@@ -9,11 +9,21 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
 import { VoziloParka, VozniParkService } from '../../services/vozni-park.service';
-import { MarkaComponent } from '../../components/vozac/marka/marka.component';
+import { MarkaComponent, markaZa } from '../../components/vozac/marka/marka.component';
 import { TablicaComponent } from '../../components/vozac/tablica/tablica.component';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
 
 const INTERVAL_MS = 45_000;
+const SKRIVENE_KEY = 'vz-skrivene-marke';
+
+interface MarkaFilter {
+  oznaka: string;
+  naziv: string;
+  model: string;
+  ukupno: number;
+  naLiniji: number;
+  vidljiva: boolean;
+}
 
 interface Grupa {
   model: string;
@@ -54,6 +64,8 @@ export class VozniParkComponent implements OnInit, OnDestroy {
   readonly opisKasnjenja = opisKasnjenja;
   readonly kasniZnatno = kasniZnatno;
   private timer: ReturnType<typeof setInterval> | null = null;
+  /** Skrivene marke (oznaka, npr. "MAN") – pamti se na uređaju. */
+  skrivene = new Set<string>(this.ucitajSkrivene());
 
   constructor() {
     postaviPrimeNgTemu(inject(PrimeNG));
@@ -84,6 +96,42 @@ export class VozniParkComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Marke prisutne u voznom parku, za filter gore (najbrojnija prva). */
+  get marke(): MarkaFilter[] {
+    const mapa = new Map<string, MarkaFilter>();
+    for (const v of this.vozila) {
+      const m = markaZa(v.kratko);
+      const f = mapa.get(m.oznaka) ?? {
+        oznaka: m.oznaka,
+        naziv: m.naziv,
+        model: v.kratko,
+        ukupno: 0,
+        naLiniji: 0,
+        vidljiva: !this.skrivene.has(m.oznaka),
+      };
+      f.ukupno++;
+      if (v.uzivo) f.naLiniji++;
+      mapa.set(m.oznaka, f);
+    }
+    return [...mapa.values()].sort((a, b) => b.ukupno - a.ukupno);
+  }
+
+  prebaciMarku(oznaka: string): void {
+    if (this.skrivene.has(oznaka)) this.skrivene.delete(oznaka);
+    else this.skrivene.add(oznaka);
+    try {
+      localStorage.setItem(SKRIVENE_KEY, JSON.stringify([...this.skrivene]));
+    } catch {}
+  }
+
+  private ucitajSkrivene(): string[] {
+    try {
+      return JSON.parse(localStorage.getItem(SKRIVENE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
   get naLiniji(): number {
     return this.vozila.filter((v) => v.uzivo).length;
   }
@@ -94,6 +142,7 @@ export class VozniParkComponent implements OnInit, OnDestroy {
     const mapa = new Map<string, VoziloParka[]>();
     for (const v of this.vozila) {
       if (this.samoNaLiniji && !v.uzivo) continue;
+      if (this.skrivene.has(markaZa(v.kratko).oznaka)) continue;
       if (
         q &&
         !v.broj.toLowerCase().includes(q) &&

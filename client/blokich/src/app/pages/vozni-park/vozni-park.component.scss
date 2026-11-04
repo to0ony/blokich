@@ -98,6 +98,47 @@
   flex-shrink: 0;
 }
 
+/* Filter po markama */
+.vp-brands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border: 1px solid var(--vz-border);
+  border-radius: 999px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+
+  &.is-off {
+    opacity: 0.45;
+    background: var(--vz-surface-2);
+
+    .vp-brand-name {
+      text-decoration: line-through;
+    }
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.vp-brand-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vz-muted);
+}
+
 /* Alati */
 .vp-tools {
   display: flex;

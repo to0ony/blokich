@@ -23,6 +23,22 @@
       <div class="vp-stat muted"><strong>{{ vozila.length }}</strong> ukupno</div>
     </section>
 
+    <!-- Filter po markama: dodir skriva / prikazuje marku -->
+    <div class="vp-brands" *ngIf="marke.length > 1" role="group" aria-label="Marke autobusa">
+      <button
+        *ngFor="let m of marke"
+        type="button"
+        class="vp-brand"
+        [class.is-off]="!m.vidljiva"
+        [attr.aria-pressed]="m.vidljiva"
+        (click)="prebaciMarku(m.oznaka)"
+      >
+        <app-marka [model]="m.model" [mala]="true" />
+        <span class="vp-brand-name">{{ m.naziv }}</span>
+        <span class="vp-brand-count">{{ m.ukupno }}</span>
+      </button>
+    </div>
+
     <div class="vp-tools">
       <input
         pInputText
