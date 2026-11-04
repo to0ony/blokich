@@ -54,6 +54,8 @@
       [class.is-today]="c.danas"
       [class.is-work]="c.sluzba"
       [class.is-empty]="!c.dan"
+      [class.is-sat]="c.vikend === 'sub'"
+      [class.is-sun]="c.vikend === 'ned'"
       [disabled]="!c.sluzba"
       [attr.title]="c.dan && !c.sluzba ? opisOdsustva(c.dan.oznaka) : null"
       (click)="otvori(c)"

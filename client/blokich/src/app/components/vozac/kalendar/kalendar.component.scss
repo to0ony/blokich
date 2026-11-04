@@ -88,6 +88,14 @@
     opacity: 0.55;
   }
 
+  &.is-sat {
+    background: #e9f7ee;
+  }
+
+  &.is-sun {
+    background: #fdecea;
+  }
+
   &.is-today {
     border-color: var(--p-primary-500);
 

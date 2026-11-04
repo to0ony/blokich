@@ -26,6 +26,7 @@ interface Celija {
   sluzba: string | null;
   linije: string[];
   pricuva: boolean;
+  vikend: 'sub' | 'ned' | null;
 }
 
 @Component({
@@ -138,6 +139,7 @@ export class KalendarComponent implements OnInit, OnDestroy {
         sluzba: sluzbe[0]?.br_sl ?? null,
         linije: [...new Set(sluzbe.map((s) => s.linija).filter((l): l is string => !!l))],
         pricuva: !!sluzbe.length && sluzbe.every((s) => !s.linija),
+        vikend: datum.isoWeekday() === 6 ? 'sub' : datum.isoWeekday() === 7 ? 'ned' : null,
       };
     });
   }
