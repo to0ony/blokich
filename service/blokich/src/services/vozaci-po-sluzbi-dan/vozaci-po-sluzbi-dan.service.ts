@@ -50,11 +50,14 @@ export class VozaciPoSluzbiDanService {
       (dokument) => dokument.sluzbe || [],
     );
 
-    // Pronađi službu po broju
-    const regex = new RegExp(`^${brojSluzbe}(P*)$`, 'i');
-    const pronadenaSluzba = sveSluzbe.find((sluzba) =>
-      regex.test(sluzba.br_sl),
-    );
+    // Pronađi službu po broju – sve dijelove (npr. 207 i 207P kod dvokratne
+    // službe, koji mogu voziti različite linije).
+    const regex = new RegExp(`^${escapeRegex(brojSluzbe)}(P*)$`, 'i');
+    const dijelovi = sveSluzbe
+      .filter((sluzba) => regex.test(sluzba.br_sl))
+      .sort((a, b) => a.br_sl.length - b.br_sl.length)
+      .map(dioSluzbe);
+    const pronadenaSluzba = dijelovi[0];
 
     if (!pronadenaSluzba) {
       throw new NotFoundException(
@@ -148,6 +151,7 @@ export class VozaciPoSluzbiDanService {
       efektivni_sati: pronadenaSluzba.efektivni_sati,
       ukupni_sati: pronadenaSluzba.ukupni_sati,
       verzija: verzijaSluzbe,
+      dijelovi,
       vozaci: rezultat,
     };
   }
@@ -181,11 +185,14 @@ export class VozaciPoSluzbiDanService {
       (dokument) => dokument.sluzbe || [],
     );
 
-    // Pronađi službu po broju
-    const regex = new RegExp(`^${brojSluzbe}(P*)$`, 'i');
-    const pronadenaSluzba = sveSluzbe.find((sluzba) =>
-      regex.test(sluzba.br_sl),
-    );
+    // Pronađi službu po broju – sve dijelove (npr. 207 i 207P kod dvokratne
+    // službe, koji mogu voziti različite linije).
+    const regex = new RegExp(`^${escapeRegex(brojSluzbe)}(P*)$`, 'i');
+    const dijelovi = sveSluzbe
+      .filter((sluzba) => regex.test(sluzba.br_sl))
+      .sort((a, b) => a.br_sl.length - b.br_sl.length)
+      .map(dioSluzbe);
+    const pronadenaSluzba = dijelovi[0];
 
     if (!pronadenaSluzba) {
       throw new NotFoundException(
@@ -284,9 +291,31 @@ export class VozaciPoSluzbiDanService {
       efektivni_sati: pronadenaSluzba.efektivni_sati,
       ukupni_sati: pronadenaSluzba.ukupni_sati,
       verzija: verzijaSluzbe,
+      dijelovi,
       tjedan: brojTjedna,
       godina: godina,
       raspored: rasporedPoTjednu,
     };
   }
+}
+
+function escapeRegex(tekst: string): string {
+  return tekst.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Jedan dio službe (prvi ili drugi dio dvokratne). */
+function dioSluzbe(s: any) {
+  return {
+    br_sl: s.br_sl,
+    linija: s.linija,
+    varijanta: s.varijanta,
+    od: s.od,
+    do: s.do,
+    nastup_sluzbe: s.nastup_sluzbe,
+    zavrsna_sluzba: s.zavrsna_sluzba,
+    nocni_rad: s.nocni_rad,
+    druga_smjena: s.druga_smjena,
+    efektivni_sati: s.efektivni_sati,
+    ukupni_sati: s.ukupni_sati,
+  };
 }
