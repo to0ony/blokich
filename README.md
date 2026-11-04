@@ -36,8 +36,6 @@
 |:---:|:---:|:---:|:---:|:---:|
 | <img src="docs/screenshots/login.png" width="160" /> | <img src="docs/screenshots/raspored.png" width="160" /> | <img src="docs/screenshots/smjena.png" width="160" /> | <img src="docs/screenshots/danas-uzivo.png" width="160" /> | <img src="docs/screenshots/sluzba.png" width="160" /> |
 
-<img src="docs/screenshots/admin.png" alt="Admin" width="820" />
-
 <sub>Prikazani podaci i imena su izmišljeni.</sub>
 
 ## Arhitektura
