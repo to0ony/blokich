@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://i.imgur.com/GS2tBvQ.png" alt="Blokich" width="260" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="client/blokich/src/assets/blokich_logo_white.png" />
+    <source media="(prefers-color-scheme: light)" srcset="client/blokich/src/assets/blokich_logo.png" />
+    <img src="client/blokich/src/assets/blokich_logo.png" alt="Blokich" width="260" />
+  </picture>
 </p>
 
 <p align="center">
