@@ -10,6 +10,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { DriverScheduleService } from '../../../services/driver-schedule.service';
 import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
 import { DANI, DanKalendara, KalendarOdgovor, opisOdsustva } from '../vozac.model';
+import { praznikZa } from './praznici';
 
 dayjs.extend(isoWeek);
 
@@ -18,7 +19,11 @@ const MJESECI = [
   'Srpanj', 'Kolovoz', 'Rujan', 'Listopad', 'Studeni', 'Prosinac',
 ];
 
+/** Kalendar uvijek ide barem do ovog mjeseca, radi praznika i bez rasporeda. */
+const NAJSTARIJI_MJESEC = '2025-01';
+
 interface Celija {
+  datum: Dayjs;
   broj: number;
   danas: boolean;
   dan: DanKalendara | null;
@@ -27,6 +32,7 @@ interface Celija {
   linije: string[];
   pricuva: boolean;
   vikend: 'sub' | 'ned' | null;
+  praznik: string | null;
 }
 
 @Component({
@@ -61,7 +67,7 @@ export class KalendarComponent implements OnInit, OnDestroy {
   loading = true;
   greska = false;
 
-  odabrani: DanKalendara | null = null;
+  odabrana: Celija | null = null;
   detaljiOtvoreni = false;
 
   ngOnInit(): void {
@@ -77,18 +83,21 @@ export class KalendarComponent implements OnInit, OnDestroy {
   }
 
   get imaPrethodni(): boolean {
-    const od = this.podaci?.dostupno?.od;
-    return !!od && this.mjesec.format('YYYY-MM') > od;
+    const od = this.podaci?.dostupno?.od ?? NAJSTARIJI_MJESEC;
+    const granica = od < NAJSTARIJI_MJESEC ? od : NAJSTARIJI_MJESEC;
+    return this.mjesec.format('YYYY-MM') > granica;
   }
 
   get imaSljedeci(): boolean {
-    const doMjeseca = this.podaci?.dostupno?.do;
-    return !!doMjeseca && this.mjesec.format('YYYY-MM') < doMjeseca;
+    const doMjeseca = this.podaci?.dostupno?.do ?? '';
+    const ovajMjesec = dayjs().format('YYYY-MM');
+    const granica = doMjeseca > ovajMjesec ? doMjeseca : ovajMjesec;
+    return this.mjesec.format('YYYY-MM') < granica;
   }
 
   get naslovDetalja(): string {
-    if (!this.odabrani) return '';
-    const d = dayjs(this.odabrani.datum);
+    if (!this.odabrana) return '';
+    const d = this.odabrana.datum;
     return `${DANI[d.isoWeekday() - 1].naziv} · ${d.format('D.M.YYYY.')}`;
   }
 
@@ -118,8 +127,8 @@ export class KalendarComponent implements OnInit, OnDestroy {
   }
 
   otvori(c: Celija): void {
-    if (!c.dan?.sluzbe.length) return;
-    this.odabrani = c.dan;
+    if (!c.sluzba && !c.praznik) return;
+    this.odabrana = c;
     this.detaljiOtvoreni = true;
   }
 
@@ -133,6 +142,7 @@ export class KalendarComponent implements OnInit, OnDestroy {
       const dan = poDatumu.get(datum.format('YYYY-MM-DD')) ?? null;
       const sluzbe = dan?.sluzbe ?? [];
       return {
+        datum,
         broj: i + 1,
         danas: datum.isSame(danas, 'day'),
         dan,
@@ -140,6 +150,7 @@ export class KalendarComponent implements OnInit, OnDestroy {
         linije: [...new Set(sluzbe.map((s) => s.linija).filter((l): l is string => !!l))],
         pricuva: !!sluzbe.length && sluzbe.every((s) => !s.linija),
         vikend: datum.isoWeekday() === 6 ? 'sub' : datum.isoWeekday() === 7 ? 'ned' : null,
+        praznik: praznikZa(datum),
       };
     });
   }

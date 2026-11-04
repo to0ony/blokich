@@ -96,6 +96,12 @@
     background: #fdecea;
   }
 
+  &.is-holiday {
+    background: #fff4d6;
+    opacity: 1;
+    cursor: pointer;
+  }
+
   &.is-today {
     border-color: var(--p-primary-500);
 
@@ -166,6 +172,25 @@
       font-size: 8.5px;
     }
   }
+}
+
+.kl-holiday {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4d6;
+  color: #8a5a00;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.kl-free {
+  margin: 0;
+  font-size: 15px;
+  color: var(--vz-muted);
 }
 
 .kl-err {

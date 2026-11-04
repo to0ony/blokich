@@ -56,7 +56,8 @@
       [class.is-empty]="!c.dan"
       [class.is-sat]="c.vikend === 'sub'"
       [class.is-sun]="c.vikend === 'ned'"
-      [disabled]="!c.sluzba"
+      [class.is-holiday]="c.praznik"
+      [disabled]="!c.sluzba && !c.praznik"
       [attr.title]="c.dan && !c.sluzba ? opisOdsustva(c.dan.oznaka) : null"
       (click)="otvori(c)"
     >
@@ -94,5 +95,9 @@
   [blockScroll]="true"
   [header]="naslovDetalja"
 >
-  <app-sluzba-detalji *ngIf="odabrani" [sluzbe]="odabrani.sluzbe" />
+  <ng-container *ngIf="odabrana as o">
+    <p class="kl-holiday" *ngIf="o.praznik"><i class="pi pi-star"></i> {{ o.praznik }}</p>
+    <p class="kl-free" *ngIf="o.dan && !o.sluzba">{{ opisOdsustva(o.dan.oznaka) }}</p>
+    <app-sluzba-detalji *ngIf="o.sluzba" [sluzbe]="o.dan!.sluzbe" />
+  </ng-container>
 </p-drawer>
