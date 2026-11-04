@@ -17,7 +17,23 @@ interface SluzbaDan {
   vozaci: Kolega[];
 }
 
+interface DioSluzbe {
+  br_sl: string;
+  linija?: string;
+  varijanta?: string;
+  od: string;
+  do: string;
+  nastup_sluzbe?: string;
+  zavrsna_sluzba?: string;
+  nocni_rad?: string;
+  druga_smjena?: string;
+  efektivni_sati?: string;
+  ukupni_sati?: string;
+}
+
 interface SluzbaOdgovor {
+  /** Svi dijelovi službe (npr. 207 i 207P); stariji backend ga ne šalje. */
+  dijelovi?: DioSluzbe[];
   br_sl: string;
   linija?: string;
   varijanta?: string;
@@ -63,6 +79,12 @@ export class SluzbeComponent {
   loading = false;
   greska = '';
   readonly rutaUrl = rutaUrl;
+
+  /** Dijelovi službe; bez polja `dijelovi` (stariji backend) samo prvi dio. */
+  get dijelovi(): DioSluzbe[] {
+    if (!this.rezultat) return [];
+    return this.rezultat.dijelovi?.length ? this.rezultat.dijelovi : [this.rezultat];
+  }
 
   constructor(private serviceScheduleService: ServiceScheduleService) {}
 

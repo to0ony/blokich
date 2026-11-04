@@ -44,55 +44,61 @@
 <p-message *ngIf="greska && !loading" severity="error" [text]="greska" />
 
 <ng-container *ngIf="rezultat && !loading">
-  <!-- Sažetak službe -->
+  <!-- Sažetak službe: svaki dio posebno (dvokratna služba može voziti više linija) -->
   <section class="sl-summary">
-    <div class="sl-summary-head">
-      <div class="sl-key">
-        <span class="vz-label">Služba</span>
-        <strong>{{ rezultat.br_sl }}</strong>
-      </div>
-      <a
-        *ngIf="rezultat.linija; else bezLinije"
-        class="sl-line"
-        [href]="rutaUrl(rezultat.linija)"
-        target="_blank"
-        rel="noopener"
-      >
-        <span class="vz-label">Linija</span>
-        <strong>{{ rezultat.linija }}</strong>
-      </a>
-      <ng-template #bezLinije>
-        <div>
-          <span class="vz-label">Linija</span>
-          <strong>–</strong>
+    <ng-container *ngFor="let d of dijelovi; let i = index; let last = last">
+      <div class="sl-part" *ngIf="dijelovi.length > 1">{{ i + 1 }}. dio · Sl. {{ d.br_sl }}</div>
+
+      <div class="sl-summary-head">
+        <div class="sl-key">
+          <span class="vz-label">Služba</span>
+          <strong>{{ d.br_sl }}</strong>
         </div>
-      </ng-template>
-      <div>
-        <span class="vz-label">V.R.</span>
-        <strong>{{ rezultat.varijanta || "–" }}</strong>
+        <a
+          *ngIf="d.linija; else bezLinije"
+          class="sl-line"
+          [href]="rutaUrl(d.linija)"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="vz-label">Linija</span>
+          <strong>{{ d.linija }}</strong>
+        </a>
+        <ng-template #bezLinije>
+          <div>
+            <span class="vz-label">Linija</span>
+            <strong>–</strong>
+          </div>
+        </ng-template>
+        <div>
+          <span class="vz-label">V.R.</span>
+          <strong>{{ d.varijanta || "–" }}</strong>
+        </div>
       </div>
-    </div>
 
-    <div class="sl-times">
-      <div>
-        <span class="vz-label">Nastup</span>
-        <span class="sl-time">{{ rezultat.od }}</span>
-        <span class="sl-place">{{ rezultat.nastup_sluzbe }}</span>
+      <div class="sl-times">
+        <div>
+          <span class="vz-label">Nastup</span>
+          <span class="sl-time">{{ d.od }}</span>
+          <span class="sl-place">{{ d.nastup_sluzbe }}</span>
+        </div>
+        <i class="pi pi-arrow-right"></i>
+        <div class="right">
+          <span class="vz-label">Završetak</span>
+          <span class="sl-time">{{ d.do }}</span>
+          <span class="sl-place">{{ d.zavrsna_sluzba }}</span>
+        </div>
       </div>
-      <i class="pi pi-arrow-right"></i>
-      <div class="right">
-        <span class="vz-label">Završetak</span>
-        <span class="sl-time">{{ rezultat.do }}</span>
-        <span class="sl-place">{{ rezultat.zavrsna_sluzba }}</span>
-      </div>
-    </div>
 
-    <div class="sl-hours">
-      <div><span>Ukupno</span><strong>{{ rezultat.ukupni_sati || "–" }}</strong></div>
-      <div><span>Efektivno</span><strong>{{ rezultat.efektivni_sati || "–" }}</strong></div>
-      <div><span>Noćni</span><strong>{{ rezultat.nocni_rad || "–" }}</strong></div>
-      <div><span>Dr. smjena</span><strong>{{ rezultat.druga_smjena || "–" }}</strong></div>
-    </div>
+      <div class="sl-hours">
+        <div><span>Ukupno</span><strong>{{ d.ukupni_sati || "–" }}</strong></div>
+        <div><span>Efektivno</span><strong>{{ d.efektivni_sati || "–" }}</strong></div>
+        <div><span>Noćni</span><strong>{{ d.nocni_rad || "–" }}</strong></div>
+        <div><span>Dr. smjena</span><strong>{{ d.druga_smjena || "–" }}</strong></div>
+      </div>
+
+      <div class="sl-sep" *ngIf="!last"></div>
+    </ng-container>
   </section>
 
   <!-- Po danima -->
