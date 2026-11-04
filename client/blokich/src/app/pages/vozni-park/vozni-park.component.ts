@@ -10,6 +10,7 @@ import { MessageModule } from 'primeng/message';
 import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
 import { VoziloParka, VozniParkService } from '../../services/vozni-park.service';
 import { MarkaComponent } from '../../components/vozac/marka/marka.component';
+import { TablicaComponent } from '../../components/vozac/tablica/tablica.component';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
 
 const INTERVAL_MS = 45_000;
@@ -33,6 +34,7 @@ interface Grupa {
     SkeletonModule,
     MessageModule,
     MarkaComponent,
+    TablicaComponent,
   ],
   templateUrl: './vozni-park.component.html',
   styleUrl: './vozni-park.component.scss',

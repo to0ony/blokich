@@ -59,8 +59,9 @@
       <ul class="vp-list">
         <li *ngFor="let v of g.vozila" class="vp-row" [class.is-live]="v.uzivo">
           <div class="vp-id">
-            <strong>{{ v.broj }}</strong>
-            <span>{{ v.tablica || "neregistriran" }}</span>
+            <app-tablica *ngIf="v.tablica; else bezTablice" [tablica]="v.tablica" />
+            <ng-template #bezTablice><span class="vp-noreg">neregistriran</span></ng-template>
+            <strong class="vp-broj">{{ v.broj }}</strong>
           </div>
 
           <div class="vp-state" *ngIf="v.uzivo as u; else neVozi">
