@@ -1,0 +1,131 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+
+/** Vozilo koje trenutno vozi na bloku (linija + V.R.). */
+export interface BlokUzivo {
+  /** Garažni broj vozila. */
+  vozilo: string;
+  /** Kašnjenje u sekundama (negativno = ranije od voznog reda). */
+  kasnjenje: number;
+}
+
+export interface UzivoStanje {
+  /** Vrijeme ZET-ovog feeda (ISO) ili null ako podaci nisu dostupni. */
+  vrijeme: string | null;
+  blokovi: Record<string, BlokUzivo>;
+}
+
+const CACHE_MS = 20_000;
+/** Stariji podaci se ne prikazuju – bolje ništa nego krivo. */
+const MAX_STAROST_S = 180;
+
+/**
+ * Podaci uživo iz ZET-ovog GTFS-Realtime feeda.
+ *
+ * trip_id ima oblik 0_1_10910_109_10258, gdje je treći dio blok:
+ * linija (109) + V.R. s dvije znamenke (10). Isti V.R. koristi Blokich.
+ */
+@Injectable()
+export class ZetUzivoService {
+  private readonly logger = new Logger(ZetUzivoService.name);
+  private readonly url: string;
+  private cache: { do: number; stanje: Promise<UzivoStanje> } | null = null;
+
+  constructor(
+    private readonly http: HttpService,
+    private readonly config: ConfigService,
+  ) {
+    this.url =
+      this.config.get<string>('ZET_GTFS_RT_URL') ||
+      'https://www.zet.hr/gtfs-rt-protobuf';
+  }
+
+  async zaBlokove(blokovi: string[]): Promise<UzivoStanje> {
+    const stanje = await this.stanje();
+    const odabrani: Record<string, BlokUzivo> = {};
+    for (const b of blokovi) {
+      if (stanje.blokovi[b]) odabrani[b] = stanje.blokovi[b];
+    }
+    return { vrijeme: stanje.vrijeme, blokovi: odabrani };
+  }
+
+  /** Feed se dohvaća najviše jednom u 20 s, bez obzira na broj vozača. */
+  private stanje(): Promise<UzivoStanje> {
+    const sad = Date.now();
+    if (!this.cache || this.cache.do < sad) {
+      this.cache = {
+        do: sad + CACHE_MS,
+        stanje: this.dohvati().catch((err) => {
+          this.logger.warn(`ZET GTFS-RT nije dostupan: ${err?.message}`);
+          return { vrijeme: null, blokovi: {} };
+        }),
+      };
+    }
+    return this.cache.stanje;
+  }
+
+  private async dohvati(): Promise<UzivoStanje> {
+    const res = await firstValueFrom(
+      this.http.get<ArrayBuffer>(this.url, {
+        responseType: 'arraybuffer',
+        timeout: 10_000,
+      }),
+    );
+    const feed =
+      GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+        new Uint8Array(res.data),
+      );
+    return this.obradi(feed, Date.now() / 1000);
+  }
+
+  /** Izdvojeno radi testiranja. */
+  obradi(feed: any, sadSek: number): UzivoStanje {
+    const vrijemeFeeda = Number(feed.header?.timestamp ?? 0);
+    if (!vrijemeFeeda || sadSek - vrijemeFeeda > MAX_STAROST_S) {
+      return { vrijeme: null, blokovi: {} };
+    }
+
+    // Kašnjenje po vožnji: prva sljedeća stanica u trip_update.
+    const kasnjenjePoVoznji = new Map<string, number>();
+    for (const e of feed.entity ?? []) {
+      const tu = e.tripUpdate;
+      const tripId = tu?.trip?.tripId;
+      const prva = tu?.stopTimeUpdate?.[0];
+      if (!tripId || !prva) continue;
+      const delay = prva.arrival?.delay ?? prva.departure?.delay;
+      if (typeof delay === 'number') kasnjenjePoVoznji.set(tripId, delay);
+    }
+
+    const blokovi: Record<string, BlokUzivo> = {};
+    const dvostruki = new Set<string>();
+
+    for (const e of feed.entity ?? []) {
+      const v = e.vehicle;
+      const tripId: string | undefined = v?.trip?.tripId;
+      const vozilo: string | undefined = v?.vehicle?.id;
+      if (!tripId || !vozilo || !v.position) continue;
+
+      // Pozicija mora biti svježa.
+      const ts = Number(v.timestamp ?? 0);
+      if (!ts || sadSek - ts > MAX_STAROST_S) continue;
+
+      const blok = tripId.split('_')[2];
+      const kasnjenje = kasnjenjePoVoznji.get(tripId);
+      if (!blok || !/^\d+$/.test(blok) || kasnjenje === undefined) continue;
+
+      if (blokovi[blok]) dvostruki.add(blok);
+      blokovi[blok] = { vozilo, kasnjenje };
+    }
+
+    // Dva vozila na istom bloku = nejasno, ne prikazuj ništa.
+    for (const b of dvostruki) delete blokovi[b];
+
+    return {
+      vrijeme: new Date(vrijemeFeeda * 1000).toISOString(),
+      blokovi,
+    };
+  }
+}
