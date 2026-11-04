@@ -19,14 +19,8 @@
       <span class="t">{{ s.od }}</span>
       <i class="pi pi-arrow-right"></i>
       <span class="t">{{ s.do }}</span>
-      <span
-        class="rs-today-line"
-        *ngIf="
-          s.linija &&
-          (i === 0 ||
-            s.linija !== d.sluzbe[i - 1].linija ||
-            s.varijanta !== d.sluzbe[i - 1].varijanta)
-        "
+      <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
+      <span class="rs-today-line" *ngIf="s.linija"
         >{{ s.linija
         }}<span class="rs-today-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span></span
       >
