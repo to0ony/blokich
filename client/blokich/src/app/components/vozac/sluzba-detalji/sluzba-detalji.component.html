@@ -1,0 +1,43 @@
+<section class="sd-duty" *ngFor="let s of sluzbe">
+  <div class="sd-duty-head">
+    <div class="sd-key">
+      <span class="sd-label">Služba</span>
+      <strong>{{ s.br_sl }}</strong>
+    </div>
+    <div *ngIf="s.linija">
+      <span class="sd-label">Linija</span>
+      <strong>{{ s.linija }}</strong>
+    </div>
+    <div *ngIf="s.varijanta">
+      <span class="sd-label">V.R.</span>
+      <strong>{{ s.varijanta }}</strong>
+    </div>
+  </div>
+
+  <div class="sd-timeline">
+    <div>
+      <span class="sd-label">Nastup</span>
+      <span class="sd-time">{{ s.od }}</span>
+      <span class="sd-place">{{ s.nastup_sluzbe }}</span>
+    </div>
+    <i class="pi pi-arrow-right"></i>
+    <div class="right">
+      <span class="sd-label">Završetak</span>
+      <span class="sd-time">{{ s.do }}</span>
+      <span class="sd-place">{{ s.zavrsna_sluzba }}</span>
+    </div>
+  </div>
+
+  <div class="sd-hours" *ngIf="s.ukupni_sati || s.efektivni_sati">
+    <div><span>Ukupno</span><strong>{{ s.ukupni_sati || "–" }}</strong></div>
+    <div><span>Efektivno</span><strong>{{ s.efektivni_sati || "–" }}</strong></div>
+    <div><span>Noćni rad</span><strong>{{ s.nocni_rad || "–" }}</strong></div>
+    <div><span>Druga smjena</span><strong>{{ s.druga_smjena || "–" }}</strong></div>
+  </div>
+
+  <div class="sd-links" *ngIf="s.linija">
+    <a [href]="rutaUrl(s.linija)" target="_blank" rel="noopener">
+      <i class="pi pi-map"></i> Karta uživo
+    </a>
+  </div>
+</section>

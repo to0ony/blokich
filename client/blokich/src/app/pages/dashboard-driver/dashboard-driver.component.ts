@@ -9,6 +9,7 @@ import { DriverScheduleService } from '../../services/driver-schedule.service';
 import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
 import { RasporedComponent } from '../../components/vozac/raspored/raspored.component';
 import { DanasComponent } from '../../components/vozac/danas/danas.component';
+import { KalendarComponent } from '../../components/vozac/kalendar/kalendar.component';
 import { LinijeComponent } from '../../components/vozac/linije/linije.component';
 import { SluzbeComponent } from '../../components/vozac/sluzbe/sluzbe.component';
 import { DriverStatsComponent } from '../../components/stats/driver-stats/driver-stats.component';
@@ -28,7 +29,7 @@ interface NavStavka {
   icon: string;
 }
 
-const VIEWS: VozacView[] = ['raspored', 'danas', 'linije', 'sluzbe', 'statistika'];
+const VIEWS: VozacView[] = ['raspored', 'kalendar', 'danas', 'linije', 'sluzbe', 'statistika'];
 
 @Component({
   selector: 'app-dashboard-driver',
@@ -39,6 +40,7 @@ const VIEWS: VozacView[] = ['raspored', 'danas', 'linije', 'sluzbe', 'statistika
     MenuModule,
     RasporedComponent,
     DanasComponent,
+    KalendarComponent,
     LinijeComponent,
     SluzbeComponent,
     DriverStatsComponent,
@@ -104,6 +106,11 @@ export class DashboardDriverComponent implements OnInit {
     });
 
     this.ucitaj();
+  }
+
+  /** Kalendar se otvara iz Rasporeda, pa tab Raspored ostaje označen. */
+  aktivan(v: VozacView): boolean {
+    return this.view === v || (v === 'raspored' && this.view === 'kalendar');
   }
 
   promijeniView(v: VozacView): void {

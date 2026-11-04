@@ -25,8 +25,8 @@
         *ngFor="let n of nav"
         type="button"
         class="vz-tab"
-        [class.is-active]="view === n.view"
-        [attr.aria-current]="view === n.view ? 'page' : null"
+        [class.is-active]="aktivan(n.view)"
+        [attr.aria-current]="aktivan(n.view) ? 'page' : null"
         (click)="promijeniView(n.view)"
       >
         <i [class]="n.icon"></i>
@@ -45,7 +45,10 @@
       [naredniDostupan]="naredniDostupan"
       (tjedanChange)="promijeniTjedan($event)"
       (retry)="ucitaj()"
+      (otvoriKalendar)="promijeniView('kalendar')"
     />
+
+    <app-kalendar *ngIf="view === 'kalendar'" (natrag)="promijeniView('raspored')" />
 
     <app-danas
       *ngIf="view === 'danas'"
@@ -66,8 +69,8 @@
       *ngFor="let n of nav"
       type="button"
       class="vz-bottom-item"
-      [class.is-active]="view === n.view"
-      [attr.aria-current]="view === n.view ? 'page' : null"
+      [class.is-active]="aktivan(n.view)"
+      [attr.aria-current]="aktivan(n.view) ? 'page' : null"
       (click)="promijeniView(n.view)"
     >
       <i [class]="n.icon"></i>

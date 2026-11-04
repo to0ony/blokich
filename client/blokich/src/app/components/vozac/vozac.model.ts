@@ -5,7 +5,7 @@ dayjs.extend(isoWeek);
 
 export type DanKey = 'pon' | 'uto' | 'sri' | 'cet' | 'pet' | 'sub' | 'ned';
 export type TjedanTip = 'trenutni' | 'naredni';
-export type VozacView = 'raspored' | 'danas' | 'linije' | 'sluzbe' | 'statistika';
+export type VozacView = 'raspored' | 'kalendar' | 'danas' | 'linije' | 'sluzbe' | 'statistika';
 
 export const DANI: { key: DanKey; naziv: string; kratko: string }[] = [
   { key: 'pon', naziv: 'Ponedjeljak', kratko: 'Pon' },
@@ -41,6 +41,23 @@ export interface RasporedOdgovor {
   godina: number;
   tjedan: number;
   raspored: Record<DanKey, (Sluzba | Odsustvo)[]>;
+}
+
+/** Dan u kalendaru; službe su iz verzije koju ima disponent tog tjedna. */
+export interface DanKalendara {
+  datum: string;
+  /** Oznaka iz disponenta: broj službe ili odsustvo (O, I-GO…). */
+  oznaka: string;
+  verzija: string | null;
+  sluzbe: Sluzba[];
+}
+
+export interface KalendarOdgovor {
+  godina: number;
+  mjesec: number;
+  /** Mjeseci s podacima, "YYYY-MM". */
+  dostupno: { od: string; do: string } | null;
+  dani: DanKalendara[];
 }
 
 /** Vozač na liniji / službi određenog dana. */
