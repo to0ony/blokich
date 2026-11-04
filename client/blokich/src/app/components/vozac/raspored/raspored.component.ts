@@ -19,6 +19,7 @@ import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
 import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
+import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
 import {
   DanRasporeda,
   Kolega,
@@ -68,6 +69,7 @@ const MJESECI_GEN = [
     MessageModule,
     LucideAngularModule,
     KolegeListaComponent,
+    SluzbaDetaljiComponent,
   ],
   templateUrl: './raspored.component.html',
   styleUrl: './raspored.component.scss',
@@ -80,6 +82,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @Input() naredniDostupan = false;
   @Output() tjedanChange = new EventEmitter<TjedanTip>();
   @Output() retry = new EventEmitter<void>();
+  @Output() otvoriKalendar = new EventEmitter<void>();
 
   dani: DanRasporeda[] = [];
   /** Ikona odmora kao na tahografu (krevet). */

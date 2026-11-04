@@ -1,0 +1,96 @@
+<header class="kl-head">
+  <p-button
+    icon="pi pi-arrow-left"
+    [rounded]="true"
+    [text]="true"
+    severity="secondary"
+    ariaLabel="Natrag na raspored"
+    (onClick)="natrag.emit()"
+  />
+  <h1>Kalendar</h1>
+</header>
+
+<section class="vz-card kl-card">
+  <div class="kl-nav">
+    <p-button
+      icon="pi pi-angle-left"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      ariaLabel="Prethodni mjesec"
+      [disabled]="loading || !imaPrethodni"
+      (onClick)="pomakni(-1)"
+    />
+    <strong>{{ naslov }}</strong>
+    <p-button
+      icon="pi pi-angle-right"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      ariaLabel="Sljedeći mjesec"
+      [disabled]="loading || !imaSljedeci"
+      (onClick)="pomakni(1)"
+    />
+  </div>
+
+  <div class="kl-grid kl-weekdays">
+    <span
+      *ngFor="let d of daniUTjednu"
+      [class.is-sat]="d.key === 'sub'"
+      [class.is-sun]="d.key === 'ned'"
+      >{{ d.kratko }}</span
+    >
+  </div>
+
+  <p-skeleton *ngIf="loading" height="340px" borderRadius="12px" />
+
+  <div class="kl-grid" *ngIf="!loading && !greska">
+    <span *ngFor="let p of praznine"></span>
+
+    <button
+      *ngFor="let c of celije"
+      type="button"
+      class="kl-day"
+      [class.is-today]="c.danas"
+      [class.is-work]="c.sluzba"
+      [class.is-empty]="!c.dan"
+      [disabled]="!c.sluzba"
+      [attr.title]="c.dan && !c.sluzba ? opisOdsustva(c.dan.oznaka) : null"
+      (click)="otvori(c)"
+    >
+      <span class="kl-num">{{ c.broj }}</span>
+
+      <ng-container *ngIf="c.sluzba; else bezSluzbe">
+        <strong class="kl-sl">{{ c.sluzba }}</strong>
+        <span class="kl-line" *ngFor="let l of c.linije">{{ l }}</span>
+        <span class="kl-line is-res" *ngIf="c.pricuva">Pričuva</span>
+      </ng-container>
+      <ng-template #bezSluzbe>
+        <span class="kl-off" *ngIf="c.dan">{{ c.dan.oznaka }}</span>
+      </ng-template>
+    </button>
+  </div>
+</section>
+
+<p-message *ngIf="greska && !loading" severity="error">
+  <div class="kl-err">
+    Kalendar nije moguće učitati.
+    <p-button label="Ponovno" size="small" (onClick)="ucitaj()" />
+  </div>
+</p-message>
+
+<div class="vz-empty" *ngIf="!loading && !greska && !podaci?.dani?.length">
+  <span class="vz-empty-icon"><i class="pi pi-calendar"></i></span>
+  <strong>Nema podataka</strong>
+  <span>Za ovaj mjesec nema rasporeda.</span>
+</div>
+
+<p-drawer
+  [(visible)]="detaljiOtvoreni"
+  position="bottom"
+  styleClass="rs-drawer vz-app"
+  [blockScroll]="true"
+  [header]="naslovDetalja"
+>
+  <app-sluzba-detalji *ngIf="odabrani" [sluzbe]="odabrani.sluzbe" />
+</p-drawer>
