@@ -36,8 +36,8 @@ import {
   uSmjeniSad,
 } from '../vozac.model';
 
-/** Koliko prije svoje službe vozač vidi gdje mu je bus. */
-const CEKANJE_MIN = 120;
+/** Bus koji preuzimam prikazuje se tek 60 min prije mog nastupa. */
+const CEKANJE_MIN = 60;
 const UZIVO_INTERVAL_MS = 30_000;
 
 /** Moj bus uživo: vozim ga sad ili čekam da ga preuzmem. */
@@ -129,7 +129,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
 
   /**
    * Služba u tijeku → "kasniš X min · bus N".
-   * Inače sljedeća služba unutar 2 h → bus na mom V.R. je onaj koji
+   * Inače sljedeća služba unutar 60 min → bus na mom V.R. je onaj koji
    * preuzimam: "tvoj bus N stiže ~HH:MM".
    */
   osvjeziMojBus(): void {
