@@ -24,7 +24,7 @@
 - 👥 Današnja smjena i vozači po liniji – s pozivom jednim dodirom i grupiranjem po V.R.
 - 🔎 Pregled službe, uključujući dvokratne službe na više linija
 - 📊 Statistika rada po tjednu i mjesecu
-- 📱 Mobile-first, zajednička lozinka za pristup koja se upisuje samo jednom po uređaju
+- 📱 Mobile-first dizajn
 
 **Za administratora**
 - ☁️ Jedan klik povlači službe i disponent s ZET intraneta i obrađuje ih
