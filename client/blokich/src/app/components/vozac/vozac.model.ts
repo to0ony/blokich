@@ -161,13 +161,16 @@ function minute(hhmm: string | undefined): number | null {
   return m ? +m[1] * 60 + +m[2] : null;
 }
 
-/** Je li služba (od–do, ista ili preko ponoći) sad u tijeku. */
+/**
+ * Je li služba sad u tijeku: od `od` do neposredno prije `do` (i preko
+ * ponoći). U minuti predaje vozi onaj koji preuzima.
+ */
 export function uSmjeniSad(od?: string, doo?: string, sad = new Date()): boolean {
   const a = minute(od);
   const b = minute(doo);
   if (a === null || b === null) return false;
   const n = sad.getHours() * 60 + sad.getMinutes();
-  return a <= b ? n >= a && n <= b : n >= a || n <= b;
+  return a <= b ? n >= a && n < b : n >= a || n < b;
 }
 
 /**
