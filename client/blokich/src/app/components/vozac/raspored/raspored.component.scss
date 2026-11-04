@@ -156,6 +156,13 @@
   opacity: 0.85;
 }
 
+/* Model u svom redu ispod "Tvoj bus … stiže" */
+.rs-live-model {
+  flex-basis: 100%;
+  padding-left: 16px;
+  font-size: 12.5px;
+}
+
 .rs-live-dot {
   width: 8px;
   height: 8px;

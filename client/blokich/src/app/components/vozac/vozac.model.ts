@@ -195,6 +195,8 @@ export interface VoziloUzivo {
   vozilo: string;
   /** Sekunde; negativno = ranije od voznog reda. */
   kasnjenje: number;
+  /** Model vozila ako je poznat (vozni park AP Podsused). */
+  model?: string;
 }
 
 /** "kasni 5 min" / "kasniš 5 min" / "na vremenu" / "2 min ranije". */

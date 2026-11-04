@@ -47,6 +47,7 @@ interface MojBus {
   kasnjenje: number;
   /** Za 'cekam': procjena kad bus stiže na moju predaju. */
   stize: string | null;
+  model?: string;
 }
 
 const MJESECI_GEN = [
@@ -162,6 +163,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
                 vozilo: v.vozilo,
                 kasnjenje: v.kasnjenje,
                 stize: sad ? null : procjenaDolaska(cilj.od, v.kasnjenje),
+                model: v.model,
               }
             : null;
       },
