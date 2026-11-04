@@ -1,0 +1,28 @@
+<p-selectbutton
+  *ngIf="imaViseVr"
+  [options]="opcije"
+  optionLabel="label"
+  optionValue="value"
+  [allowEmpty]="false"
+  [ngModel]="grupiraj"
+  (ngModelChange)="promijeni($event)"
+  size="small"
+/>
+
+<!-- Po vremenu -->
+<div class="kl-list" *ngIf="!grupiraj || !imaViseVr">
+  <app-kolega-row *ngFor="let k of kolege" [kolega]="k" />
+</div>
+
+<!-- Po V.R. -->
+<ng-container *ngIf="grupiraj && imaViseVr">
+  <section class="kl-group" *ngFor="let g of grupe">
+    <h4 class="kl-group-title">
+      <span class="kl-vr">{{ g.vr ? "V.R. " + g.vr : "Bez V.R." }}</span>
+      <span class="kl-count">{{ g.kolege.length }} {{ g.kolege.length === 1 ? "vozač" : "vozača" }}</span>
+    </h4>
+    <div class="kl-list">
+      <app-kolega-row *ngFor="let k of g.kolege" [kolega]="k" />
+    </div>
+  </section>
+</ng-container>

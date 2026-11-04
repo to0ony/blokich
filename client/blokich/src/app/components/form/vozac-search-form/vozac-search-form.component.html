@@ -1,51 +1,47 @@
-<div class="apple-search-wrapper">
-  <div class="apple-search-bar">
-    <div class="search-input-container">
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        id="searchVozac"
-        placeholder="Ime ili službeni broj..."
-        (keyup.enter)="openSearch()"
-      />
-    </div>
-    <button class="apple-search-btn" (click)="openSearch()">Pretraži</button>
-  </div>
+<section class="vs">
+  <form class="vs-bar" (ngSubmit)="openSearch()">
+    <input
+      pInputText
+      type="text"
+      name="q"
+      id="searchVozac"
+      autocomplete="off"
+      placeholder="Prezime, ime ili broj"
+      class="vs-input"
+      [(ngModel)]="searchQuery"
+    />
+    <p-button
+      type="submit"
+      icon="pi pi-search"
+      ariaLabel="Traži"
+      [disabled]="!searchQuery.trim()"
+    />
+  </form>
 
-  <div class="results-container" *ngIf="isModalVisible">
-    <div class="results-header">
-      <span class="results-title">Rezultati pretrage</span>
-      <button class="close-link" (click)="closeSearch()">Zatvori</button>
+  <ng-container *ngIf="isModalVisible">
+    <div class="vs-head">
+      <span>Rezultati</span>
+      <button type="button" class="vs-close" (click)="closeSearch()">Zatvori</button>
     </div>
 
-    <div class="apple-list" *ngIf="searchResults.length > 0">
-      <div
-        class="apple-list-item"
+    <div class="vs-list" *ngIf="searchResults.length; else nema">
+      <button
+        type="button"
+        class="vs-item"
         *ngFor="let v of searchResults"
         (click)="onSelectVozac(v.sluz_broj)"
       >
-        <div class="item-icon">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"
-              fill="currentColor"
-            />
-          </svg>
-        </div>
-
-        <div class="item-content">
-          <span class="item-name">{{ v.ime_prezime }}</span>
-          <span class="item-sub">Službeni broj: {{ v.sluz_broj }}</span>
-        </div>
-      </div>
+        <span class="vs-avatar">{{ inicijali(v.ime_prezime) }}</span>
+        <span class="vs-text">
+          <span class="vs-name">{{ v.ime_prezime }}</span>
+          <span class="vs-num">{{ v.sluz_broj }}</span>
+        </span>
+        <i class="pi pi-angle-right"></i>
+      </button>
     </div>
 
-    <div class="apple-empty-state" *ngIf="searchResults.length === 0">
-      <p>Nema rezultata za "{{ searchQuery }}"</p>
-    </div>
-  </div>
-</div>
+    <ng-template #nema>
+      <p class="vs-empty">Nema rezultata za „{{ searchQuery }}“.</p>
+    </ng-template>
+  </ng-container>
+</section>

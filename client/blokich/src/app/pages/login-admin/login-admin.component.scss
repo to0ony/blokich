@@ -1,34 +1,19 @@
-.admin-page-container {
+.lp {
   min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--vz-bg);
   display: flex;
   justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  background-color: #f5f5f7;
-  padding: 20px;
+  align-items: flex-start;
+  padding: calc(12vh + env(safe-area-inset-top)) 16px 32px;
 
-  &::before {
-    content: "";
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    background: rgba(0, 122, 255, 0.05);
-    filter: blur(80px);
-    top: -100px;
-    right: -50px;
-    border-radius: 50%;
+  @media (min-height: 760px) {
+    align-items: center;
+    padding-top: 16px;
   }
+}
 
-  &::after {
-    content: "";
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: rgba(0, 122, 255, 0.03);
-    filter: blur(100px);
-    bottom: -150px;
-    left: -100px;
-    border-radius: 50%;
-  }
+.lp-main {
+  width: 100%;
+  max-width: 400px;
 }

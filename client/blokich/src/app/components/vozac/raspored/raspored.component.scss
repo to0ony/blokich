@@ -1,0 +1,629 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Tjedan: naslov, prekidač i traka s danima u jednoj kartici */
+.rs-week {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 20px;
+}
+
+.rs-week-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px -8px -4px 0;
+}
+
+.rs-week-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+    color: var(--vz-text);
+  }
+}
+
+.rs-week-sub {
+  font-size: 13.5px;
+  color: var(--vz-muted);
+}
+
+:host ::ng-deep .rs-error {
+  width: 100%;
+}
+
+.rs-error-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Danas */
+.rs-today {
+  position: relative;
+  padding: 18px 18px 16px;
+  border-radius: 20px;
+  color: #fff;
+  background: #1b3654;
+  cursor: pointer;
+}
+
+.rs-today-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rs-today-label {
+  font-size: 13px;
+  font-weight: 650;
+  opacity: 0.9;
+}
+
+.rs-today-sl {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.rs-today-time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .t {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+
+  .pi {
+    font-size: 16px;
+    opacity: 0.7;
+  }
+}
+
+.rs-today-line {
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.rs-today-place {
+  margin-top: 4px;
+  font-size: 14px;
+  opacity: 0.88;
+}
+
+:host ::ng-deep .rs-today-btn {
+  margin-top: 14px;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+
+  &:not(:disabled):hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: transparent;
+    color: #fff;
+  }
+}
+
+.rs-today-free {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 750;
+  padding: 6px 0 2px;
+
+  .pi {
+    font-size: 22px;
+  }
+}
+
+/* Traka s danima */
+.rs-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.rs-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 8px 0 7px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+  color: var(--vz-muted);
+  cursor: pointer;
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &.is-past {
+    opacity: 0.5;
+  }
+
+  &.is-today {
+    background: var(--p-primary-500);
+    border-color: var(--p-primary-500);
+    color: #fff;
+    opacity: 1;
+
+    .rs-chip-num {
+      color: #fff;
+    }
+  }
+}
+
+.rs-chip-day {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rs-chip-num {
+  font-size: 17px;
+  font-weight: 750;
+  color: var(--vz-text);
+}
+
+.rs-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+
+  .is-work & {
+    background: var(--p-primary-500);
+  }
+  .is-today.is-work & {
+    background: #fff;
+  }
+}
+
+
+
+/* Dani */
+.rs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rs-day {
+  position: relative;
+  padding: 14px 16px 0;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 18px;
+  scroll-margin: 90px;
+
+  &.is-today {
+    border-color: var(--p-primary-400);
+  }
+
+  &.is-past {
+    opacity: 0.6;
+  }
+
+  &.is-off {
+    background: var(--vz-surface-2);
+    padding-bottom: 14px;
+  }
+}
+
+.rs-day-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .is-off & {
+    margin-bottom: 0;
+  }
+}
+
+.rs-day-name {
+  font-size: 15px;
+  font-weight: 750;
+  color: var(--vz-text);
+
+  .is-sat & {
+    color: #13804b;
+  }
+  .is-sun & {
+    color: #d93025;
+  }
+  .is-today & {
+    color: var(--p-primary-600);
+  }
+}
+
+.rs-day-date {
+  font-size: 14px;
+  color: var(--vz-muted);
+}
+
+.chip.rs-day-code {
+  margin-left: auto;
+  padding: 2px 9px;
+  font-size: 12px;
+  color: var(--vz-muted);
+  background: var(--vz-surface);
+}
+
+.rs-day-free {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 0 2px;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--vz-muted);
+}
+
+.rs-duty {
+  &.has-sep {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed var(--vz-border);
+  }
+}
+
+/* Vremenska crta: mreža 3 stupca – vrijeme | crta | vrijeme */
+.rs-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    ".     sl    ."
+    "od    track do"
+    "pod   .     pdo";
+  column-gap: 12px;
+  align-items: center;
+}
+
+.chip.rs-sl {
+  grid-area: sl;
+  justify-self: center;
+  margin-bottom: 4px;
+  padding: 2px 9px;
+  font-size: 12px;
+  color: var(--vz-muted);
+}
+
+.rs-time {
+  grid-area: od;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  color: var(--vz-text);
+  font-variant-numeric: tabular-nums;
+
+  &.right {
+    grid-area: do;
+    text-align: right;
+  }
+}
+
+.rs-place {
+  grid-area: pod;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vz-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.right {
+    grid-area: pdo;
+    text-align: right;
+  }
+}
+
+.rs-track {
+  grid-area: track;
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  height: 29px;
+  align-items: center;
+}
+
+.rs-track-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--p-primary-300) 0 6px,
+    transparent 6px 10px
+  );
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    background: var(--p-primary-500);
+  }
+  &::before {
+    left: 0;
+  }
+  &::after {
+    right: 0;
+  }
+}
+
+.rs-mid {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--vz-surface);
+  border: 1px solid var(--p-primary-200);
+  color: var(--p-primary-700);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+
+  .pi {
+    font-size: 12px;
+  }
+  strong {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &:active {
+    background: var(--p-primary-50);
+  }
+
+  &.is-res {
+    border-color: #ffe0b2;
+    color: #a35400;
+    font-weight: 650;
+  }
+}
+
+.rs-mid-vr {
+  padding-left: 6px;
+  border-left: 1px solid var(--p-primary-200);
+  font-weight: 600;
+  color: var(--vz-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  background: var(--vz-surface-2);
+  color: var(--vz-text);
+  border: 1px solid var(--vz-border);
+  text-decoration: none;
+
+  .pi {
+    font-size: 11px;
+  }
+}
+
+.chip-res {
+  background: #fff3e0;
+  border-color: #ffe0b2;
+  color: #a35400;
+}
+
+.rs-day-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(100% + 32px);
+  margin: 12px -16px 0;
+  padding: 12px 16px;
+  border: none;
+  border-top: 1px solid var(--vz-border);
+  border-radius: 0 0 18px 18px;
+  background: none;
+  color: var(--p-primary-600);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &:active {
+    background: var(--vz-surface-2);
+  }
+}
+
+/* Donji panel – okvir je u styles.scss (drawer se renderira u <body>) */
+.sd-duty {
+  padding: 14px;
+  border: 1px solid var(--vz-border);
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.sd-duty-head {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+
+  strong {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--vz-text);
+  }
+}
+
+.sd-key {
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+  border: 1px solid var(--vz-border);
+  min-width: 88px;
+}
+
+.sd-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vz-muted);
+}
+
+.sd-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .right {
+    text-align: right;
+  }
+  > .pi {
+    color: var(--vz-muted);
+  }
+}
+
+.sd-time {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--vz-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-place {
+  font-size: 13px;
+  color: var(--vz-muted);
+}
+
+.sd-hours {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: var(--vz-surface-2);
+    text-align: center;
+  }
+
+  span {
+    font-size: 10.5px;
+    color: var(--vz-muted);
+  }
+  strong {
+    font-size: 15px;
+    color: var(--vz-text);
+  }
+
+  @media (max-width: 380px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.sd-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+
+  a {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--p-primary-600);
+    text-decoration: none;
+  }
+}
+
+.sd-title {
+  margin: 18px 2px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vz-muted);
+}
+
+.sd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sd-empty {
+  font-size: 14px;
+  color: var(--vz-muted);
+  text-align: center;
+  padding: 12px 0;
+}

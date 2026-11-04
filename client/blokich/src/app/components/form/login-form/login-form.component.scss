@@ -1,251 +1,189 @@
 :host {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 80vh;
-  padding: 20px;
-}
-
-.apple-login-container {
+  display: block;
   width: 100%;
-  max-width: 380px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.apple-brand-header {
-  text-align: center;
-  margin-bottom: 32px;
-
-  .apple-logo {
-    max-height: 52px; //52px regular -- 72px for xmas
-    width: auto;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
-  }
-}
-
-.apple-form {
+.lg {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
 }
 
-.input-group-custom {
+.lg-logo {
+  align-self: center;
+  height: 40px;
+  margin-bottom: 14px;
+}
+
+.lg-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #8e8e93; // Apple gray text aka recent-label color
-    margin-left: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: -2px; /* Malo pribliziti inputu */
-  }
-
-  input {
-    height: 48px;
-    background: rgba(118, 118, 128, 0.12);
-    border: none;
-    border-radius: 12px;
-    padding: 0 16px;
-    font-size: 16px;
-    color: #1d1d1f;
-    transition: all 0.2s ease;
-
-    &:focus {
-      outline: none;
-      background: rgba(118, 118, 128, 0.18);
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
-    }
-
-    &.has-error {
-      background: rgba(255, 59, 48, 0.08);
-      color: #ff3b30;
-    }
-  }
+  padding: 20px;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+  border-radius: 20px;
 }
 
-.error-text {
-  font-size: 12px;
-  color: #ff3b30;
-  margin-left: 4px;
-}
-
-.recent-numbers-container {
-  margin-top: 8px;
-  padding: 0 4px;
-
-  .recent-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #8e8e93;
-    margin: 0 0 6px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .recent-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .recent-chip {
-    display: flex;
-    align-items: center;
-    background: rgba(118, 118, 128, 0.08); // Vrlo lagana siva
-    border-radius: 16px; // Pilula oblik
-    padding: 6px 10px 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(0, 0, 0, 0.03);
-
-    &:hover {
-      background: rgba(0, 122, 255, 0.1); // Lagano plava na hover
-      border-color: rgba(0, 122, 255, 0.2);
-      transform: scale(1.02);
-
-      .chip-number {
-        color: #007aff;
-      }
-    }
-
-    &:active {
-      transform: scale(0.96);
-    }
-  }
-
-  .chip-number {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1d1d1f;
-    margin-right: 6px;
-    font-feature-settings: "tnum"; // Monospace brojevi za bolje poravnanje
-  }
-
-  .chip-remove {
-    background: rgba(142, 142, 147, 0.2);
-    border: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8e8e93;
-    font-size: 14px;
-    line-height: 1;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: #ff3b30;
-      color: white;
-    }
-  }
-}
-
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-// Apple Primary Button (Solid Blue)
-.apple-btn-primary {
-  height: 50px;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-size: 16px;
+.lg-input {
+  width: 100%;
+  font-size: 18px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover:not(:disabled) {
-    background: #0066d6;
-    transform: scale(0.99);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  padding: 12px 14px;
 }
 
-// Apple Secondary Button (Link style)
-.apple-btn-secondary {
-  height: 44px;
-  background: transparent;
-  color: #007aff;
-  border: none;
-  font-size: 15px;
+.lg-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 500;
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    text-decoration: underline;
-  }
-
-  &:disabled {
-    color: #c7c7cc;
-    cursor: not-allowed;
-  }
-}
-
-.login-greska {
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255, 59, 48, 0.08);
   color: #d70015;
+
+  .pi {
+    font-size: 13px;
+  }
+}
+
+:host ::ng-deep .lg-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 650;
+  border-radius: 12px;
+}
+
+/* Nedavni brojevi */
+.lg-recent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.lg-recent-label {
+  margin-right: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vz-muted);
+}
+
+.lg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--vz-border);
+  background: var(--vz-surface-2);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 650;
+  color: var(--vz-text);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--p-primary-300);
+  }
 }
 
-// Apple Spinner
-.apple-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
+.lg-chip-x {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
   border-radius: 50%;
-  margin: 0 auto;
-  animation: spin 0.8s linear infinite;
-}
+  background: transparent;
+  color: var(--vz-muted);
+  cursor: pointer;
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+  .pi {
+    font-size: 10px;
+  }
+
+  &:hover {
+    background: var(--vz-border);
   }
 }
 
-.search-collapsible {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Obavijest o sljedećem tjednu */
+.lg-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--p-primary-50);
+  border: 1px solid var(--p-primary-200);
+  color: var(--p-primary-800);
+  font-size: 14px;
+  font-weight: 600;
 
-  &.open {
-    max-height: 500px;
-    margin-top: 24px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding-top: 16px;
+  .pi {
+    font-size: 16px;
+    color: var(--p-primary-600);
   }
 }
 
-// Reset number arrows
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* Dodatne opcije */
+.lg-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lg-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  .pi {
+    font-size: 14px;
+    color: var(--p-primary-600);
+  }
+
+  &:hover,
+  &.is-open {
+    border-color: var(--p-primary-300);
+    background: var(--p-primary-50);
+  }
+}
+
+/* Diskretan ulaz za administratora */
+.lg-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  margin-top: 18px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--vz-muted);
+  opacity: 0.75;
+  text-decoration: none;
+
+  .pi {
+    font-size: 11px;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: var(--vz-surface-2);
+  }
 }

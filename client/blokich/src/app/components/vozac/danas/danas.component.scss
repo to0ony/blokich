@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dn-group {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .dn-sk {
+  margin-bottom: 8px;
+}
+
+.dn-err {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}

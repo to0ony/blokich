@@ -1,9 +1,10 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import { VozaciService } from '../../../services/vozaci.service';
-
-declare var bootstrap: any;
+import { inicijali } from '../../vozac/vozac.model';
 
 interface VozacInfo {
   sluz_broj: string;
@@ -13,7 +14,7 @@ interface VozacInfo {
 @Component({
   standalone: true,
   selector: 'app-vozac-search-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule],
   templateUrl: './vozac-search-form.component.html',
   styleUrls: ['./vozac-search-form.component.scss'],
 })
@@ -23,6 +24,7 @@ export class VozacSearchFormComponent {
   isModalVisible = false;
 
   @Output() selectVozac = new EventEmitter<string>();
+  readonly inicijali = inicijali;
 
   constructor(private vozaciService: VozaciService) {}
 

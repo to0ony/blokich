@@ -8,9 +8,10 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UploadService } from '../../../services/upload.service';
-import { DisponentStatusComponent } from '../../status/disponent-status/disponent-status.component';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
@@ -25,7 +26,9 @@ dayjs.extend(isoWeek);
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    DisponentStatusComponent,
+    RouterLink,
+    ButtonModule,
+    InputTextModule,
     VozacSearchFormComponent,
   ],
   templateUrl: './login-form.component.html',

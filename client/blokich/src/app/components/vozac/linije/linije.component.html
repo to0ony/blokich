@@ -1,0 +1,85 @@
+<header class="vz-page-head">
+  <h1>Vozači na liniji</h1>
+  <p>Tko vozi određenu liniju na odabrani dan.</p>
+</header>
+
+<form class="vz-card ln-form" (ngSubmit)="trazi()">
+  <label class="vz-label" for="ln-linija">Linija</label>
+  <div class="ln-search">
+    <input
+      pInputText
+      id="ln-linija"
+      name="linija"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="npr. 109"
+      [(ngModel)]="linija"
+      class="ln-input"
+    />
+    <p-button
+      type="submit"
+      icon="pi pi-search"
+      label="Traži"
+      [loading]="loading"
+      [disabled]="!linija.trim()"
+    />
+  </div>
+
+  <div class="ln-recent" *ngIf="zadnje.length">
+    <button
+      *ngFor="let l of zadnje"
+      type="button"
+      class="ln-recent-chip"
+      [class.is-active]="rezultat?.linija === l"
+      (click)="odaberiZadnju(l)"
+    >
+      {{ l }}
+    </button>
+  </div>
+
+  <label class="vz-label">Dan</label>
+  <div class="ln-days">
+    <button
+      *ngFor="let d of dani"
+      type="button"
+      class="ln-day"
+      [class.is-active]="dan === d.key"
+      (click)="odaberiDan(d.key)"
+    >
+      {{ d.kratko }}
+    </button>
+  </div>
+
+  <p-selectbutton
+    [options]="tjedanOpcije"
+    optionLabel="label"
+    optionValue="value"
+    optionDisabled="disabled"
+    [allowEmpty]="false"
+    [ngModel]="tjedan"
+    (ngModelChange)="promijeniTjedan($event)"
+    name="tjedan"
+  />
+</form>
+
+<div class="ln-list" *ngIf="loading">
+  <p-skeleton *ngFor="let i of [1, 2, 3, 4]" height="76px" borderRadius="16px" />
+</div>
+
+<p-message *ngIf="greska && !loading" severity="error" [text]="greska" />
+
+<ng-container *ngIf="rezultat && !loading">
+  <h2 class="vz-section-title">
+    Linija {{ rezultat.linija }} · {{ nazivDana }}
+    <span>{{ rezultat.voze.length }} vozača</span>
+  </h2>
+
+  <app-kolege-lista *ngIf="rezultat.voze.length; else prazno" [kolege]="rezultat.voze" />
+  <ng-template #prazno>
+    <div class="vz-empty">
+      <span class="vz-empty-icon"><i class="pi pi-search"></i></span>
+      <strong>Nema vožnji</strong>
+      <span>Linija {{ rezultat.linija }} nema službi za {{ nazivDana | lowercase }}.</span>
+    </div>
+  </ng-template>
+</ng-container>

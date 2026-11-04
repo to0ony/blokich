@@ -1,0 +1,51 @@
+<div class="kr" [class.is-me]="jaSam">
+  <!-- Tko: ime, broj, telefon, poziv -->
+  <div class="kr-top">
+    <div class="kr-avatar">{{ inicijali }}</div>
+
+    <div class="kr-main">
+      <div class="kr-name">
+        <span class="kr-name-text">{{ kolega.ime_prezime || "Nepoznat vozač" }}</span>
+        <span class="kr-num">{{ kolega.sluz_broj }}</span>
+        <span class="kr-me" *ngIf="jaSam">Ti</span>
+      </div>
+
+      <div class="kr-tel" *ngIf="telefoni.length">
+        <ng-container *ngFor="let t of telefoni; let i = index">
+          <span *ngIf="i > 0" class="kr-ili">ili</span>
+          <a [href]="'tel:' + t">{{ t }}</a>
+        </ng-container>
+      </div>
+    </div>
+
+    <a
+      *ngIf="kolega.kontakt_broj && !jaSam"
+      class="kr-call"
+      [href]="'tel:' + kolega.kontakt_broj"
+      [attr.aria-label]="'Nazovi ' + (kolega.ime_prezime || kolega.sluz_broj)"
+    >
+      <i class="pi pi-phone"></i>
+    </a>
+  </div>
+
+  <!-- Što vozi: vrijeme lijevo, služba i linija desno -->
+  <div class="kr-bottom" *ngIf="imaDetalje">
+    <div class="kr-when" *ngIf="prikaziVrijeme && kolega.od">
+      <strong>{{ kolega.od }} – {{ kolega.do }}</strong>
+      <span *ngIf="kolega.nastup || kolega.zavrsetak">
+        {{ kolega.nastup }} → {{ kolega.zavrsetak }}
+      </span>
+    </div>
+
+    <div class="kr-tags">
+      <span class="kr-tag kr-sl" *ngIf="kolega.br_sl">
+        <small>Služba</small>{{ kolega.br_sl }}
+      </span>
+      <span class="kr-tag kr-line" *ngIf="kolega.linija">
+        <i class="pi pi-map"></i>
+        <strong>{{ kolega.linija }}</strong>
+        <span class="kr-vr" *ngIf="varijanta">V.R. {{ varijanta }}</span>
+      </span>
+    </div>
+  </div>
+</div>

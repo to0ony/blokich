@@ -1,0 +1,174 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sl-search {
+  display: flex;
+  gap: 8px;
+}
+
+.sl-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.sl-summary {
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--vz-surface);
+  border: 1px solid var(--vz-border);
+}
+
+.sl-summary-head {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
+
+  > * {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  strong {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--vz-text);
+  }
+}
+
+/* Broj službe izdvojen u svoju kutiju, linija i V.R. desno kao par */
+.sl-key {
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+  border: 1px solid var(--vz-border);
+  min-width: 96px;
+}
+
+.sl-line {
+  text-decoration: none;
+
+  strong {
+    color: var(--p-primary-600) !important;
+  }
+}
+
+.sl-times {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .right {
+    text-align: right;
+  }
+  > .pi {
+    color: var(--vz-muted);
+  }
+}
+
+.sl-time {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--vz-text);
+}
+
+.sl-place {
+  font-size: 13px;
+  color: var(--vz-muted);
+}
+
+.sl-hours {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: var(--vz-surface-2);
+  }
+  span {
+    font-size: 10.5px;
+    color: var(--vz-muted);
+  }
+  strong {
+    font-size: 15px;
+    color: var(--vz-text);
+  }
+}
+
+.sl-day {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.is-today .sl-day-head strong {
+    color: var(--p-primary-600);
+  }
+}
+
+.sl-day-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 4px;
+
+  strong {
+    font-size: 15px;
+    color: var(--vz-text);
+  }
+  span {
+    font-size: 13px;
+    color: var(--vz-muted);
+  }
+}
+
+.sl-today {
+  font-size: 11px !important;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--p-primary-500);
+  color: #fff !important;
+}
+
+.sl-day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sl-nobody {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--vz-muted);
+}

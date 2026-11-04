@@ -1,1 +1,131 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ---------- Vozačka aplikacija (redizajn) ---------- */
+.vz-app {
+  --vz-bg: #f3f5f8;
+  --vz-surface: #ffffff;
+  --vz-surface-2: #f6f8fa;
+  --vz-border: #e3e8ee;
+  --vz-text: #0f172a;
+  --vz-muted: #64748b;
+
+  color: var(--vz-text);
+  -webkit-font-smoothing: antialiased;
+
+  .vz-page-head {
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 750;
+      letter-spacing: -0.5px;
+    }
+    p {
+      margin: 2px 0 0;
+      font-size: 14px;
+      color: var(--vz-muted);
+    }
+  }
+
+  .vz-card {
+    padding: 16px;
+    background: var(--vz-surface);
+    border: 1px solid var(--vz-border);
+    border-radius: 20px;
+  }
+
+  .vz-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--vz-muted);
+  }
+
+  .vz-section-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 8px 4px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--vz-muted);
+
+    span {
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+
+  .vz-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 36px 16px;
+    text-align: center;
+    background: var(--vz-surface);
+    border: 1px dashed var(--vz-border);
+    border-radius: 20px;
+    color: var(--vz-muted);
+    font-size: 14px;
+
+    strong {
+      color: var(--vz-text);
+      font-size: 17px;
+    }
+  }
+
+  .vz-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 6px;
+    border-radius: 16px;
+    background: var(--p-primary-50);
+    color: var(--p-primary-600);
+
+    .pi {
+      font-size: 22px;
+    }
+  }
+}
+
+.vz-app .p-selectbutton {
+  display: flex;
+  width: 100%;
+
+  .p-togglebutton {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Donji panel sa smjenom (p-drawer se renderira u <body>) */
+.p-drawer.rs-drawer {
+  height: auto !important;
+  max-height: 88vh;
+  border-radius: 22px 22px 0 0;
+
+  .p-drawer-header {
+    padding-bottom: 8px;
+  }
+
+  .p-drawer-title {
+    font-weight: 750;
+    font-size: 18px;
+  }
+
+  .p-drawer-content {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 720px) {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+}

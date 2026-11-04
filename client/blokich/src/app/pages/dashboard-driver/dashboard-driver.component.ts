@@ -1,143 +1,158 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PrimeNG } from 'primeng/config';
+import { ButtonModule } from 'primeng/button';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { DriverScheduleService } from '../../services/driver-schedule.service';
-import { WeeklyScheduleComponent } from '../../components/schedule/weekly-schedule/weekly-schedule.component';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { LineScheduleComponent } from '../../components/schedule/line-schedule/line-schedule.component';
-import { LineScheduleService } from '../../services/line-schedule.service';
-import { DriverShiftScheduleComponent } from '../../components/schedule/driver-shift-schedule/driver-shift-schedule.component';
-import { ServiceScheduleComponent } from '../../components/schedule/service-schedule/service-schedule.component';
+import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
+import { RasporedComponent } from '../../components/vozac/raspored/raspored.component';
+import { DanasComponent } from '../../components/vozac/danas/danas.component';
+import { LinijeComponent } from '../../components/vozac/linije/linije.component';
+import { SluzbeComponent } from '../../components/vozac/sluzbe/sluzbe.component';
 import { DriverStatsComponent } from '../../components/stats/driver-stats/driver-stats.component';
+import {
+  DanRasporeda,
+  RasporedOdgovor,
+  TjedanTip,
+  VozacView,
+  inicijali,
+  slozTjedan,
+  telefoni,
+} from '../../components/vozac/vozac.model';
+
+interface NavStavka {
+  view: VozacView;
+  label: string;
+  icon: string;
+}
+
+const VIEWS: VozacView[] = ['raspored', 'danas', 'linije', 'sluzbe', 'statistika'];
 
 @Component({
   selector: 'app-dashboard-driver',
   standalone: true,
   imports: [
     CommonModule,
-    WeeklyScheduleComponent,
-    NavbarComponent,
-    LineScheduleComponent,
-    DriverShiftScheduleComponent,
-    ServiceScheduleComponent,
+    ButtonModule,
+    MenuModule,
+    RasporedComponent,
+    DanasComponent,
+    LinijeComponent,
+    SluzbeComponent,
     DriverStatsComponent,
   ],
   templateUrl: './dashboard-driver.component.html',
   styleUrls: ['./dashboard-driver.component.scss'],
 })
 export class DashboardDriverComponent implements OnInit {
-  rasporedData: any = null;
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly rasporedService = inject(DriverScheduleService);
+
+  readonly imePrezime = sessionStorage.getItem('imePrezime') || 'Vozač';
+  readonly sluzbeniBroj = sessionStorage.getItem('sluzbeniBroj') || '';
+  readonly telefoni = telefoni(
+    sessionStorage.getItem('kontaktBroj'),
+    sessionStorage.getItem('kontaktBrojInfo'),
+  );
+
+  readonly nav: NavStavka[] = [
+    { view: 'raspored', label: 'Raspored', icon: 'pi pi-calendar' },
+    { view: 'danas', label: 'Danas', icon: 'pi pi-clock' },
+    { view: 'linije', label: 'Linije', icon: 'pi pi-directions' },
+    { view: 'sluzbe', label: 'Službe', icon: 'pi pi-search' },
+    { view: 'statistika', label: 'Statistika', icon: 'pi pi-chart-bar' },
+  ];
+
+  readonly menu: MenuItem[] = [
+    { label: 'Odjava', icon: 'pi pi-sign-out', command: () => this.odjava() },
+  ];
+
+  view: VozacView = 'raspored';
+  tjedan: TjedanTip = 'trenutni';
+  naredniDostupan = false;
+
+  /** Prikazani tjedan (trenutni ili naredni). */
+  podaci: RasporedOdgovor | null = null;
   loading = true;
   error: string | null = null;
-  view: 'raspored' | 'vozaci' | 'smjena' | 'sluzba' | 'statistika' = 'raspored';
-  naredniTjedanDostupan: boolean = true;
 
-  linijaParam: string | null = null;
-  danParam: string | null = null;
-  tjedanParam: 'trenutni' | 'naredni' = 'trenutni';
-  vozaciPodaci: any = null;
+  /** Današnji dan iz tekućeg tjedna – za pogled "Danas". */
+  danas: DanRasporeda | undefined;
+  danasLoading = true;
 
-  tjedanAktivan: 'trenutni' | 'naredni' = 'trenutni';
+  constructor() {
+    postaviPrimeNgTemu(inject(PrimeNG));
+  }
 
-  godina: number | null = null;
-  brojTjedna: number | null = null;
-
-  danasnjeLinije: string[] = [];
-
-  constructor(
-    private rasporedService: DriverScheduleService,
-    private vozaciService: LineScheduleService,
-  ) {}
+  get inicijali(): string {
+    return inicijali(this.imePrezime);
+  }
 
   ngOnInit(): void {
-    this.dataAvailabilityForNextWeek();
-    this.displayData('trenutni');
-  }
+    this.route.queryParamMap.subscribe((q) => {
+      const v = q.get('v') as VozacView | null;
+      this.view = v && VIEWS.includes(v) ? v : 'raspored';
+      window.scrollTo({ top: 0 });
+    });
 
-  setView(
-    view: 'raspored' | 'vozaci' | 'smjena' | 'sluzba' | 'statistika',
-    linija?: string,
-    dan?: string,
-    tjedan: 'trenutni' | 'naredni' = 'trenutni',
-  ) {
-    this.view = view;
-
-    if (view === 'vozaci' && linija && dan) {
-      this.linijaParam = linija;
-      this.danParam = dan;
-      this.tjedanParam = tjedan;
-
-      this.vozaciService.fetchLineDrivers(linija, dan, tjedan).subscribe({
-        next: (data) => (this.vozaciPodaci = data),
-        error: (err) => {
-          console.error('Greška pri dohvaćanju vozača po liniji', err);
-          this.vozaciPodaci = null;
-        },
-      });
-    }
-  }
-
-  onWeekChange(tip: 'trenutni' | 'naredni') {
-    this.tjedanAktivan = tip;
-    this.displayData(tip);
-  }
-
-  dataAvailabilityForNextWeek() {
     this.rasporedService.fetchUpcomingWeekSchedule().subscribe({
-      next: () => {
-        this.naredniTjedanDostupan = true;
-      },
-      error: () => {
-        this.naredniTjedanDostupan = false;
-      },
+      next: (d) => (this.naredniDostupan = !!d),
+      error: () => (this.naredniDostupan = false),
+    });
+
+    this.ucitaj();
+  }
+
+  promijeniView(v: VozacView): void {
+    this.router.navigate([], {
+      queryParams: { v: v === 'raspored' ? null : v },
+      queryParamsHandling: 'merge',
     });
   }
 
-  private storePresentDriverLines(data: any) {
-    const dani = ['ned', 'pon', 'uto', 'sri', 'cet', 'pet', 'sub'];
-    const danasnjiDan = dani[new Date().getDay()];
-
-    const danasnjiRaspored = data.raspored[danasnjiDan];
-
-    if (Array.isArray(danasnjiRaspored)) {
-      const linije = Array.from(
-        new Set(
-          danasnjiRaspored
-            .filter((item) => item.linija)
-            .map((item) => item.linija),
-        ),
-      );
-
-      sessionStorage.setItem('danasnjeLinije', JSON.stringify(linije));
-    } else {
-      sessionStorage.setItem('danasnjeLinije', JSON.stringify([]));
-    }
+  promijeniTjedan(t: TjedanTip): void {
+    this.tjedan = t;
+    this.ucitaj();
   }
 
-  private displayData(tip: 'trenutni' | 'naredni') {
+  ucitaj(): void {
     this.loading = true;
     this.error = null;
 
     const zahtjev =
-      tip === 'trenutni'
+      this.tjedan === 'trenutni'
         ? this.rasporedService.fetchDriverSchedule()
         : this.rasporedService.fetchUpcomingWeekSchedule();
 
     zahtjev.subscribe({
-      next: (data) => {
-        this.rasporedData = data;
-        this.godina = data.godina;
-        this.brojTjedna = data.tjedan;
+      next: (data: RasporedOdgovor) => {
+        this.podaci = data;
         this.loading = false;
-
-        if (this.tjedanAktivan == 'trenutni') {
-          this.storePresentDriverLines(data);
-        }
+        if (this.tjedan === 'trenutni') this.postaviDanas(data);
       },
-      error: (err) => {
-        this.error = 'Greška pri dohvaćanju rasporeda.';
-        console.error(err);
+      error: () => {
+        this.podaci = null;
         this.loading = false;
+        this.danasLoading = false;
+        this.error = 'Raspored nije moguće učitati. Provjeri vezu i pokušaj ponovno.';
       },
     });
+  }
+
+  private postaviDanas(data: RasporedOdgovor): void {
+    this.danas = slozTjedan(data).find((d) => d.danas);
+    this.danasLoading = false;
+    // Stare komponente (navbar) čitaju današnje linije iz sessionStorage.
+    const linije = [...new Set((this.danas?.sluzbe ?? []).map((s) => s.linija).filter(Boolean))];
+    sessionStorage.setItem('danasnjeLinije', JSON.stringify(linije));
+  }
+
+  odjava(): void {
+    // Pristupni token (lozinka) ostaje u localStorage – vozač je ne upisuje ponovno.
+    sessionStorage.clear();
+    this.router.navigate(['/login']);
   }
 }

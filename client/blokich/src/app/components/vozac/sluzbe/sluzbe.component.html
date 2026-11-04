@@ -1,0 +1,113 @@
+<header class="vz-page-head">
+  <h1>Pregled službe</h1>
+  <p>Tko vozi određenu službu kroz tjedan.</p>
+</header>
+
+<form class="vz-card sl-form" (ngSubmit)="trazi()">
+  <label class="vz-label" for="sl-broj">Broj službe</label>
+  <div class="sl-search">
+    <input
+      pInputText
+      id="sl-broj"
+      name="sluzba"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="npr. 308"
+      [(ngModel)]="sluzba"
+      class="sl-input"
+    />
+    <p-button
+      type="submit"
+      icon="pi pi-search"
+      label="Traži"
+      [loading]="loading"
+      [disabled]="!sluzba.trim()"
+    />
+  </div>
+  <p-selectbutton
+    [options]="tjedanOpcije"
+    optionLabel="label"
+    optionValue="value"
+    optionDisabled="disabled"
+    [allowEmpty]="false"
+    [ngModel]="tjedan"
+    (ngModelChange)="promijeniTjedan($event)"
+    name="tjedan"
+  />
+</form>
+
+<ng-container *ngIf="loading">
+  <p-skeleton height="170px" borderRadius="20px" />
+  <p-skeleton height="110px" borderRadius="18px" />
+</ng-container>
+
+<p-message *ngIf="greska && !loading" severity="error" [text]="greska" />
+
+<ng-container *ngIf="rezultat && !loading">
+  <!-- Sažetak službe -->
+  <section class="sl-summary">
+    <div class="sl-summary-head">
+      <div class="sl-key">
+        <span class="vz-label">Služba</span>
+        <strong>{{ rezultat.br_sl }}</strong>
+      </div>
+      <a
+        *ngIf="rezultat.linija; else bezLinije"
+        class="sl-line"
+        [href]="rutaUrl(rezultat.linija)"
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="vz-label">Linija</span>
+        <strong>{{ rezultat.linija }}</strong>
+      </a>
+      <ng-template #bezLinije>
+        <div>
+          <span class="vz-label">Linija</span>
+          <strong>–</strong>
+        </div>
+      </ng-template>
+      <div>
+        <span class="vz-label">V.R.</span>
+        <strong>{{ rezultat.varijanta || "–" }}</strong>
+      </div>
+    </div>
+
+    <div class="sl-times">
+      <div>
+        <span class="vz-label">Nastup</span>
+        <span class="sl-time">{{ rezultat.od }}</span>
+        <span class="sl-place">{{ rezultat.nastup_sluzbe }}</span>
+      </div>
+      <i class="pi pi-arrow-right"></i>
+      <div class="right">
+        <span class="vz-label">Završetak</span>
+        <span class="sl-time">{{ rezultat.do }}</span>
+        <span class="sl-place">{{ rezultat.zavrsna_sluzba }}</span>
+      </div>
+    </div>
+
+    <div class="sl-hours">
+      <div><span>Ukupno</span><strong>{{ rezultat.ukupni_sati || "–" }}</strong></div>
+      <div><span>Efektivno</span><strong>{{ rezultat.efektivni_sati || "–" }}</strong></div>
+      <div><span>Noćni</span><strong>{{ rezultat.nocni_rad || "–" }}</strong></div>
+      <div><span>Dr. smjena</span><strong>{{ rezultat.druga_smjena || "–" }}</strong></div>
+    </div>
+  </section>
+
+  <!-- Po danima -->
+  <h2 class="vz-section-title">Vozači po danima</h2>
+  <section class="sl-day" *ngFor="let d of rezultat.raspored" [class.is-today]="jeDanas(d.datum)">
+    <div class="sl-day-head">
+      <strong>{{ nazivDana(d.dan) }}</strong>
+      <span>{{ datum(d.datum) }}</span>
+      <span class="sl-today" *ngIf="jeDanas(d.datum)">Danas</span>
+    </div>
+    <div class="sl-day-list" *ngIf="d.vozaci.length; else nitko">
+      <app-kolega-row *ngFor="let k of d.vozaci" [kolega]="k" [prikaziVrijeme]="false" />
+    </div>
+    <ng-template #nitko>
+      <p class="sl-nobody">Nitko nije raspoređen.</p>
+    </ng-template>
+  </section>
+</ng-container>
