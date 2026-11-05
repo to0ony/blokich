@@ -37,14 +37,23 @@ export class UploadService {
     return this.api.get('godisnji-upload/last-upload');
   }
 
-  syncZetPodsused() {
-    return this.api.post<ZetSyncOdgovor>('zet-sync/podsused', {});
+  provjeriZetPodsused() {
+    return this.api.post<ZetSyncOdgovor>('zet-sync/podsused/provjera', {});
   }
 
-  uploadPdf(tip: UploadTip, pdf: File) {
+  uveziZetPodsused(potvrda: ZetUvozPotvrda) {
+    return this.api.post<ZetSyncOdgovor>('zet-sync/podsused/uvoz', potvrda);
+  }
+
+  uploadPdf(tip: UploadTip, pdf: File, izvorniSha256?: string) {
     const formData = new FormData();
     formData.append('pdf', pdf);
+    if (izvorniSha256) formData.append('izvorni_sha256', izvorniSha256);
     return this.api.post<UploadOdgovor>(`${tip}-upload/upload`, formData);
+  }
+
+  fetchRucniUvozi() {
+    return this.api.get<RucniUvoz[]>('rucni-uvoz');
   }
 
   fetchLastUpload<T = any>(tip: UploadTip) {
@@ -81,11 +90,24 @@ export interface ZadnjiGodisnjiUpload {
 }
 
 export interface ZetSyncStavka {
-  dokument: 'sluzba' | 'disponent';
-  status: UploadStatus;
+  dokument: ZetDokument;
+  status: UploadStatus | 'novo';
   poruka: string;
   filename?: string;
   url?: string;
+  sha256?: string;
+}
+
+export type ZetDokument = 'sluzba' | 'disponent';
+
+export type ZetUvozPotvrda = Partial<Record<ZetDokument, string>>;
+
+export interface RucniUvoz {
+  dokument: ZetDokument;
+  oznaka: string;
+  datum_unosa: string;
+  original_filename?: string;
+  izvorni_sha256?: string;
 }
 
 export interface ZetSyncOdgovor {
