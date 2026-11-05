@@ -32,6 +32,15 @@ export const routes: Routes = [
         (m) => m.PregledSluzbeComponent,
       ),
   },
+  // Vozači na liniji s login ekrana (bez prijave službenim brojem)
+  {
+    canActivate: [PristupGuard],
+    path: 'linija',
+    loadComponent: () =>
+      import('./pages/pregled-linije/pregled-linije.component').then(
+        (m) => m.PregledLinijeComponent,
+      ),
+  },
   // Vozni park s login ekrana (otključan uređaj)
   {
     canActivate: [PristupGuard],
