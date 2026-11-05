@@ -8,10 +8,12 @@ import {
 import { SluzbaUploadController } from '../../controllers/sluzba-upload/sluzba-upload.controller';
 import { SluzbaUploadService } from '../../services/sluzba-upload/sluzba-upload.service';
 import { PdfModule } from '../pdf/pdf.module';
+import { RucniUvozModule } from '../rucni-uvoz/rucni-uvoz.module';
 
 @Module({
   imports: [
     PdfModule,
+    RucniUvozModule,
     MongooseModule.forFeature([{ name: Sluzba.name, schema: SluzbaSchema }]),
     MongooseModule.forFeature([
       { name: SluzbaUpload.name, schema: SluzbaUploadSchema },
