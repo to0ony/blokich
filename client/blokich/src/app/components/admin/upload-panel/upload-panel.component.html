@@ -109,13 +109,13 @@
       <div class="adm-zet-text">
         <h2>Automatski dohvat sa ZET-a</h2>
         <p>
-          Prijava na ZET intranet, preuzimanje službi i disponenta sa stranice
-          AP Podsused i obrada. PDF koji je već učitan se preskače.
+          Prijava na ZET intranet, preuzimanje i čitanje službi i disponenta sa
+          stranice AP Podsused. U bazu ide tek nakon tvoje potvrde.
         </p>
         <span class="adm-zet-hint" [class.is-active]="cekaSeNoviDisponent">
           <i class="pi pi-clock"></i>
           <ng-container *ngIf="cekaSeNoviDisponent; else redovno">
-            ZET je vjerojatno objavio disponent za sljedeći tjedan – povuci ga.
+            ZET je vjerojatno objavio disponent za sljedeći tjedan – provjeri ga.
           </ng-container>
           <ng-template #redovno>
             Novi disponent izlazi petkom između 12 i 14 h.
@@ -124,10 +124,11 @@
       </div>
       <p-button
         styleClass="adm-zet-btn"
-        [label]="zetLoading ? 'Povlačim…' : 'Povuci podatke s ZET za Podsused'"
-        icon="pi pi-download"
+        [label]="zetLoading ? 'Provjeravam…' : 'Provjeri ZET za Podsused'"
+        icon="pi pi-search"
         [loading]="zetLoading"
-        (onClick)="syncZetPodsused()"
+        [disabled]="zetUvozi"
+        (onClick)="provjeriZet()"
       />
     </div>
 
@@ -136,15 +137,62 @@
         Rezultat dohvata · {{ zetVrijeme | date: "HH:mm:ss" }}
       </div>
 
-      <div *ngFor="let s of zetStavke" class="adm-zet-row">
-        <p-tag [value]="zetStatusTekst(s)" [severity]="zetSeverity(s)" />
+      <div *ngIf="zetNemaNista; else stavke" class="adm-zet-row">
+        <p-tag value="Bez promjena" severity="info" />
         <div class="adm-zet-row-body">
-          <strong>{{ naziviDokumenata[s.dokument] }}</strong>
-          <span>{{ s.poruka }}</span>
-          <a *ngIf="s.url" [href]="s.url" target="_blank" rel="noopener">
-            <i class="pi pi-external-link"></i> {{ s.filename || "PDF" }}
-          </a>
+          <span>Nema ništa novo na ZET-u.</span>
         </div>
+      </div>
+
+      <ng-template #stavke>
+        <div *ngFor="let s of zetStavke" class="adm-zet-row">
+          <p-tag [value]="zetStatusTekst(s)" [severity]="zetSeverity(s)" />
+          <div class="adm-zet-row-body">
+            <strong>{{ naziviDokumenata[s.dokument] }}</strong>
+            <span>{{ s.poruka }}</span>
+            <a *ngIf="s.url" [href]="s.url" target="_blank" rel="noopener">
+              <i class="pi pi-external-link"></i>
+              {{ s.status === "greska" ? "Preuzmi PDF" : s.filename || "PDF" }}
+            </a>
+
+            <ng-container *ngIf="s.status === 'greska' && s.sha256">
+              <label
+                *ngIf="zetMozeIspravak(s); else sluzbePrvo"
+                class="adm-zet-fix"
+                [class.is-busy]="zetIspravakUcitava"
+              >
+                <i class="pi pi-upload"></i>
+                {{ zetIspravakUcitava ? "Učitavam…" : "Učitaj ispravljeni PDF" }}
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  hidden
+                  [disabled]="zetIspravakUcitava"
+                  (change)="ucitajIspravak(s, $event)"
+                />
+              </label>
+              <ng-template #sluzbePrvo>
+                <span class="adm-zet-note">
+                  Prvo ubaci službe, pa ponovno provjeri.
+                </span>
+              </ng-template>
+            </ng-container>
+          </div>
+        </div>
+      </ng-template>
+
+      <div *ngIf="zetMozePotvrda" class="adm-zet-confirm">
+        <span>Provjeri brojke pa potvrdi. Službe se ubacuju prve.</span>
+        <p-button
+          [label]="zetUvozi ? 'Ubacujem…' : 'Potvrdi i ubaci u bazu'"
+          icon="pi pi-check"
+          [loading]="zetUvozi"
+          (onClick)="potvrdiZet()"
+        />
+      </div>
+
+      <div *ngIf="zetImaNovo && zetImaGresku" class="adm-zet-confirm">
+        <span>Ništa se ne ubacuje jer jedan PDF nije pročitan.</span>
       </div>
 
       <div *ngIf="zetGreska" class="adm-zet-row">
@@ -190,6 +238,40 @@
           </p-tabpanel>
         </p-tabpanels>
       </p-tabs>
+    </div>
+
+    <div class="adm-povijest">
+      <p-button
+        label="Povijest ručnih uvoza"
+        [icon]="povijestOtvorena ? 'pi pi-chevron-up' : 'pi pi-history'"
+        severity="secondary"
+        [text]="true"
+        (onClick)="togglePovijest()"
+      />
+
+      <div *ngIf="povijestOtvorena" class="adm-card adm-povijest-lista">
+        <p *ngIf="povijestUcitava" class="adm-povijest-prazno">Učitavam…</p>
+        <p
+          *ngIf="!povijestUcitava && !povijest.length"
+          class="adm-povijest-prazno"
+        >
+          Još nema ručnih uvoza.
+        </p>
+
+        <ng-container *ngIf="!povijestUcitava">
+          <div *ngFor="let u of povijest" class="adm-povijest-red">
+            <span class="adm-povijest-datum">
+              {{ u.datum_unosa | date: "d.M.yyyy. HH:mm" }}
+            </span>
+            <strong>{{ naziviDokumenata[u.dokument] }} {{ u.oznaka }}</strong>
+            <span class="adm-povijest-file">{{ u.original_filename }}</span>
+            <p-tag
+              [value]="u.izvorni_sha256 ? 'Ispravak ZET PDF-a' : 'Ručni uvoz'"
+              [severity]="u.izvorni_sha256 ? 'warn' : 'secondary'"
+            />
+          </div>
+        </ng-container>
+      </div>
     </div>
   </section>
 </div>

@@ -19,6 +19,8 @@ import {
   ZadnjiGodisnjiUpload,
   ZadnjiSluzbaUpload,
   ZetSyncStavka,
+  ZetUvozPotvrda,
+  RucniUvoz,
 } from '../../../services/upload.service';
 
 dayjs.extend(isoWeek);
@@ -63,11 +65,17 @@ export class UploadPanelComponent implements OnInit {
   godisnji: ZadnjiGodisnjiUpload | null = null;
 
   zetLoading = false;
+  zetUvozi = false;
+  zetIspravakUcitava = false;
   zetStavke: ZetSyncStavka[] = [];
   zetGreska = '';
   zetVrijeme: Date | null = null;
 
   aktivniTab: UploadTip = 'disponent';
+
+  povijestOtvorena = false;
+  povijestUcitava = false;
+  povijest: RucniUvoz[] = [];
 
   readonly naziviDokumenata: Record<ZetSyncStavka['dokument'], string> = {
     sluzba: 'Službe',
@@ -122,46 +130,132 @@ export class UploadPanelComponent implements OnInit {
     );
   }
 
-  syncZetPodsused(): void {
+  get zetNemaNista(): boolean {
+    return (
+      this.zetStavke.length > 0 &&
+      this.zetStavke.every((s) => s.status === 'nema_promjene')
+    );
+  }
+
+  get zetImaGresku(): boolean {
+    return this.zetStavke.some((s) => s.status === 'greska');
+  }
+
+  get zetImaNovo(): boolean {
+    return this.zetStavke.some((s) => s.status === 'novo');
+  }
+
+  /** Uvoz je sve ili ništa: uz grešku bilo kojeg PDF-a nema potvrde. */
+  get zetMozePotvrda(): boolean {
+    return this.zetImaNovo && !this.zetImaGresku;
+  }
+
+  /** Službe uvijek idu prve, pa disponent čeka dok one nisu u bazi. */
+  zetMozeIspravak(stavka: ZetSyncStavka): boolean {
+    return (
+      stavka.dokument === 'sluzba' ||
+      this.zetStavke.find((s) => s.dokument === 'sluzba')?.status ===
+        'nema_promjene'
+    );
+  }
+
+  ucitajIspravak(stavka: ZetSyncStavka, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const pdf = input.files?.[0];
+    input.value = '';
+    if (!pdf) return;
+
+    this.zetIspravakUcitava = true;
+
+    this.uploadService
+      .uploadPdf(stavka.dokument, pdf, stavka.sha256)
+      .subscribe({
+        next: (res) => {
+          this.zetIspravakUcitava = false;
+          this.messages.add({
+            severity: 'success',
+            summary: 'Ispravak ubačen',
+            detail: res.poruka,
+          });
+          this.ucitajStanje();
+          this.osvjeziPovijest();
+          this.provjeriZet();
+        },
+        error: () => {
+          this.zetIspravakUcitava = false;
+          this.messages.add({
+            severity: 'error',
+            summary: 'Neuspjelo',
+            detail: 'Ispravljeni PDF nije pročitan.',
+          });
+        },
+      });
+  }
+
+  togglePovijest(): void {
+    this.povijestOtvorena = !this.povijestOtvorena;
+    this.osvjeziPovijest();
+  }
+
+  provjeriZet(): void {
     this.zetLoading = true;
     this.zetStavke = [];
     this.zetGreska = '';
 
-    this.uploadService.syncZetPodsused().subscribe({
+    this.uploadService.provjeriZetPodsused().subscribe({
       next: (res) => {
         this.zetStavke = res.stavke;
         this.zetVrijeme = new Date();
         this.zetLoading = false;
-        this.ucitajStanje();
-
-        const obradjeno = res.stavke.filter((s) => s.status === 'obradjeno');
-        const greske = res.stavke.filter((s) => s.status === 'greska');
-        this.messages.add(
-          greske.length
-            ? {
-                severity: 'error',
-                summary: 'Dohvat djelomično neuspješan',
-                detail: `${greske.length} od ${res.stavke.length} dokumenata nije obrađeno.`,
-              }
-            : obradjeno.length
-              ? {
-                  severity: 'success',
-                  summary: 'Podaci ažurirani',
-                  detail: obradjeno
-                    .map((s) => this.naziviDokumenata[s.dokument])
-                    .join(' i '),
-                }
-              : {
-                  severity: 'info',
-                  summary: 'Nema promjena',
-                  detail: 'Na ZET-u nema novih PDF-ova.',
-                },
-        );
       },
       error: (err) => {
         this.zetGreska =
-          err?.error?.message || 'Povlačenje podataka sa ZET-a nije uspjelo.';
+          err?.error?.message || 'Provjera podataka sa ZET-a nije uspjela.';
         this.zetLoading = false;
+      },
+    });
+  }
+
+  potvrdiZet(): void {
+    const potvrda: ZetUvozPotvrda = {};
+    for (const s of this.zetStavke) {
+      if (s.status === 'novo') potvrda[s.dokument] = s.sha256;
+    }
+
+    this.zetUvozi = true;
+    this.zetGreska = '';
+
+    this.uploadService.uveziZetPodsused(potvrda).subscribe({
+      next: (res) => {
+        this.zetStavke = res.stavke;
+        this.zetVrijeme = new Date();
+        this.zetUvozi = false;
+        this.ucitajStanje();
+
+        const obradjeno = res.stavke.filter((s) => s.status === 'obradjeno');
+        const greska = res.stavke.find((s) => s.status === 'greska');
+        this.messages.add(
+          greska
+            ? {
+                severity: 'error',
+                summary: 'Uvoz nije dovršen',
+                detail: `${this.naziviDokumenata[greska.dokument]} nisu spremljeni – provjeri rezultat.`,
+              }
+            : {
+                severity: 'success',
+                summary: 'Podaci ažurirani',
+                detail: obradjeno
+                  .map((s) => this.naziviDokumenata[s.dokument])
+                  .join(' i '),
+              },
+        );
+      },
+      error: (err) => {
+        // Server ništa nije upisao, a stari hashevi više ne vrijede.
+        this.zetStavke = [];
+        this.zetGreska =
+          err?.error?.message || 'Uvoz podataka sa ZET-a nije uspio.';
+        this.zetUvozi = false;
       },
     });
   }
@@ -169,6 +263,7 @@ export class UploadPanelComponent implements OnInit {
   onManualUpload(tip: UploadTip, res: UploadOdgovor): void {
     if (res.status === 'nema_promjene') return;
     this.ucitajStanje();
+    this.osvjeziPovijest();
     this.messages.add({
       severity: 'success',
       summary: 'Uvoz završen',
@@ -176,19 +271,37 @@ export class UploadPanelComponent implements OnInit {
     });
   }
 
+  private osvjeziPovijest(): void {
+    if (!this.povijestOtvorena) return;
+
+    this.povijestUcitava = true;
+    this.uploadService.fetchRucniUvozi().subscribe({
+      next: (povijest) => {
+        this.povijest = povijest;
+        this.povijestUcitava = false;
+      },
+      error: () => {
+        this.povijest = [];
+        this.povijestUcitava = false;
+      },
+    });
+  }
+
   zetSeverity(stavka: ZetSyncStavka): Severity {
-    return stavka.status === 'obradjeno'
-      ? 'success'
-      : stavka.status === 'nema_promjene'
-        ? 'info'
-        : 'danger';
+    return {
+      novo: 'warn',
+      obradjeno: 'success',
+      nema_promjene: 'info',
+      greska: 'danger',
+    }[stavka.status] as Severity;
   }
 
   zetStatusTekst(stavka: ZetSyncStavka): string {
-    return stavka.status === 'obradjeno'
-      ? 'Obrađeno'
-      : stavka.status === 'nema_promjene'
-        ? 'Bez promjena'
-        : 'Greška';
+    return {
+      novo: 'Novo',
+      obradjeno: 'Obrađeno',
+      nema_promjene: 'Bez promjena',
+      greska: 'Greška',
+    }[stavka.status];
   }
 }

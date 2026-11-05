@@ -37,6 +37,10 @@ export class Disponent extends Document {
   @Prop()
   sha256?: string;
 
+  /** Hash ZET-ovog PDF-a koji je ovaj ručni uvoz ispravio. */
+  @Prop()
+  izvorni_sha256?: string;
+
   @Prop()
   izvor?: string;
 

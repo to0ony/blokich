@@ -13,6 +13,25 @@ import { Godisnji } from '../../schemas/godisnji.schema';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
 import { PdfInput, PdfIzvor, sha256 } from 'src/pdf/pdf-input';
 import { VozacStatsService } from '../vozac-stats/vozac-stats.service';
+import { RucniUvozService } from '../rucni-uvoz/rucni-uvoz.service';
+
+export interface DisponentPripremaNovo {
+  status: 'novo';
+  poruka: string;
+  sha256: string;
+  parsed: any;
+  filename: string;
+}
+
+export type DisponentPriprema =
+  | DisponentPripremaNovo
+  | {
+      status: 'nema_promjene';
+      poruka: string;
+      brojTjedna: number;
+      godina: number;
+      filename: string;
+    };
 
 @Injectable()
 export class DisponentUploadService {
@@ -25,6 +44,7 @@ export class DisponentUploadService {
     private readonly godisnjiModel: Model<Godisnji>,
     private readonly pdfProcessingService: PdfProcessingService,
     private readonly vozacStatsService: VozacStatsService,
+    private readonly rucniUvozService: RucniUvozService,
   ) {}
 
   private async addNewDriversToGodisnji(rawSluzBrojevi: string[]) {
@@ -75,80 +95,134 @@ export class DisponentUploadService {
     }
   }
 
-  async processPdf(file: PdfInput, izvor: PdfIzvor = 'rucno') {
+  async processPdf(
+    file: PdfInput,
+    izvor: PdfIzvor = 'rucno',
+    izvorniSha256?: string,
+  ) {
     try {
-      const hash = sha256(file.buffer);
+      const priprema = await this.pripremi(file);
 
-      const zadnji = await this.disponentModel
-        .findOne({}, 'sha256 godina brojTjedna')
-        .sort({ datum_unosa: -1 })
-        .lean();
-
-      if (zadnji?.sha256 === hash) {
-        return {
-          status: 'nema_promjene' as const,
-          poruka: `Ovaj PDF disponenta je već učitan (tjedan ${zadnji.brojTjedna}/${zadnji.godina}). Nema promjena.`,
-          brojTjedna: zadnji.brojTjedna,
-          godina: zadnji.godina,
-          filename: file.originalname,
-        };
+      if (priprema.status !== 'novo') {
+        // Već učitan PDF može naknadno postati ispravak ZET-ovog originala.
+        if (izvorniSha256) {
+          await this.disponentModel.updateOne(
+            { sha256: sha256(file.buffer) },
+            { izvorni_sha256: izvorniSha256 },
+          );
+        }
+        return priprema;
       }
 
-      const parsed = await this.pdfProcessingService.extractDisponent(file);
+      const rezultat = await this.spremi(file, priprema, izvor, izvorniSha256);
 
-      if (!parsed.godina || !parsed.brojTjedna || !parsed.radnici) {
-        throw new Error('Nedostaju ključna polja u JSON-u.');
+      if (izvor === 'rucno') {
+        await this.rucniUvozService.zabiljezi({
+          dokument: 'disponent',
+          oznaka: `${rezultat.brojTjedna}/${rezultat.godina}`,
+          original_filename: file.originalname,
+          sha256: priprema.sha256,
+          izvorni_sha256: izvorniSha256,
+        });
       }
-
-      const sviSluzBrojevi = parsed.radnici.map((r: any) => r.radnik);
-      await this.addNewDriversToGodisnji(sviSluzBrojevi);
-
-      await this.disponentModel.deleteOne({
-        godina: parsed.godina,
-        brojTjedna: parsed.brojTjedna,
-      });
-
-      const verzijaSluzbi = await this.sluzbaUploadModel
-        .findOne()
-        .sort({ datum_unosa: -1 })
-        .lean();
-
-      const doc = await this.disponentModel.create({
-        ...parsed,
-        datum_unosa: new Date(),
-        verzija_sluzbe: verzijaSluzbi?.verzija || null,
-        sha256: hash,
-        izvor,
-        original_filename: file.originalname,
-      });
-
-      // Greška u statistici ne smije srušiti upload disponenta
-      let statistika: number | null = null;
-      try {
-        statistika = await this.vozacStatsService.preracunajTjedan(
-          parsed.godina,
-          parsed.brojTjedna,
-        );
-      } catch (err) {
-        console.error('Greška pri izračunu statistike:', err);
-      }
-
-      return {
-        status: 'obradjeno' as const,
-        poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
-        brojTjedna: parsed.brojTjedna,
-        godina: parsed.godina,
-        filename: file.originalname,
-        verzija: verzijaSluzbi?.verzija || null,
-        id: doc._id,
-        statistika,
-      };
+      return rezultat;
     } catch (error) {
       console.error('Greška:', error);
       throw new InternalServerErrorException(
         error.message || 'Greška prilikom obrade PDF-a.',
       );
     }
+  }
+
+  /** Usporedi hash i isparsira PDF. Ne upisuje ništa u bazu. */
+  async pripremi(file: PdfInput): Promise<DisponentPriprema> {
+    const hash = sha256(file.buffer);
+
+    const zadnji = await this.disponentModel
+      .findOne({}, 'sha256 izvorni_sha256 godina brojTjedna')
+      .sort({ datum_unosa: -1 })
+      .lean();
+
+    if (zadnji?.sha256 === hash || zadnji?.izvorni_sha256 === hash) {
+      return {
+        status: 'nema_promjene',
+        poruka:
+          zadnji.sha256 === hash
+            ? `Ovaj PDF disponenta je već učitan (tjedan ${zadnji.brojTjedna}/${zadnji.godina}). Nema promjena.`
+            : `Ovaj PDF disponenta je već ručno ispravljen (tjedan ${zadnji.brojTjedna}/${zadnji.godina}). Nema promjena.`,
+        brojTjedna: zadnji.brojTjedna,
+        godina: zadnji.godina,
+        filename: file.originalname,
+      };
+    }
+
+    const parsed = await this.pdfProcessingService.extractDisponent(file);
+
+    if (!parsed.godina || !parsed.brojTjedna || !parsed.radnici?.length) {
+      throw new Error('Nedostaju ključna polja u JSON-u.');
+    }
+
+    return {
+      status: 'novo',
+      poruka: `Tjedan ${parsed.brojTjedna}/${parsed.godina}, izvučeno vozača: ${parsed.radnici.length}.`,
+      sha256: hash,
+      parsed,
+      filename: file.originalname,
+    };
+  }
+
+  async spremi(
+    file: PdfInput,
+    priprema: DisponentPripremaNovo,
+    izvor: PdfIzvor,
+    izvorniSha256?: string,
+  ) {
+    const { parsed, sha256: hash } = priprema;
+
+    const sviSluzBrojevi = parsed.radnici.map((r: any) => r.radnik);
+    await this.addNewDriversToGodisnji(sviSluzBrojevi);
+
+    await this.disponentModel.deleteOne({
+      godina: parsed.godina,
+      brojTjedna: parsed.brojTjedna,
+    });
+
+    const verzijaSluzbi = await this.sluzbaUploadModel
+      .findOne()
+      .sort({ datum_unosa: -1 })
+      .lean();
+
+    const doc = await this.disponentModel.create({
+      ...parsed,
+      datum_unosa: new Date(),
+      verzija_sluzbe: verzijaSluzbi?.verzija || null,
+      sha256: hash,
+      izvorni_sha256: izvorniSha256,
+      izvor,
+      original_filename: file.originalname,
+    });
+
+    // Greška u statistici ne smije srušiti upload disponenta
+    let statistika: number | null = null;
+    try {
+      statistika = await this.vozacStatsService.preracunajTjedan(
+        parsed.godina,
+        parsed.brojTjedna,
+      );
+    } catch (err) {
+      console.error('Greška pri izračunu statistike:', err);
+    }
+
+    return {
+      status: 'obradjeno' as const,
+      poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
+      brojTjedna: parsed.brojTjedna,
+      godina: parsed.godina,
+      filename: file.originalname,
+      verzija: verzijaSluzbi?.verzija || null,
+      id: doc._id,
+      statistika,
+    };
   }
 
   async getLastUploadInfo() {

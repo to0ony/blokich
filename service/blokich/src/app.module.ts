@@ -19,6 +19,7 @@ import { VozaciModule } from './modules/vozaci/vozaci.module';
 import { VozaciPoSluzbiDanModule } from './modules/vozaci-po-sluzbi-dan/vozaci-po-sluzbi-dan.module';
 import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
 import { ZetSyncModule } from './modules/zet-sync/zet-sync.module';
+import { RucniUvozModule } from './modules/rucni-uvoz/rucni-uvoz.module';
 import { ZetUzivoModule } from './modules/zet-uzivo/zet-uzivo.module';
 
 @Module({
@@ -37,6 +38,7 @@ import { ZetUzivoModule } from './modules/zet-uzivo/zet-uzivo.module';
     }),
     SluzbaModule,
     SluzbaUploadModule,
+    RucniUvozModule,
     DisponentModule,
     DisponentUploadModule,
     GodisnjiModule,

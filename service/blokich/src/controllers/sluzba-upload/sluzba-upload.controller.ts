@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Body,
   Get,
   UploadedFile,
   UseInterceptors,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { izvorniHash } from 'src/pdf/pdf-input';
 import { SluzbaUploadService } from '../../services/sluzba-upload/sluzba-upload.service';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { AdminOnly } from 'src/authentication/decorators/admin-only.decorator';
@@ -34,12 +36,19 @@ export class SluzbaUploadController {
       },
     }),
   )
-  async uploadSluzba(@UploadedFile() file: Express.Multer.File) {
+  async uploadSluzba(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('izvorni_sha256') izvorni?: string,
+  ) {
     if (!file) {
       throw new BadRequestException('PDF datoteka nije poslana.');
     }
 
-    return this.sluzbaUploadService.processPdf(file);
+    return this.sluzbaUploadService.processPdf(
+      file,
+      'rucno',
+      izvorniHash(izvorni),
+    );
   }
 
   @Get('last-upload')
