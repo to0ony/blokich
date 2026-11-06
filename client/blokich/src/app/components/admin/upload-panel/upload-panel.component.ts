@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -21,6 +21,8 @@ import {
   ZetSyncStavka,
   ZetUvozPotvrda,
   RucniUvoz,
+  PovijestDisponenta,
+  PovijestSluzbi,
 } from '../../../services/upload.service';
 
 dayjs.extend(isoWeek);
@@ -75,6 +77,9 @@ export class UploadPanelComponent implements OnInit {
 
   povijestOtvorena = false;
   povijestUcitava = false;
+  povijestTab: 'disponent' | 'sluzba' | 'rucni' = 'disponent';
+  povijestDisponenta: PovijestDisponenta[] = [];
+  povijestSluzbi: PovijestSluzbi[] = [];
   povijest: RucniUvoz[] = [];
 
   readonly naziviDokumenata: Record<ZetSyncStavka['dokument'], string> = {
@@ -112,12 +117,25 @@ export class UploadPanelComponent implements OnInit {
   /** Disponent je aktualan ako pokriva tekući ili neki budući tjedan. */
   get disponentStanje(): { tekst: string; severity: Severity } {
     if (!this.disponent) return { tekst: 'Nema podataka', severity: 'danger' };
-    const { godina, brojTjedna } = this.disponent;
+    return this.stanjeTjedna(this.disponent);
+  }
+
+  stanjeTjedna(tjedan: { godina: number; brojTjedna: number }): {
+    tekst: string;
+    severity: Severity;
+  } {
     const razlika =
-      (godina - this.tekucaGodina) * 53 + (brojTjedna - this.tekuciTjedan);
+      (tjedan.godina - this.tekucaGodina) * 53 +
+      (tjedan.brojTjedna - this.tekuciTjedan);
     if (razlika > 0) return { tekst: 'Sljedeći tjedan', severity: 'info' };
     if (razlika === 0) return { tekst: 'Aktualno', severity: 'success' };
     return { tekst: 'Zastarjelo', severity: 'warn' };
+  }
+
+  izvorTekst(uvoz: { izvor?: string; izvorni_sha256?: string }): string {
+    if (uvoz.izvorni_sha256) return 'Ispravak ZET PDF-a';
+    if (uvoz.izvor === 'zet') return 'ZET';
+    return uvoz.izvor === 'rucno' ? 'Ručni uvoz' : '';
   }
 
   /** Petkom od podneva ZET objavljuje disponent za sljedeći tjedan. */
@@ -127,13 +145,6 @@ export class UploadPanelComponent implements OnInit {
     return (
       (petakPopodne || vikend) &&
       this.disponentStanje.severity !== 'info'
-    );
-  }
-
-  get zetNemaNista(): boolean {
-    return (
-      this.zetStavke.length > 0 &&
-      this.zetStavke.every((s) => s.status === 'nema_promjene')
     );
   }
 
@@ -197,7 +208,8 @@ export class UploadPanelComponent implements OnInit {
     this.osvjeziPovijest();
   }
 
-  provjeriZet(): void {
+  /** porukaUvoza: uvoz nije javio ishod, pa provjera pokazuje što je upisano. */
+  provjeriZet(porukaUvoza?: string): void {
     this.zetLoading = true;
     this.zetStavke = [];
     this.zetGreska = '';
@@ -207,12 +219,29 @@ export class UploadPanelComponent implements OnInit {
         this.zetStavke = res.stavke;
         this.zetVrijeme = new Date();
         this.zetLoading = false;
+        if (porukaUvoza) this.zavrsiNeodgovoreniUvoz(porukaUvoza);
       },
       error: (err) => {
         this.zetGreska =
-          err?.error?.message || 'Provjera podataka sa ZET-a nije uspjela.';
+          porukaUvoza ||
+          err?.error?.message ||
+          'Provjera podataka sa ZET-a nije uspjela.';
         this.zetLoading = false;
       },
+    });
+  }
+
+  private zavrsiNeodgovoreniUvoz(poruka: string): void {
+    if (!this.zetStavke.every((s) => s.status === 'nema_promjene')) {
+      this.zetGreska = poruka;
+      return;
+    }
+    this.ucitajStanje();
+    this.osvjeziPovijest();
+    this.messages.add({
+      severity: 'success',
+      summary: 'Podaci ažurirani',
+      detail: 'Uvoz je dovršen, baza je jednaka ZET-u.',
     });
   }
 
@@ -231,6 +260,7 @@ export class UploadPanelComponent implements OnInit {
         this.zetVrijeme = new Date();
         this.zetUvozi = false;
         this.ucitajStanje();
+        this.osvjeziPovijest();
 
         const obradjeno = res.stavke.filter((s) => s.status === 'obradjeno');
         const greska = res.stavke.find((s) => s.status === 'greska');
@@ -251,11 +281,14 @@ export class UploadPanelComponent implements OnInit {
         );
       },
       error: (err) => {
-        // Server ništa nije upisao, a stari hashevi više ne vrijede.
-        this.zetStavke = [];
-        this.zetGreska =
-          err?.error?.message || 'Uvoz podataka sa ZET-a nije uspio.';
+        // Veza može puknuti dok server dovršava upis, a stari hashevi više
+        // ne vrijede – zato stvarno stanje dolazi iz nove provjere.
         this.zetUvozi = false;
+        this.ucitajStanje();
+        this.provjeriZet(
+          err?.error?.message ||
+            'Server nije potvrdio uvoz. Pogledaj gornji rezultat prije ponovnog ubacivanja.',
+        );
       },
     });
   }
@@ -275,15 +308,18 @@ export class UploadPanelComponent implements OnInit {
     if (!this.povijestOtvorena) return;
 
     this.povijestUcitava = true;
-    this.uploadService.fetchRucniUvozi().subscribe({
-      next: (povijest) => {
-        this.povijest = povijest;
-        this.povijestUcitava = false;
-      },
-      error: () => {
-        this.povijest = [];
-        this.povijestUcitava = false;
-      },
+    const iliPrazno = <T>(zahtjev: Observable<T[]>) =>
+      zahtjev.pipe(catchError(() => of([] as T[])));
+
+    forkJoin({
+      disponent: iliPrazno(this.uploadService.fetchPovijestDisponenta()),
+      sluzba: iliPrazno(this.uploadService.fetchPovijestSluzbi()),
+      rucni: iliPrazno(this.uploadService.fetchRucniUvozi()),
+    }).subscribe(({ disponent, sluzba, rucni }) => {
+      this.povijestDisponenta = disponent;
+      this.povijestSluzbi = sluzba;
+      this.povijest = rucni;
+      this.povijestUcitava = false;
     });
   }
 
@@ -291,7 +327,7 @@ export class UploadPanelComponent implements OnInit {
     return {
       novo: 'warn',
       obradjeno: 'success',
-      nema_promjene: 'info',
+      nema_promjene: 'success',
       greska: 'danger',
     }[stavka.status] as Severity;
   }
@@ -300,7 +336,7 @@ export class UploadPanelComponent implements OnInit {
     return {
       novo: 'Novo',
       obradjeno: 'Obrađeno',
-      nema_promjene: 'Bez promjena',
+      nema_promjene: 'Aktualno',
       greska: 'Greška',
     }[stavka.status];
   }

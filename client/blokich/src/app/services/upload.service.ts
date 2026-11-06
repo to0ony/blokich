@@ -56,6 +56,14 @@ export class UploadService {
     return this.api.get<RucniUvoz[]>('rucni-uvoz');
   }
 
+  fetchPovijestDisponenta() {
+    return this.api.get<PovijestDisponenta[]>('disponent-upload/povijest');
+  }
+
+  fetchPovijestSluzbi() {
+    return this.api.get<PovijestSluzbi[]>('sluzba-upload/povijest');
+  }
+
   fetchLastUpload<T = any>(tip: UploadTip) {
     return this.api.get<T>(`${tip}-upload/last-upload`);
   }
@@ -75,6 +83,7 @@ export interface ZadnjiSluzbaUpload {
   broj_ubacenih: number;
   original_filename?: string;
   verzija?: string;
+  sha256?: string;
   izvor?: 'rucno' | 'zet';
 }
 
@@ -82,6 +91,7 @@ export interface ZadnjiDisponentUpload {
   datum_unosa: string;
   brojTjedna: number;
   godina: number;
+  verzija_sluzbe?: string | null;
 }
 
 export interface ZadnjiGodisnjiUpload {
@@ -108,6 +118,26 @@ export interface RucniUvoz {
   datum_unosa: string;
   original_filename?: string;
   izvorni_sha256?: string;
+}
+
+interface PovijestUvoza {
+  datum_unosa: string;
+  original_filename?: string;
+  sha256?: string;
+  izvorni_sha256?: string;
+  izvor?: 'rucno' | 'zet';
+}
+
+export interface PovijestDisponenta extends PovijestUvoza {
+  godina: number;
+  brojTjedna: number;
+  broj_vozaca: number;
+  verzija_sluzbe?: string | null;
+}
+
+export interface PovijestSluzbi extends PovijestUvoza {
+  verzija?: string;
+  broj_ubacenih: number;
 }
 
 export interface ZetSyncOdgovor {

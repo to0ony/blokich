@@ -54,6 +54,9 @@
             <div class="adm-stat-sub">
               Uneseno {{ disponent.datum_unosa | date: "d.M.yyyy. 'u' HH:mm" }}
             </div>
+            <div class="adm-stat-sub" *ngIf="disponent.verzija_sluzbe">
+              Koristi službe v{{ disponent.verzija_sluzbe }}
+            </div>
           </ng-container>
         </ng-container>
       </article>
@@ -77,6 +80,12 @@
             <div class="adm-stat-sub">
               Uneseno {{ sluzba.datum_unosa | date: "d.M.yyyy. 'u' HH:mm" }}
               <span *ngIf="sluzba.izvor === 'zet'" class="adm-src">· ZET</span>
+            </div>
+            <div class="adm-stat-sub adm-stat-file" *ngIf="sluzba.original_filename">
+              {{ sluzba.original_filename }}
+            </div>
+            <div class="adm-stat-sub" *ngIf="sluzba.sha256">
+              Hash <code [title]="sluzba.sha256">{{ sluzba.sha256 | slice: 0 : 12 }}</code>
             </div>
           </ng-container>
         </ng-container>
@@ -137,49 +146,40 @@
         Rezultat dohvata · {{ zetVrijeme | date: "HH:mm:ss" }}
       </div>
 
-      <div *ngIf="zetNemaNista; else stavke" class="adm-zet-row">
-        <p-tag value="Bez promjena" severity="info" />
+      <div *ngFor="let s of zetStavke" class="adm-zet-row">
+        <p-tag [value]="zetStatusTekst(s)" [severity]="zetSeverity(s)" />
         <div class="adm-zet-row-body">
-          <span>Nema ništa novo na ZET-u.</span>
+          <strong>{{ naziviDokumenata[s.dokument] }}</strong>
+          <span>{{ s.poruka }}</span>
+          <a *ngIf="s.url" [href]="s.url" target="_blank" rel="noopener">
+            <i class="pi pi-external-link"></i>
+            {{ s.status === "greska" ? "Preuzmi PDF" : s.filename || "PDF" }}
+          </a>
+
+          <ng-container *ngIf="s.status === 'greska' && s.sha256">
+            <label
+              *ngIf="zetMozeIspravak(s); else sluzbePrvo"
+              class="adm-zet-fix"
+              [class.is-busy]="zetIspravakUcitava"
+            >
+              <i class="pi pi-upload"></i>
+              {{ zetIspravakUcitava ? "Učitavam…" : "Učitaj ispravljeni PDF" }}
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                hidden
+                [disabled]="zetIspravakUcitava"
+                (change)="ucitajIspravak(s, $event)"
+              />
+            </label>
+            <ng-template #sluzbePrvo>
+              <span class="adm-zet-note">
+                Prvo ubaci službe, pa ponovno provjeri.
+              </span>
+            </ng-template>
+          </ng-container>
         </div>
       </div>
-
-      <ng-template #stavke>
-        <div *ngFor="let s of zetStavke" class="adm-zet-row">
-          <p-tag [value]="zetStatusTekst(s)" [severity]="zetSeverity(s)" />
-          <div class="adm-zet-row-body">
-            <strong>{{ naziviDokumenata[s.dokument] }}</strong>
-            <span>{{ s.poruka }}</span>
-            <a *ngIf="s.url" [href]="s.url" target="_blank" rel="noopener">
-              <i class="pi pi-external-link"></i>
-              {{ s.status === "greska" ? "Preuzmi PDF" : s.filename || "PDF" }}
-            </a>
-
-            <ng-container *ngIf="s.status === 'greska' && s.sha256">
-              <label
-                *ngIf="zetMozeIspravak(s); else sluzbePrvo"
-                class="adm-zet-fix"
-                [class.is-busy]="zetIspravakUcitava"
-              >
-                <i class="pi pi-upload"></i>
-                {{ zetIspravakUcitava ? "Učitavam…" : "Učitaj ispravljeni PDF" }}
-                <input
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  hidden
-                  [disabled]="zetIspravakUcitava"
-                  (change)="ucitajIspravak(s, $event)"
-                />
-              </label>
-              <ng-template #sluzbePrvo>
-                <span class="adm-zet-note">
-                  Prvo ubaci službe, pa ponovno provjeri.
-                </span>
-              </ng-template>
-            </ng-container>
-          </div>
-        </div>
-      </ng-template>
 
       <div *ngIf="zetMozePotvrda" class="adm-zet-confirm">
         <span>Provjeri brojke pa potvrdi. Službe se ubacuju prve.</span>
@@ -239,39 +239,90 @@
         </p-tabpanels>
       </p-tabs>
     </div>
+  </section>
 
-    <div class="adm-povijest">
-      <p-button
-        label="Povijest ručnih uvoza"
-        [icon]="povijestOtvorena ? 'pi pi-chevron-up' : 'pi pi-history'"
-        severity="secondary"
-        [text]="true"
-        (onClick)="togglePovijest()"
-      />
+  <!-- Povijest -->
+  <section class="adm-section">
+    <p-button
+      label="Povijest disponenata i službi"
+      [icon]="povijestOtvorena ? 'pi pi-chevron-up' : 'pi pi-history'"
+      severity="secondary"
+      [text]="true"
+      (onClick)="togglePovijest()"
+    />
 
-      <div *ngIf="povijestOtvorena" class="adm-card adm-povijest-lista">
-        <p *ngIf="povijestUcitava" class="adm-povijest-prazno">Učitavam…</p>
-        <p
-          *ngIf="!povijestUcitava && !povijest.length"
-          class="adm-povijest-prazno"
-        >
-          Još nema ručnih uvoza.
-        </p>
+    <div *ngIf="povijestOtvorena" class="adm-card">
+      <p *ngIf="povijestUcitava" class="adm-povijest-prazno adm-povijest-ucitava">
+        Učitavam…
+      </p>
 
-        <ng-container *ngIf="!povijestUcitava">
-          <div *ngFor="let u of povijest" class="adm-povijest-red">
-            <span class="adm-povijest-datum">
-              {{ u.datum_unosa | date: "d.M.yyyy. HH:mm" }}
-            </span>
-            <strong>{{ naziviDokumenata[u.dokument] }} {{ u.oznaka }}</strong>
-            <span class="adm-povijest-file">{{ u.original_filename }}</span>
-            <p-tag
-              [value]="u.izvorni_sha256 ? 'Ispravak ZET PDF-a' : 'Ručni uvoz'"
-              [severity]="u.izvorni_sha256 ? 'warn' : 'secondary'"
-            />
-          </div>
-        </ng-container>
-      </div>
+      <p-tabs *ngIf="!povijestUcitava" [(value)]="povijestTab">
+        <p-tablist>
+          <p-tab value="disponent"><i class="pi pi-calendar"></i> Disponent</p-tab>
+          <p-tab value="sluzba"><i class="pi pi-list"></i> Službe</p-tab>
+          <p-tab value="rucni"><i class="pi pi-upload"></i> Ručni uvozi</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="disponent">
+            <p *ngIf="!povijestDisponenta.length" class="adm-povijest-prazno">
+              Još nema disponenata.
+            </p>
+            <div *ngFor="let d of povijestDisponenta" class="adm-povijest-red">
+              <span class="adm-povijest-datum">
+                {{ d.datum_unosa | date: "d.M.yyyy. HH:mm" }}
+              </span>
+              <strong>Tjedan {{ d.brojTjedna }}/{{ d.godina }}</strong>
+              <span>{{ d.broj_vozaca }} vozača</span>
+              <span *ngIf="d.verzija_sluzbe">Službe v{{ d.verzija_sluzbe }}</span>
+              <span class="adm-povijest-file">{{ d.original_filename }}</span>
+              <code *ngIf="d.sha256" [title]="d.sha256">{{ d.sha256 | slice: 0 : 12 }}</code>
+              <p-tag *ngIf="izvorTekst(d)" [value]="izvorTekst(d)" severity="secondary" />
+              <p-tag
+                *ngIf="stanjeTjedna(d).severity !== 'warn'"
+                [value]="stanjeTjedna(d).tekst"
+                [severity]="stanjeTjedna(d).severity"
+              />
+            </div>
+          </p-tabpanel>
+
+          <p-tabpanel value="sluzba">
+            <p *ngIf="!povijestSluzbi.length" class="adm-povijest-prazno">
+              Još nema službi.
+            </p>
+            <div
+              *ngFor="let s of povijestSluzbi; let prva = first"
+              class="adm-povijest-red"
+            >
+              <span class="adm-povijest-datum">
+                {{ s.datum_unosa | date: "d.M.yyyy. HH:mm" }}
+              </span>
+              <strong>v{{ s.verzija }}</strong>
+              <span>{{ s.broj_ubacenih }} službi</span>
+              <span class="adm-povijest-file">{{ s.original_filename }}</span>
+              <code *ngIf="s.sha256" [title]="s.sha256">{{ s.sha256 | slice: 0 : 12 }}</code>
+              <p-tag *ngIf="izvorTekst(s)" [value]="izvorTekst(s)" severity="secondary" />
+              <p-tag *ngIf="prva" value="Aktualno" severity="success" />
+            </div>
+          </p-tabpanel>
+
+          <p-tabpanel value="rucni">
+            <p *ngIf="!povijest.length" class="adm-povijest-prazno">
+              Još nema ručnih uvoza.
+            </p>
+            <div *ngFor="let u of povijest" class="adm-povijest-red">
+              <span class="adm-povijest-datum">
+                {{ u.datum_unosa | date: "d.M.yyyy. HH:mm" }}
+              </span>
+              <strong>{{ naziviDokumenata[u.dokument] }} {{ u.oznaka }}</strong>
+              <span class="adm-povijest-file">{{ u.original_filename }}</span>
+              <p-tag
+                [value]="u.izvorni_sha256 ? 'Ispravak ZET PDF-a' : 'Ručni uvoz'"
+                [severity]="u.izvorni_sha256 ? 'warn' : 'secondary'"
+              />
+            </div>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
     </div>
   </section>
 </div>
