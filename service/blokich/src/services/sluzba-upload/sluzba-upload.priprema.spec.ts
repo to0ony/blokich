@@ -34,7 +34,7 @@ describe('SluzbaUploadService.pripremi', () => {
 
     await expect(service.pripremi(file)).resolves.toMatchObject({
       status: 'novo',
-      poruka: 'Izvučeno službi: 4, linija: 2.',
+      poruka: 'Izvučeno službi: 4.',
     });
     expect(sluzbaModel.create).not.toHaveBeenCalled();
     expect(uploadModel.create).not.toHaveBeenCalled();

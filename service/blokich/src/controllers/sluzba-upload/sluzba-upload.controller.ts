@@ -55,4 +55,11 @@ export class SluzbaUploadController {
   async getLastUpload() {
     return this.sluzbaUploadService.getLastUploadInfo();
   }
+
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('povijest')
+  async getPovijest() {
+    return this.sluzbaUploadService.getPovijest();
+  }
 }

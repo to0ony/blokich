@@ -33,6 +33,8 @@ export type DisponentPriprema =
       filename: string;
     };
 
+const POVIJEST_LIMIT = 50;
+
 @Injectable()
 export class DisponentUploadService {
   constructor(
@@ -164,7 +166,7 @@ export class DisponentUploadService {
 
     return {
       status: 'novo',
-      poruka: `Tjedan ${parsed.brojTjedna}/${parsed.godina}, izvučeno vozača: ${parsed.radnici.length}.`,
+      poruka: `Izvučeno vozača: ${parsed.radnici.length}.`,
       sha256: hash,
       parsed,
       filename: file.originalname,
@@ -215,7 +217,7 @@ export class DisponentUploadService {
 
     return {
       status: 'obradjeno' as const,
-      poruka: `Uspješno spremljen disponent za tjedan ${parsed.brojTjedna}/${parsed.godina}`,
+      poruka: `Uspješno spremljeno ${parsed.radnici.length} vozača. Tjedan: ${parsed.brojTjedna}/${parsed.godina}`,
       brojTjedna: parsed.brojTjedna,
       godina: parsed.godina,
       filename: file.originalname,
@@ -239,6 +241,28 @@ export class DisponentUploadService {
       datum_unosa: last.datum_unosa,
       brojTjedna: last.brojTjedna,
       godina: last.godina,
+      verzija_sluzbe: last.verzija_sluzbe,
     };
+  }
+
+  /** Po jedan red za tjedan: ponovni uvoz tjedna zamjenjuje prethodni. */
+  async getPovijest() {
+    return this.disponentModel.aggregate([
+      { $sort: { godina: -1, brojTjedna: -1 } },
+      { $limit: POVIJEST_LIMIT },
+      {
+        $project: {
+          godina: 1,
+          brojTjedna: 1,
+          datum_unosa: 1,
+          verzija_sluzbe: 1,
+          original_filename: 1,
+          sha256: 1,
+          izvorni_sha256: 1,
+          izvor: 1,
+          broj_vozaca: { $size: { $ifNull: ['$radnici', []] } },
+        },
+      },
+    ]);
   }
 }

@@ -30,6 +30,8 @@ export type SluzbaPriprema =
       filename: string;
     };
 
+const POVIJEST_LIMIT = 50;
+
 @Injectable()
 export class SluzbaUploadService {
   constructor(
@@ -108,13 +110,9 @@ export class SluzbaUploadService {
       throw new Error('Iz PDF-a službi nije izvučena nijedna služba.');
     }
 
-    const brojLinija = new Set(
-      sluzbe.map((s) => s.linija?.trim()).filter(Boolean),
-    ).size;
-
     return {
       status: 'novo',
-      poruka: `Izvučeno službi: ${sluzbe.length}, linija: ${brojLinija}.`,
+      poruka: `Izvučeno službi: ${sluzbe.length}.`,
       sha256: hash,
       sluzbe,
       filename: file.originalname,
@@ -184,5 +182,16 @@ export class SluzbaUploadService {
     }
 
     return last;
+  }
+
+  async getPovijest() {
+    return this.sluzbaUploadModel
+      .find(
+        {},
+        'datum_unosa broj_ubacenih original_filename verzija sha256 izvorni_sha256 izvor',
+      )
+      .sort({ datum_unosa: -1 })
+      .limit(POVIJEST_LIMIT)
+      .lean();
   }
 }

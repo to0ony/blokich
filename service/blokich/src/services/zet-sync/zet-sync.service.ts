@@ -29,6 +29,7 @@ interface ZetPriprema {
   status: 'novo' | 'nema_promjene';
   poruka: string;
   filename: string;
+  url?: string;
   sha256?: string;
   spremi?: () => Promise<{ poruka: string }>;
 }
@@ -97,7 +98,7 @@ export class ZetSyncService {
 
     const stavke: ZetSyncStavka[] = [];
     for (const { dokument, priprema } of pripreme) {
-      const { filename, spremi } = priprema;
+      const { filename, url, spremi } = priprema;
 
       if (!spremi) {
         stavke.push({
@@ -105,13 +106,14 @@ export class ZetSyncService {
           status: 'nema_promjene',
           poruka: priprema.poruka,
           filename,
+          url,
         });
         continue;
       }
 
       try {
         const { poruka } = await spremi();
-        stavke.push({ dokument, status: 'obradjeno', poruka, filename });
+        stavke.push({ dokument, status: 'obradjeno', poruka, filename, url });
       } catch (err) {
         // Upis nije u transakciji, pa se ovdje samo staje i javlja stanje.
         this.logger.error(`ZET uvoz ${dokument} nije uspio`, err);
@@ -120,6 +122,7 @@ export class ZetSyncService {
           status: 'greska',
           poruka: NEUSPJELO,
           filename,
+          url,
         });
         break;
       }
@@ -178,7 +181,7 @@ export class ZetSyncService {
 
     try {
       const pdf = await this.scraper.downloadPdf(link);
-      return await this.pripremi(pdf, dokument);
+      return { ...(await this.pripremi(pdf, dokument)), url: link.url };
     } catch (err) {
       this.logger.error(`ZET uvoz ${dokument} nije uspio`, err);
       throw new BadGatewayException(NEUSPJELO);

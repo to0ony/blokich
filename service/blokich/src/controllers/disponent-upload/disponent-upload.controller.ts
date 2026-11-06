@@ -60,4 +60,11 @@ export class DisponentUploadController {
   async getLastUpload() {
     return this.disponentUploadService.getLastUploadInfo();
   }
+
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('povijest')
+  async getPovijest() {
+    return this.disponentUploadService.getPovijest();
+  }
 }
