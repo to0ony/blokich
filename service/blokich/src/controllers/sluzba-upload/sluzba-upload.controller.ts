@@ -8,6 +8,7 @@ import {
   BadRequestException,
   UseGuards,
   Param,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -66,6 +67,14 @@ export class SluzbaUploadController {
   @Get('povijest')
   async getPovijest() {
     return this.sluzbaUploadService.getPovijest();
+  }
+
+  // Pregled s login ekrana: dovoljna je lozinka uređaja (globalni PristupGuard).
+  @Get('aktualna')
+  async getAktualna(@Query('tjedan') tjedan?: string) {
+    return this.sluzbaUploadService.getAktualna(
+      tjedan === 'naredni' ? 'naredni' : 'tekuci',
+    );
   }
 
   @UseGuards(JwtAuthGuard)

@@ -327,6 +327,55 @@ export class SluzbaUploadService {
     }));
   }
 
+  /**
+   * Službe koje vrijede za tekući (ili naredni) tjedan: verzija koju koristi
+   * disponent tog tjedna, a bez disponenta zadnja učitana verzija.
+   */
+  async getAktualna(tjedan: 'tekuci' | 'naredni' = 'tekuci') {
+    const sada = toZonedTime(new Date(), 'Europe/Zagreb');
+    const datum =
+      tjedan === 'naredni'
+        ? new Date(sada.getTime() + 7 * 24 * 3600 * 1000)
+        : sada;
+    const godina = getISOWeekYear(datum);
+    const brojTjedna = getISOWeek(datum);
+
+    const disponent = await this.disponentModel
+      .findOne({ godina, brojTjedna }, 'verzija_sluzbe')
+      .lean();
+
+    const uvoz = disponent?.verzija_sluzbe
+      ? await this.sluzbaUploadModel
+          .findOne({ verzija: disponent.verzija_sluzbe })
+          .lean()
+      : await this.sluzbaUploadModel.findOne().sort({ datum_unosa: -1 }).lean();
+
+    const verzija = disponent?.verzija_sluzbe ?? uvoz?.verzija;
+    if (!verzija) {
+      throw new NotFoundException('Još nema učitanih službi.');
+    }
+
+    const dokument = await this.sluzbaModel.findOne({ verzija }).lean();
+    if (!dokument) {
+      throw new NotFoundException(`Verzija službi ${verzija} ne postoji.`);
+    }
+
+    return {
+      verzija,
+      tjedan: { godina, brojTjedna },
+      /** false: za taj tjedan nema disponenta, prikazana je zadnja verzija. */
+      prema_disponentu: !!disponent?.verzija_sluzbe,
+      uvoz: uvoz
+        ? {
+            datum_unosa: uvoz.datum_unosa,
+            original_filename: uvoz.original_filename,
+            broj_ubacenih: uvoz.broj_ubacenih,
+          }
+        : null,
+      sluzbe: dokument.sluzbe ?? [],
+    };
+  }
+
   /** Sve službe jedne verzije (za pregled u admin panelu). */
   async getVerzija(verzija: string) {
     const dokument = await this.sluzbaModel.findOne({ verzija }).lean();

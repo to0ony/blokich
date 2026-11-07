@@ -291,3 +291,63 @@ describe('SluzbaUploadService – ponovni ručni uvoz (prepisi)', () => {
     expect(pdf.extractSluzba).not.toHaveBeenCalled();
   });
 });
+
+describe('SluzbaUploadService.getAktualna', () => {
+  const lean = (v: any) => ({ lean: () => Promise.resolve(v) });
+
+  const napravi = (disponent: any) => {
+    const sluzbaModel = {
+      findOne: jest.fn((f: any) =>
+        lean({ verzija: f.verzija, sluzbe: [{ br_sl: '1' }] }),
+      ),
+    };
+    const uploadModel = {
+      findOne: jest.fn((f: any) =>
+        f?.verzija
+          ? lean({ verzija: f.verzija, broj_ubacenih: 1 })
+          : { sort: () => lean({ verzija: '2026-46-3', broj_ubacenih: 1 }) },
+      ),
+    };
+    const disponentModel = { findOne: jest.fn(() => lean(disponent)) };
+    const service = new SluzbaUploadService(
+      sluzbaModel as any,
+      uploadModel as any,
+      {} as any,
+      {} as any,
+      disponentModel as any,
+    );
+    return { service, sluzbaModel, disponentModel };
+  };
+
+  it('uzima verziju koju koristi disponent tjedna', async () => {
+    const { service, sluzbaModel } = napravi({ verzija_sluzbe: '2026-45-1' });
+
+    const r = await service.getAktualna();
+
+    expect(r.verzija).toBe('2026-45-1');
+    expect(r.prema_disponentu).toBe(true);
+    expect(sluzbaModel.findOne).toHaveBeenCalledWith({ verzija: '2026-45-1' });
+    expect(r.sluzbe).toEqual([{ br_sl: '1' }]);
+  });
+
+  it('bez disponenta uzima zadnju učitanu verziju', async () => {
+    const { service } = napravi(null);
+
+    const r = await service.getAktualna('naredni');
+
+    expect(r.verzija).toBe('2026-46-3');
+    expect(r.prema_disponentu).toBe(false);
+  });
+
+  it('naredni tjedan je tjedan nakon tekućeg', async () => {
+    const { service, disponentModel } = napravi(null);
+
+    const tekuci = await service.getAktualna('tekuci');
+    const naredni = await service.getAktualna('naredni');
+
+    const redni = (t: { godina: number; brojTjedna: number }) =>
+      t.godina * 53 + t.brojTjedna;
+    expect(redni(naredni.tjedan) - redni(tekuci.tjedan)).toBeGreaterThan(0);
+    expect(disponentModel.findOne).toHaveBeenCalledTimes(2);
+  });
+});
