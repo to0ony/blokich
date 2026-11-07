@@ -1,4 +1,4 @@
-import { grupiraj } from './sluzbe-pregled.component';
+import { grupiraj } from './sluzbe-popis.component';
 
 describe('grupiraj (pregled službi)', () => {
   it('spaja "79" i "79P" u jednu službu i računa trajanje dijelova', () => {
