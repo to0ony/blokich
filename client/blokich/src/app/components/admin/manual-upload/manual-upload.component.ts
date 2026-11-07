@@ -89,28 +89,36 @@ export class ManualUploadComponent {
     this.status = null;
   }
 
-  upload(): void {
+  /** Disponent i službe se mogu ponovno unijeti i kad je PDF isti. */
+  get mozePrepisati(): boolean {
+    return this.status === 'nema_promjene' && this.tip !== 'godisnji';
+  }
+
+  /** prepisi: isti PDF se ponovno parsira i prepisuje postojeći uvoz. */
+  upload(prepisi = false): void {
     if (!this.file) return;
 
     this.loading = true;
     this.poruka = '';
     this.status = null;
 
-    this.uploadService.uploadPdf(this.tip, this.file).subscribe({
-      next: (res) => {
-        this.status = res.status ?? 'obradjeno';
-        this.poruka = res.poruka || 'PDF je uspješno obrađen.';
-        this.loading = false;
-        if (this.status === 'obradjeno') this.file = null;
-        this.uploaded.emit(res);
-      },
-      error: (err) => {
-        this.status = 'greska';
-        this.poruka =
-          err?.error?.message || 'Došlo je do greške prilikom obrade PDF-a.';
-        this.loading = false;
-      },
-    });
+    this.uploadService
+      .uploadPdf(this.tip, this.file, undefined, prepisi)
+      .subscribe({
+        next: (res) => {
+          this.status = res.status ?? 'obradjeno';
+          this.poruka = res.poruka || 'PDF je uspješno obrađen.';
+          this.loading = false;
+          if (this.status === 'obradjeno') this.file = null;
+          this.uploaded.emit(res);
+        },
+        error: (err) => {
+          this.status = 'greska';
+          this.poruka =
+            err?.error?.message || 'Došlo je do greške prilikom obrade PDF-a.';
+          this.loading = false;
+        },
+      });
   }
 
   formatSize(bytes: number): string {

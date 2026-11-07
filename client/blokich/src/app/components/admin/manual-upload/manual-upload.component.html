@@ -55,4 +55,25 @@
   >
     {{ poruka }}
   </p-message>
+
+  <div *ngIf="mozePrepisati && file" class="mu-prepisi">
+    <span>
+      Želiš li ga ipak unijeti ponovno? Postojeći
+      {{
+        tip === "sluzba"
+          ? "unos službi (ista verzija)"
+          : "disponent za taj tjedan"
+      }}
+      bit će prepisan.
+    </span>
+    <p-button
+      label="Ipak unesi ponovno"
+      icon="pi pi-refresh"
+      severity="warn"
+      size="small"
+      [outlined]="true"
+      [loading]="loading"
+      (onClick)="upload(true)"
+    />
+  </div>
 </div>

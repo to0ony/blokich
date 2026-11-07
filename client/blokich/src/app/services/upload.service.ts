@@ -45,10 +45,17 @@ export class UploadService {
     return this.api.post<ZetSyncOdgovor>('zet-sync/podsused/uvoz', potvrda);
   }
 
-  uploadPdf(tip: UploadTip, pdf: File, izvorniSha256?: string) {
+  /** prepisi: isti PDF se ipak ponovno unosi i prepisuje postojeći uvoz. */
+  uploadPdf(
+    tip: UploadTip,
+    pdf: File,
+    izvorniSha256?: string,
+    prepisi = false,
+  ) {
     const formData = new FormData();
     formData.append('pdf', pdf);
     if (izvorniSha256) formData.append('izvorni_sha256', izvorniSha256);
+    if (prepisi) formData.append('prepisi', 'true');
     return this.api.post<UploadOdgovor>(`${tip}-upload/upload`, formData);
   }
 
