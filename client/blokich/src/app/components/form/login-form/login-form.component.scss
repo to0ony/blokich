@@ -136,6 +136,11 @@
   gap: 8px;
 }
 
+// Neparan broj linkova: zadnji ide preko cijele širine
+.lg-links > .lg-link:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 .lg-link {
   display: flex;
   align-items: center;

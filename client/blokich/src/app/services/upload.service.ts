@@ -71,6 +71,13 @@ export class UploadService {
     return this.api.get<PovijestSluzbi[]>('sluzba-upload/povijest');
   }
 
+  /** Službe koje vrijede za tekući ili naredni tjedan (login ekran). */
+  fetchAktualneSluzbe(tjedan: 'tekuci' | 'naredni' = 'tekuci') {
+    return this.api.get<AktualneSluzbe>(
+      `sluzba-upload/aktualna?tjedan=${tjedan}`,
+    );
+  }
+
   fetchSluzbeVerzije(verzija: string) {
     return this.api.get<SluzbeVerzije>(
       `sluzba-upload/verzija/${encodeURIComponent(verzija)}`,
@@ -174,6 +181,19 @@ export interface SluzbaZapis {
   vazi_do?: string | null;
   sekcija?: string | null;
   vrsta?: 'jednodijelna' | 's_pauzom' | 'dvokratna';
+}
+
+export interface AktualneSluzbe {
+  verzija: string;
+  tjedan: { godina: number; brojTjedna: number };
+  /** false: za taj tjedan nema disponenta, prikazana je zadnja verzija. */
+  prema_disponentu: boolean;
+  uvoz: {
+    datum_unosa: string;
+    original_filename?: string;
+    broj_ubacenih: number;
+  } | null;
+  sluzbe: SluzbaZapis[];
 }
 
 export interface SluzbeVerzije {

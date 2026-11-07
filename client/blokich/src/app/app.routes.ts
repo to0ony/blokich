@@ -32,6 +32,15 @@ export const routes: Routes = [
         (m) => m.PregledSluzbeComponent,
       ),
   },
+  // Popis svih službi aktualne verzije s login ekrana
+  {
+    canActivate: [PristupGuard],
+    path: 'sluzbe',
+    loadComponent: () =>
+      import('./pages/popis-sluzbi/popis-sluzbi.component').then(
+        (m) => m.PopisSluzbiComponent,
+      ),
+  },
   // Vozači na liniji s login ekrana (bez prijave službenim brojem)
   {
     canActivate: [PristupGuard],
