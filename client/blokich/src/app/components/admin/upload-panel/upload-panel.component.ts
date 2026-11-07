@@ -11,6 +11,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ManualUploadComponent } from '../manual-upload/manual-upload.component';
+import { SluzbePregledComponent } from '../sluzbe-pregled/sluzbe-pregled.component';
 import {
   UploadOdgovor,
   UploadService,
@@ -50,6 +51,7 @@ type Severity ='success' | 'info' | 'warn' | 'danger' | 'secondary';
     SkeletonModule,
     ToastModule,
     ManualUploadComponent,
+    SluzbePregledComponent,
   ],
   providers: [MessageService],
   templateUrl: './upload-panel.component.html',
@@ -81,6 +83,8 @@ export class UploadPanelComponent implements OnInit {
   povijestDisponenta: PovijestDisponenta[] = [];
   povijestSluzbi: PovijestSluzbi[] = [];
   povijest: RucniUvoz[] = [];
+  /** Verzija službi otvorena u pregledu (dijalog). */
+  pregledSluzbi: PovijestSluzbi | null = null;
 
   readonly naziviDokumenata: Record<ZetSyncStavka['dokument'], string> = {
     sluzba: 'Službe',
@@ -201,6 +205,10 @@ export class UploadPanelComponent implements OnInit {
           });
         },
       });
+  }
+
+  otvoriSluzbe(uvoz: PovijestSluzbi): void {
+    if (uvoz.verzija) this.pregledSluzbi = uvoz;
   }
 
   togglePovijest(): void {
