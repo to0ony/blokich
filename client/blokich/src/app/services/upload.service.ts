@@ -78,6 +78,17 @@ export class UploadService {
     );
   }
 
+  /** Verzije službi koje je koristio barem jedan tjedan (login ekran). */
+  fetchKoristeneSluzbe() {
+    return this.api.get<KoristenaVerzija[]>('sluzba-upload/koristene');
+  }
+
+  fetchKoristenaVerzija(verzija: string) {
+    return this.api.get<KoristenaVerzija & { sluzbe: SluzbaZapis[] }>(
+      `sluzba-upload/koristene/${encodeURIComponent(verzija)}`,
+    );
+  }
+
   fetchSluzbeVerzije(verzija: string) {
     return this.api.get<SluzbeVerzije>(
       `sluzba-upload/verzija/${encodeURIComponent(verzija)}`,
@@ -181,6 +192,12 @@ export interface SluzbaZapis {
   vazi_do?: string | null;
   sekcija?: string | null;
   vrsta?: 'jednodijelna' | 's_pauzom' | 'dvokratna';
+}
+
+export interface KoristenaVerzija {
+  verzija: string;
+  /** Tjedni čiji disponent koristi verziju, najnoviji prvi. */
+  tjedni: { godina: number; brojTjedna: number }[];
 }
 
 export interface AktualneSluzbe {
