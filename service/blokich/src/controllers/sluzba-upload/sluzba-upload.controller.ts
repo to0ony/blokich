@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   BadRequestException,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -61,5 +62,12 @@ export class SluzbaUploadController {
   @Get('povijest')
   async getPovijest() {
     return this.sluzbaUploadService.getPovijest();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('verzija/:verzija')
+  async getVerzija(@Param('verzija') verzija: string) {
+    return this.sluzbaUploadService.getVerzija(verzija);
   }
 }

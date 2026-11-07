@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { SluzbaUpload } from '../../schemas/sluzba-upload.schema';
+import { Disponent } from '../../schemas/disponent.schema';
 import { toZonedTime } from 'date-fns-tz';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { PdfProcessingService } from 'src/pdf/pdf-processing.service';
@@ -43,6 +44,8 @@ export class SluzbaUploadService {
     private readonly sluzbaUploadModel: Model<SluzbaUpload>,
     private readonly pdfProcessingService: PdfProcessingService,
     private readonly rucniUvozService: RucniUvozService,
+    @InjectModel(Disponent.name)
+    private readonly disponentModel: Model<Disponent>,
   ) {}
 
   async processPdf(
@@ -196,8 +199,12 @@ export class SluzbaUploadService {
     return last;
   }
 
+  /**
+   * Uvozi službi, najnoviji prvi. Uz svaku verziju idu tjedni čiji disponent
+   * koristi tu verziju (disponent.verzija_sluzbe), najnoviji prvi.
+   */
   async getPovijest() {
-    return this.sluzbaUploadModel
+    const uvozi = await this.sluzbaUploadModel
       .find(
         {},
         'datum_unosa broj_ubacenih original_filename verzija sha256 izvorni_sha256 izvor',
@@ -205,5 +212,52 @@ export class SluzbaUploadService {
       .sort({ datum_unosa: -1 })
       .limit(POVIJEST_LIMIT)
       .lean();
+
+    const verzije = [...new Set(uvozi.map((u) => u.verzija).filter(Boolean))];
+    const disponenti = verzije.length
+      ? await this.disponentModel
+          .find(
+            { verzija_sluzbe: { $in: verzije } },
+            { godina: 1, brojTjedna: 1, verzija_sluzbe: 1 },
+          )
+          .sort({ godina: -1, brojTjedna: -1 })
+          .lean()
+      : [];
+
+    const tjedniPoVerziji = new Map<
+      string,
+      { godina: number; brojTjedna: number }[]
+    >();
+    for (const d of disponenti) {
+      const lista = tjedniPoVerziji.get(d.verzija_sluzbe) ?? [];
+      if (
+        !lista.some(
+          (t) => t.godina === d.godina && t.brojTjedna === d.brojTjedna,
+        )
+      ) {
+        lista.push({ godina: d.godina, brojTjedna: d.brojTjedna });
+      }
+      tjedniPoVerziji.set(d.verzija_sluzbe, lista);
+    }
+
+    return uvozi.map((u) => ({
+      ...u,
+      tjedni: (u.verzija && tjedniPoVerziji.get(u.verzija)) || [],
+    }));
+  }
+
+  /** Sve službe jedne verzije (za pregled u admin panelu). */
+  async getVerzija(verzija: string) {
+    const dokument = await this.sluzbaModel.findOne({ verzija }).lean();
+    if (!dokument) {
+      throw new NotFoundException(`Verzija službi ${verzija} ne postoji.`);
+    }
+    const uvoz = await this.sluzbaUploadModel
+      .findOne(
+        { verzija },
+        'datum_unosa broj_ubacenih original_filename verzija sha256 izvor izvorni_sha256',
+      )
+      .lean();
+    return { verzija, uvoz, sluzbe: dokument.sluzbe ?? [] };
   }
 }

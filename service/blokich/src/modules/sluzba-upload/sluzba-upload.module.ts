@@ -5,6 +5,7 @@ import {
   SluzbaUpload,
   SluzbaUploadSchema,
 } from '../../schemas/sluzba-upload.schema';
+import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { SluzbaUploadController } from '../../controllers/sluzba-upload/sluzba-upload.controller';
 import { SluzbaUploadService } from '../../services/sluzba-upload/sluzba-upload.service';
 import { PdfModule } from '../pdf/pdf.module';
@@ -17,6 +18,9 @@ import { RucniUvozModule } from '../rucni-uvoz/rucni-uvoz.module';
     MongooseModule.forFeature([{ name: Sluzba.name, schema: SluzbaSchema }]),
     MongooseModule.forFeature([
       { name: SluzbaUpload.name, schema: SluzbaUploadSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Disponent.name, schema: DisponentSchema },
     ]),
   ],
   controllers: [SluzbaUploadController],
