@@ -351,3 +351,63 @@ describe('SluzbaUploadService.getAktualna', () => {
     expect(disponentModel.findOne).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('SluzbaUploadService – korištene verzije (login ekran)', () => {
+  const lanac = (v: any) => ({
+    sort: () => ({ lean: () => Promise.resolve(v) }),
+  });
+
+  const napravi = (disponenti: any[], dokument: any = { sluzbe: [] }) => {
+    const disponentModel = { find: jest.fn(() => lanac(disponenti)) };
+    const sluzbaModel = {
+      findOne: () => ({ lean: () => Promise.resolve(dokument) }),
+    };
+    const service = new SluzbaUploadService(
+      sluzbaModel as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      disponentModel as any,
+    );
+    return { service, disponentModel };
+  };
+
+  it('grupira tjedne po verziji, najnovija verzija prva', async () => {
+    const { service } = napravi([
+      { godina: 2026, brojTjedna: 47, verzija_sluzbe: '2026-46-1' },
+      { godina: 2026, brojTjedna: 46, verzija_sluzbe: '2026-46-1' },
+      { godina: 2026, brojTjedna: 45, verzija_sluzbe: '2026-40-2' },
+    ]);
+
+    await expect(service.getKoristene()).resolves.toEqual([
+      {
+        verzija: '2026-46-1',
+        tjedni: [
+          { godina: 2026, brojTjedna: 47 },
+          { godina: 2026, brojTjedna: 46 },
+        ],
+      },
+      { verzija: '2026-40-2', tjedni: [{ godina: 2026, brojTjedna: 45 }] },
+    ]);
+  });
+
+  it('ne vraća službe verzije koju nije koristio nijedan tjedan', async () => {
+    const { service } = napravi([]);
+
+    await expect(service.getKoristenaVerzija('2026-45-3')).rejects.toThrow(
+      'nijedan tjedan',
+    );
+  });
+
+  it('vraća službe i tjedne korištene verzije', async () => {
+    const { service } = napravi([{ godina: 2026, brojTjedna: 45 }], {
+      sluzbe: [{ br_sl: '1' }],
+    });
+
+    await expect(service.getKoristenaVerzija('2026-44-1')).resolves.toEqual({
+      verzija: '2026-44-1',
+      tjedni: [{ godina: 2026, brojTjedna: 45 }],
+      sluzbe: [{ br_sl: '1' }],
+    });
+  });
+});

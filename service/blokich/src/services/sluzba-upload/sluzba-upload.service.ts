@@ -328,6 +328,68 @@ export class SluzbaUploadService {
   }
 
   /**
+   * Verzije službi koje je koristio barem jedan disponent, s tjednima
+   * (najnoviji prvi). Verzije koje nijedan tjedan nije koristio se ne vraćaju.
+   */
+  async getKoristene() {
+    const disponenti = await this.disponentModel
+      .find(
+        { verzija_sluzbe: { $nin: [null, ''] } },
+        { godina: 1, brojTjedna: 1, verzija_sluzbe: 1 },
+      )
+      .sort({ godina: -1, brojTjedna: -1 })
+      .lean();
+
+    const poVerziji = new Map<
+      string,
+      { godina: number; brojTjedna: number }[]
+    >();
+    for (const d of disponenti) {
+      const tjedni = poVerziji.get(d.verzija_sluzbe) ?? [];
+      if (
+        !tjedni.some(
+          (t) => t.godina === d.godina && t.brojTjedna === d.brojTjedna,
+        )
+      ) {
+        tjedni.push({ godina: d.godina, brojTjedna: d.brojTjedna });
+      }
+      poVerziji.set(d.verzija_sluzbe, tjedni);
+    }
+
+    // Redoslijed: verzija s najnovijim tjednom prva (Map čuva redoslijed
+    // umetanja, a disponenti su sortirani od najnovijeg).
+    return [...poVerziji.entries()].map(([verzija, tjedni]) => ({
+      verzija,
+      tjedni,
+    }));
+  }
+
+  /** Službe jedne verzije, samo ako ju je koristio neki disponent. */
+  async getKoristenaVerzija(verzija: string) {
+    const tjedni = await this.disponentModel
+      .find({ verzija_sluzbe: verzija }, { godina: 1, brojTjedna: 1 })
+      .sort({ godina: -1, brojTjedna: -1 })
+      .lean();
+    if (!tjedni.length) {
+      throw new NotFoundException(
+        `Verziju službi ${verzija} nije koristio nijedan tjedan.`,
+      );
+    }
+    const dokument = await this.sluzbaModel.findOne({ verzija }).lean();
+    if (!dokument) {
+      throw new NotFoundException(`Verzija službi ${verzija} ne postoji.`);
+    }
+    return {
+      verzija,
+      tjedni: tjedni.map((t) => ({
+        godina: t.godina,
+        brojTjedna: t.brojTjedna,
+      })),
+      sluzbe: dokument.sluzbe ?? [],
+    };
+  }
+
+  /**
    * Službe koje vrijede za tekući (ili naredni) tjedan: verzija koju koristi
    * disponent tog tjedna, a bez disponenta zadnja učitana verzija.
    */

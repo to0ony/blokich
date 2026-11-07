@@ -77,6 +77,17 @@ export class SluzbaUploadController {
     );
   }
 
+  // Prethodne službe s login ekrana: samo verzije koje je koristio neki tjedan.
+  @Get('koristene')
+  async getKoristene() {
+    return this.sluzbaUploadService.getKoristene();
+  }
+
+  @Get('koristene/:verzija')
+  async getKoristenaVerzija(@Param('verzija') verzija: string) {
+    return this.sluzbaUploadService.getKoristenaVerzija(verzija);
+  }
+
   @UseGuards(JwtAuthGuard)
   @AdminOnly()
   @Get('verzija/:verzija')
