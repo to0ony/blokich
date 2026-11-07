@@ -64,6 +64,12 @@ export class UploadService {
     return this.api.get<PovijestSluzbi[]>('sluzba-upload/povijest');
   }
 
+  fetchSluzbeVerzije(verzija: string) {
+    return this.api.get<SluzbeVerzije>(
+      `sluzba-upload/verzija/${encodeURIComponent(verzija)}`,
+    );
+  }
+
   fetchLastUpload<T = any>(tip: UploadTip) {
     return this.api.get<T>(`${tip}-upload/last-upload`);
   }
@@ -138,6 +144,35 @@ export interface PovijestDisponenta extends PovijestUvoza {
 export interface PovijestSluzbi extends PovijestUvoza {
   verzija?: string;
   broj_ubacenih: number;
+  /** Tjedni čiji disponent koristi ovu verziju, najnoviji prvi. */
+  tjedni?: { godina: number; brojTjedna: number }[];
+}
+
+/** Jedan dio službe kako je spremljen u bazi ("79" i "79P"). */
+export interface SluzbaZapis {
+  br_sl: string;
+  linija?: string | null;
+  varijanta?: string | null;
+  nastup_sluzbe?: string | null;
+  od?: string | null;
+  do?: string | null;
+  zavrsna_sluzba?: string | null;
+  nocni_rad?: string | null;
+  druga_smjena?: string | null;
+  efektivni_sati?: string | null;
+  ukupni_sati?: string | null;
+  /** Samo verzije uvezene novim parserom. */
+  dani?: ('RADNI_DAN' | 'SUBOTA' | 'NEDJELJA')[];
+  vazi_od?: string | null;
+  vazi_do?: string | null;
+  sekcija?: string | null;
+  vrsta?: 'jednodijelna' | 's_pauzom' | 'dvokratna';
+}
+
+export interface SluzbeVerzije {
+  verzija: string;
+  uvoz: PovijestSluzbi | null;
+  sluzbe: SluzbaZapis[];
 }
 
 export interface ZetSyncOdgovor {

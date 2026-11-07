@@ -1,0 +1,194 @@
+<p-dialog
+  [visible]="vidljivo"
+  (visibleChange)="!$event && zatvori()"
+  [modal]="true"
+  [maximizable]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [style]="{ width: '1180px' }"
+  [breakpoints]="{ '1240px': '96vw', '640px': '100vw' }"
+  styleClass="sp-dialog"
+>
+  <ng-template #header>
+    <div class="sp-head">
+      <span class="sp-eyebrow">Povijest službi</span>
+      <h3>Službe v{{ verzija }}</h3>
+      @if (povijest) {
+        <span class="sp-meta">
+          Uneseno {{ povijest.datum_unosa | date: "d.M.yyyy. 'u' HH:mm" }}
+          @if (povijest.original_filename) {
+            · {{ povijest.original_filename }}
+          }
+        </span>
+      }
+    </div>
+  </ng-template>
+
+  @if (ucitava) {
+    <div class="sp-loading">
+      <p-skeleton height="2.2rem" styleClass="mb-2" />
+      <p-skeleton height="18rem" />
+    </div>
+  } @else if (greska) {
+    <p class="sp-error"><i class="pi pi-exclamation-triangle"></i> {{ greska }}</p>
+  } @else {
+    <!-- Sažetak -->
+    <div class="sp-summary">
+      <div class="sp-chip"><strong>{{ grupe.length }}</strong> službi</div>
+      <div class="sp-chip"><strong>{{ brojDvodijelnih }}</strong> dvodijelnih</div>
+      @if (imaDane) {
+        @for (d of dani; track d.kljuc) {
+          <div class="sp-chip">
+            <span class="sp-day" [attr.data-dan]="d.kljuc">{{ d.kratko }}</span>
+            <strong>{{ brojPoDanu(d.kljuc) }}</strong>
+          </div>
+        }
+      }
+      @if (povijest?.tjedni?.length) {
+        <div class="sp-chip sp-chip-weeks">
+          <i class="pi pi-calendar"></i>
+          Korištena u tjednima:
+          @for (t of povijest!.tjedni; track t.godina + '-' + t.brojTjedna) {
+            <span class="sp-week">{{ t.brojTjedna }}/{{ t.godina }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Filteri -->
+    <div class="sp-toolbar">
+      <span class="sp-search">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="search"
+          placeholder="Broj, linija, mjesto, sekcija…"
+          [(ngModel)]="pretraga"
+          (ngModelChange)="filtriraj()"
+        />
+      </span>
+      @if (imaDane) {
+        <div class="sp-day-filter">
+          @for (d of dani; track d.kljuc) {
+            <button
+              type="button"
+              class="sp-day-btn"
+              [attr.data-dan]="d.kljuc"
+              [class.is-off]="!odabraniDani.includes(d.kljuc)"
+              (click)="prebaciDan(d.kljuc)"
+            >
+              {{ d.naziv }}
+            </button>
+          }
+        </div>
+      }
+      <label class="sp-check">
+        <p-checkbox
+          [(ngModel)]="samoDvodijelne"
+          [binary]="true"
+          (onChange)="filtriraj()"
+        />
+        Samo dvodijelne
+      </label>
+      <span class="sp-count">{{ prikazane.length }} / {{ grupe.length }}</span>
+    </div>
+
+    @if (!imaDane && grupe.length) {
+      <p class="sp-note">
+        <i class="pi pi-info-circle"></i>
+        Ova verzija je uvezena starim parserom, pa nema dane (R/S/N) ni sekcije.
+      </p>
+    }
+
+    <!-- Tablica -->
+    <div class="sp-table-wrap">
+      <table class="sp-table">
+        <thead>
+          <tr>
+            <th>BR.SL.</th>
+            @if (imaDane) {
+              <th>Dani</th>
+            }
+            <th>Dio</th>
+            <th>Linija</th>
+            <th>V.R.</th>
+            <th>Nastup</th>
+            <th>Od</th>
+            <th>Do</th>
+            <th>Završetak</th>
+            <th class="num">Traje</th>
+            <th class="num">Noćni</th>
+            <th class="num">Dr. smj.</th>
+            <th class="num">Efek.</th>
+            <th class="num">Ukupno</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (g of prikazane; track g.broj; let i = $index) {
+            @if (novaSekcija(i); as sekcija) {
+              <tr class="sp-section">
+                <td [attr.colspan]="imaDane ? 14 : 13">{{ sekcija }}</td>
+              </tr>
+            }
+            @for (d of g.dijelovi; track d.br_sl; let prvi = $first) {
+              <tr [class.sp-first]="prvi" [class.sp-multi]="g.dijelovi.length > 1">
+                @if (prvi) {
+                  <td class="sp-num" [attr.rowspan]="g.dijelovi.length">
+                    {{ g.broj }}
+                    @if (vrstaTekst(g)) {
+                      <span class="sp-kind">{{ vrstaTekst(g) }}</span>
+                    }
+                  </td>
+                  @if (imaDane) {
+                    <td [attr.rowspan]="g.dijelovi.length">
+                      @for (dan of dani; track dan.kljuc) {
+                        @if (g.dani.includes(dan.kljuc)) {
+                          <span class="sp-day" [attr.data-dan]="dan.kljuc" [title]="dan.naziv">
+                            {{ dan.kratko }}
+                          </span>
+                        }
+                      }
+                    </td>
+                  }
+                }
+                <td>
+                  <span class="sp-part" [class.is-p]="!prvi">{{ d.br_sl }}</span>
+                </td>
+                <td>
+                  <span class="sp-line" [class.is-reserve]="jePricuva(d.linija)">
+                    {{ d.linija || "—" }}
+                  </span>
+                </td>
+                <td>{{ d.varijanta || "" }}</td>
+                <td>{{ d.nastup_sluzbe }}</td>
+                <td class="sp-time">{{ d.od }}</td>
+                <td class="sp-time">
+                  {{ d.do }}
+                  @if (prekoPonoci(d)) {
+                    <i class="pi pi-moon sp-night" title="Prelazi ponoć"></i>
+                  }
+                </td>
+                <td>{{ d.zavrsna_sluzba }}</td>
+                <td class="num sp-muted">{{ trajanjeTekst(d.trajanje) }}</td>
+                @if (prvi) {
+                  <td class="num" [attr.rowspan]="g.dijelovi.length">{{ g.prvi.nocni_rad }}</td>
+                  <td class="num" [attr.rowspan]="g.dijelovi.length">{{ g.prvi.druga_smjena }}</td>
+                  <td class="num" [attr.rowspan]="g.dijelovi.length">{{ g.prvi.efektivni_sati }}</td>
+                  <td class="num sp-total" [attr.rowspan]="g.dijelovi.length">
+                    {{ g.prvi.ukupni_sati }}
+                  </td>
+                }
+              </tr>
+            }
+          } @empty {
+            <tr>
+              <td class="sp-empty" [attr.colspan]="imaDane ? 14 : 13">
+                Nijedna služba ne odgovara filteru.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</p-dialog>
