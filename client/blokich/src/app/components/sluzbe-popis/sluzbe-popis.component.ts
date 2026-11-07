@@ -168,6 +168,36 @@ export class SluzbePopisComponent implements OnChanges {
     return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
   }
 
+  /**
+   * Redovi kao u PDF-u: služba ima barem dva retka. Prvi nosi prvi dio i
+   * noćni rad, zadnji nosi dr. smjenu, efektivne i ukupne sate; drugi dio
+   * (P) je u drugom retku. Jednodijelna služba ima prazan drugi redak sa satima.
+   */
+  redovi(g: SluzbaGrupa): {
+    dio: SluzbaGrupa['dijelovi'][number] | null;
+    prvi: boolean;
+    zadnji: boolean;
+  }[] {
+    const dijelovi: (SluzbaGrupa['dijelovi'][number] | null)[] = [
+      ...g.dijelovi,
+    ];
+    if (dijelovi.length < 2) dijelovi.push(null);
+    return dijelovi.map((dio, i) => ({
+      dio,
+      prvi: i === 0,
+      zadnji: i === dijelovi.length - 1,
+    }));
+  }
+
+  /** Boja ćelije BR.SL. (glavni dan) i LIN. (dodatni dan), kao u PDF-u. */
+  glavniDan(g: SluzbaGrupa): Dan | null {
+    return g.dani[0] ?? null;
+  }
+
+  dodatniDan(g: SluzbaGrupa): Dan | null {
+    return g.dani[1] ?? null;
+  }
+
   vrstaTekst(g: SluzbaGrupa): string {
     return (
       (

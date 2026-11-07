@@ -1,93 +1,42 @@
+// Izgled namjerno prati ZET-ov PDF "APP službe": isti stupci, služba u dva
+// retka, obojana ćelija BR.SL. (i LIN. za drugi dan) i sive trake sekcija.
+
 :host {
-  --sp-text: #0f172a;
+  // boje kao u PDF-u
+  --pdf-radni: #0000ff;
+  --pdf-subota: #32cd32;
+  --pdf-nedjelja: #ff0000;
+  --pdf-line: #1f2937;
+  --pdf-grid: #9ca3af;
+  --pdf-section: #dcdcdc;
+  --pdf-text: #000;
   --sp-muted: #64748b;
-  --sp-border: #e2e8f0;
-  --sp-surface: #ffffff;
-  --sp-surface-2: #f8fafc;
-  --sp-radni: #2563eb;
-  --sp-subota: #16a34a;
-  --sp-nedjelja: #dc2626;
-  --sp-p: #b45309;
-  --sp-reserve: #7c3aed;
 
   display: block;
   container-type: inline-size;
-  color: var(--sp-text);
+  color: var(--pdf-text);
 }
 
-// ------------------------------------------------------------ sažetak, filteri
-
-.sp-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
+[data-dan="RADNI_DAN"] {
+  --dan: var(--pdf-radni);
+}
+[data-dan="SUBOTA"] {
+  --dan: var(--pdf-subota);
+}
+[data-dan="NEDJELJA"] {
+  --dan: var(--pdf-nedjelja);
 }
 
-.sp-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  font-size: 13px;
-  color: var(--sp-muted);
-  background: var(--sp-surface-2);
-  border: 1px solid var(--sp-border);
-  border-radius: 8px;
-
-  strong {
-    color: var(--sp-text);
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-.sp-chip-weeks {
-  flex-wrap: wrap;
-
-  .pi {
-    font-size: 12px;
-  }
-}
-
-.sp-week {
-  padding: 1px 7px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--p-primary-700);
-  background: var(--p-primary-50);
-  border-radius: 999px;
-}
-
-.sp-day {
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  margin-right: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  border-radius: 5px;
-
-  &[data-dan="RADNI_DAN"] {
-    background: var(--sp-radni);
-  }
-  &[data-dan="SUBOTA"] {
-    background: var(--sp-subota);
-  }
-  &[data-dan="NEDJELJA"] {
-    background: var(--sp-nedjelja);
-  }
-}
+// ------------------------------------------------------------ filteri
 
 .sp-toolbar {
   position: sticky;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
-  padding: 8px 0 12px;
+  gap: 8px 12px;
+  padding: 8px 0 10px;
   background: var(--sp-toolbar-bg, var(--p-dialog-background, #fff));
 }
 
@@ -120,24 +69,16 @@
   min-height: 34px;
   padding: 5px 10px;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
+  background: var(--dan);
   border: none;
-  border-radius: 7px;
+  border-radius: 4px;
   cursor: pointer;
   transition: opacity 0.15s;
 
-  &[data-dan="RADNI_DAN"] {
-    background: var(--sp-radni);
-  }
-  &[data-dan="SUBOTA"] {
-    background: var(--sp-subota);
-  }
-  &[data-dan="NEDJELJA"] {
-    background: var(--sp-nedjelja);
-  }
   &.is-off {
-    opacity: 0.3;
+    opacity: 0.25;
   }
 }
 
@@ -156,252 +97,240 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sp-weeks,
 .sp-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--sp-muted);
 }
 
-// ------------------------------------------------------------ zajednički dijelovi
-
-.sp-kind {
-  display: block;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--sp-p);
-  text-transform: uppercase;
-}
-
-.sp-part {
-  font-size: 12px;
-  color: var(--sp-muted);
-
-  &.is-p {
-    font-weight: 700;
-    color: var(--sp-p);
-  }
-}
-
-.sp-line {
-  display: inline-block;
-  min-width: 38px;
+.sp-week {
   padding: 1px 7px;
-  font-weight: 700;
-  text-align: center;
-  background: var(--sp-surface-2);
-  border: 1px solid var(--sp-border);
-  border-radius: 6px;
-
-  &.is-reserve {
-    color: var(--sp-reserve);
-    background: #f5f3ff;
-    border-color: #ddd6fe;
-  }
-}
-
-.sp-time {
-  font-variant-numeric: tabular-nums;
+  font-size: 12px;
   font-weight: 600;
+  color: var(--p-primary-700);
+  background: var(--p-primary-50);
+  border-radius: 999px;
 }
 
-.sp-night {
-  margin-left: 3px;
-  font-size: 11px;
-  color: var(--sp-muted);
-}
-
-.sp-muted {
-  color: var(--sp-muted);
-}
-
-.sp-empty {
-  padding: 24px !important;
-  text-align: center !important;
-  color: var(--sp-muted);
-}
-
-// ------------------------------------------------------------ tablica
+// ------------------------------------------------------------ tablica kao PDF
 
 .sp-table-wrap {
   overflow: auto;
-  max-height: 68vh;
-  background: var(--sp-surface);
-  border: 1px solid var(--sp-border);
-  border-radius: 10px;
+  max-height: 72vh;
+  background: #fff;
+  border: 1px solid var(--pdf-line);
+  -webkit-overflow-scrolling: touch;
 }
 
-.sp-table {
+.sp-pdf {
   width: 100%;
+  min-width: 400px;
   border-collapse: collapse;
-  font-size: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
 
   th,
   td {
-    padding: 6px 10px;
+    padding: 4px 5px;
     text-align: left;
     white-space: nowrap;
-    border-bottom: 1px solid var(--sp-border);
+    border-left: 1px solid var(--pdf-grid);
   }
 
-  th {
+  th:first-child,
+  td:first-child {
+    border-left: none;
+  }
+
+  thead th {
     position: sticky;
     top: 0;
-    z-index: 2;
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--sp-muted);
-    background: var(--sp-surface-2);
+    z-index: 3;
+    padding: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.15;
+    vertical-align: bottom;
+    background: #fff;
+    border-bottom: 2px solid var(--pdf-line);
   }
 
-  td[rowspan] {
-    vertical-align: top;
+  // jedna služba = jedan blok s debljom crtom ispod
+  .sp-duty {
+    border-bottom: 1px solid var(--pdf-line);
   }
 
-  .num {
+  .sp-duty tr:hover td {
+    background-color: rgba(0, 0, 0, 0.035);
+  }
+
+  // stupci
+  .c-br {
+    width: 44px;
+    text-align: center;
+  }
+  .c-lin {
+    width: 52px;
+  }
+  .c-vr {
+    width: 28px;
+    text-align: center;
+  }
+  .c-t {
+    width: 44px;
+  }
+  .c-h {
+    width: 40px;
     text-align: right;
-    font-variant-numeric: tabular-nums;
   }
 
-  tbody tr:hover td {
-    background: #f1f5f9;
+  // BR.SL. obojan po danu, prvi stupac ostaje vidljiv pri vodoravnom scrollu
+  .c-br {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #fff;
+  }
+  thead .c-br {
+    z-index: 4;
   }
 
-  tr.sp-multi:not(.sp-first) td {
-    border-top: 1px dashed var(--sp-border);
+  .sp-num {
+    font-weight: 700;
   }
-}
+  .sp-num[data-dan] {
+    color: #fff;
+    background: var(--dan);
+  }
 
-.sp-num {
-  font-size: 14px;
-  font-weight: 700;
-}
+  // drugi dan: obojana ćelija LIN.
+  .c-lin[data-dan] {
+    font-weight: 700;
+    color: #fff;
+    background: var(--dan);
+  }
 
-.sp-total {
-  font-weight: 700;
-}
+  .c-lin.is-reserve {
+    font-style: italic;
+  }
 
-.sp-section td {
-  padding: 7px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-align: center;
-  text-transform: uppercase;
-  color: var(--sp-muted);
-  background: #eef2f7;
-}
+  .sp-p {
+    font-weight: 700;
+  }
 
-// ------------------------------------------------------------ kartice
+  .sp-total {
+    font-weight: 700;
+  }
 
-.sp-cards {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-}
+  .sp-section td {
+    padding: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    white-space: normal;
+    background: var(--pdf-section);
+    border-bottom: 1px solid var(--pdf-line);
+  }
 
-.sp-card-section {
-  margin-top: 6px;
-  padding: 6px 2px 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--sp-muted);
-}
-
-.sp-card {
-  padding: 10px 12px;
-  background: var(--sp-surface);
-  border: 1px solid var(--sp-border);
-  border-radius: 12px;
-}
-
-.sp-card-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-
-  .sp-kind {
-    display: inline;
+  .sp-empty {
+    padding: 24px !important;
+    text-align: center !important;
+    color: var(--sp-muted);
   }
 }
 
-.sp-card-num {
-  margin-right: 2px;
-  font-size: 17px;
-  font-weight: 800;
-}
+// ------------------------------------------------------------ legenda
 
-.sp-card-hours {
-  margin-left: auto;
-  font-size: 12.5px;
-  color: var(--sp-muted);
-  font-variant-numeric: tabular-nums;
-
-  strong {
-    color: var(--sp-text);
-  }
-}
-
-.sp-card-part {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 10px;
-  align-items: center;
-  padding: 6px 0;
-  border-top: 1px solid var(--sp-border);
-
-  &.is-p {
-    border-top-style: dashed;
-  }
-}
-
-.sp-card-route {
+.sp-legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 6px;
-  font-size: 14px;
+  gap: 6px 14px;
+  margin-top: 10px;
+  font-size: 12.5px;
 
-  .pi-arrow-right {
-    font-size: 11px;
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  i {
+    display: inline-block;
+    width: 22px;
+    height: 12px;
+    background: var(--dan);
+    border: 1px solid var(--pdf-line);
   }
 }
 
-.sp-place {
-  color: var(--sp-muted);
-  font-size: 13px;
-}
-
-.sp-card-meta {
-  grid-column: 2;
-  font-size: 12px;
+.sp-legend-hint {
+  flex-basis: 100%;
   color: var(--sp-muted);
 }
 
-.sp-card-foot {
-  padding-top: 6px;
-  font-size: 12px;
-  color: var(--sp-muted);
-  border-top: 1px solid var(--sp-border);
+.sp-narrow-only {
+  display: none !important;
 }
 
-// Uski prostor: kartice umjesto tablice
-@container (max-width: 760px) {
-  .sp-table-wrap {
-    display: none;
-  }
-  .sp-cards {
-    display: flex;
-  }
+// Usko (mobitel): sve što vozaču treba stane bez vodoravnog scrolla;
+// noćni rad i druga smjena se skrivaju.
+@container (max-width: 520px) {
   .sp-search {
-    max-width: none;
     flex-basis: 100%;
+    max-width: none;
+  }
+  .sp-day-filter {
+    flex: 1 1 auto;
+  }
+  .sp-day-btn {
+    flex: 1 1 0;
+    padding: 5px 6px;
   }
   .sp-count {
-    margin-left: 0;
+    margin-left: auto;
+  }
+  .sp-narrow-only {
+    display: inline-flex !important;
+  }
+
+  .sp-pdf {
+    min-width: 0;
+    font-size: 11.5px;
+
+    th,
+    td {
+      padding: 3px 2px;
+    }
+    thead th {
+      padding: 4px 2px;
+      font-size: 9px;
+    }
+    .c-noc,
+    .c-dr {
+      display: none;
+    }
+    .c-br {
+      width: 34px;
+    }
+    .c-lin {
+      width: auto;
+    }
+    .c-vr {
+      width: 18px;
+    }
+    .c-t {
+      width: auto;
+    }
+    .c-h {
+      width: auto;
+    }
   }
 }

@@ -1,31 +1,4 @@
 <div class="sp">
-  <!-- Sažetak -->
-  <div class="sp-summary">
-    <div class="sp-chip">
-      <strong>{{ grupe.length }}</strong> službi
-    </div>
-    <div class="sp-chip">
-      <strong>{{ brojDvodijelnih }}</strong> dvodijelnih
-    </div>
-    @if (imaDane) {
-      @for (d of dani; track d.kljuc) {
-        <div class="sp-chip">
-          <span class="sp-day" [attr.data-dan]="d.kljuc">{{ d.kratko }}</span>
-          <strong>{{ brojPoDanu(d.kljuc) }}</strong>
-        </div>
-      }
-    }
-    @if (tjedni?.length) {
-      <div class="sp-chip sp-chip-weeks">
-        <i class="pi pi-calendar"></i>
-        Korištena u tjednima:
-        @for (t of tjedni; track t.godina + "-" + t.brojTjedna) {
-          <span class="sp-week">{{ t.brojTjedna }}/{{ t.godina }}</span>
-        }
-      </div>
-    }
-  </div>
-
   <!-- Filteri -->
   <div class="sp-toolbar" [style.top.px]="vrhFiltera">
     <span class="sp-search">
@@ -34,7 +7,7 @@
         pInputText
         type="search"
         inputmode="search"
-        placeholder="Broj, linija, mjesto…"
+        placeholder="Broj službe, linija, mjesto…"
         [(ngModel)]="pretraga"
         (ngModelChange)="filtriraj()"
       />
@@ -63,177 +36,117 @@
       />
       Samo dvodijelne
     </label>
-    <span class="sp-count">{{ prikazane.length }} / {{ grupe.length }}</span>
+    <span class="sp-count">
+      {{ prikazane.length }} / {{ grupe.length }} službi
+    </span>
   </div>
+
+  @if (tjedni?.length) {
+    <p class="sp-weeks">
+      <i class="pi pi-calendar"></i> Korištena u tjednima:
+      @for (t of tjedni; track t.godina + "-" + t.brojTjedna) {
+        <span class="sp-week">{{ t.brojTjedna }}/{{ t.godina }}</span>
+      }
+    </p>
+  }
 
   @if (!imaDane && grupe.length) {
     <p class="sp-note">
       <i class="pi pi-info-circle"></i>
-      Ova verzija je uvezena starim parserom, pa nema dane (R/S/N) ni sekcije.
+      Ova verzija je uvezena starim parserom, pa nema boje dana ni sekcije.
     </p>
   }
 
-  <!-- Tablica (široko) -->
+  <!-- Tablica kao u PDF-u: svaka služba u dva retka -->
   <div class="sp-table-wrap">
-    <table class="sp-table">
+    <table class="sp-pdf">
       <thead>
         <tr>
-          <th>BR.SL.</th>
-          @if (imaDane) {
-            <th>Dani</th>
-          }
-          <th>Dio</th>
-          <th>Linija</th>
-          <th>V.R.</th>
-          <th>Nastup</th>
-          <th>Od</th>
-          <th>Do</th>
-          <th>Završetak</th>
-          <th class="num">Traje</th>
-          <th class="num">Noćni</th>
-          <th class="num">Dr. smj.</th>
-          <th class="num">Efek.</th>
-          <th class="num">Ukupno</th>
+          <th class="c-br">BR.SL.</th>
+          <th class="c-lin">LIN.</th>
+          <th class="c-vr">V.R.</th>
+          <th class="c-mj">NASTUP<br />SLUŽBE</th>
+          <th class="c-t">OD</th>
+          <th class="c-t">DO</th>
+          <th class="c-mj">ZAVRŠ.<br />SLUŽBE</th>
+          <th class="c-h c-noc">NOĆNI<br />RAD</th>
+          <th class="c-h c-dr">DR.<br />SMJ.</th>
+          <th class="c-h">EFEK.<br />SATI</th>
+          <th class="c-h">UKUP.<br />SATI</th>
         </tr>
       </thead>
-      <tbody>
-        @for (g of prikazane; track g.broj; let i = $index) {
+      @for (g of prikazane; track g.broj; let i = $index) {
+        <tbody class="sp-duty">
           @if (novaSekcija(i); as sekcija) {
             <tr class="sp-section">
-              <td [attr.colspan]="imaDane ? 14 : 13">{{ sekcija }}</td>
+              <td colspan="11">{{ sekcija }}</td>
             </tr>
           }
-          @for (d of g.dijelovi; track d.br_sl; let prvi = $first) {
-            <tr
-              [class.sp-first]="prvi"
-              [class.sp-multi]="g.dijelovi.length > 1"
-            >
-              @if (prvi) {
-                <td class="sp-num" [attr.rowspan]="g.dijelovi.length">
+          @for (r of redovi(g); track $index) {
+            <tr [class.is-first]="r.prvi">
+              <!-- BR.SL. (prvi redak) ili P (drugi dio) -->
+              @if (r.prvi) {
+                <td class="c-br sp-num" [attr.data-dan]="glavniDan(g)">
                   {{ g.broj }}
-                  @if (vrstaTekst(g)) {
-                    <span class="sp-kind">{{ vrstaTekst(g) }}</span>
-                  }
                 </td>
-                @if (imaDane) {
-                  <td [attr.rowspan]="g.dijelovi.length">
-                    <ng-container
-                      *ngTemplateOutlet="daniTpl; context: { $implicit: g }"
-                    />
-                  </td>
-                }
+              } @else {
+                <td class="c-br sp-p">{{ r.dio ? "P" : "" }}</td>
               }
-              <td>
-                <span class="sp-part" [class.is-p]="!prvi">{{ d.br_sl }}</span>
-              </td>
-              <td>
-                <span class="sp-line" [class.is-reserve]="jePricuva(d.linija)">
-                  {{ d.linija || "—" }}
-                </span>
-              </td>
-              <td>{{ d.varijanta || "" }}</td>
-              <td>{{ d.nastup_sluzbe }}</td>
-              <td class="sp-time">{{ d.od }}</td>
-              <td class="sp-time">
-                {{ d.do }}
-                @if (prekoPonoci(d)) {
-                  <i class="pi pi-moon sp-night" title="Prelazi ponoć"></i>
-                }
-              </td>
-              <td>{{ d.zavrsna_sluzba }}</td>
-              <td class="num sp-muted">{{ trajanjeTekst(d.trajanje) }}</td>
-              @if (prvi) {
-                <td class="num" [attr.rowspan]="g.dijelovi.length">
-                  {{ g.prvi.nocni_rad }}
+
+              @if (r.dio; as d) {
+                <td
+                  class="c-lin"
+                  [attr.data-dan]="r.prvi ? dodatniDan(g) : null"
+                  [class.is-reserve]="jePricuva(d.linija)"
+                >
+                  {{ d.linija }}
                 </td>
-                <td class="num" [attr.rowspan]="g.dijelovi.length">
-                  {{ g.prvi.druga_smjena }}
-                </td>
-                <td class="num" [attr.rowspan]="g.dijelovi.length">
-                  {{ g.prvi.efektivni_sati }}
-                </td>
-                <td class="num sp-total" [attr.rowspan]="g.dijelovi.length">
-                  {{ g.prvi.ukupni_sati }}
-                </td>
+                <td class="c-vr">{{ d.varijanta }}</td>
+                <td class="c-mj">{{ d.nastup_sluzbe }}</td>
+                <td class="c-t">{{ d.od }}</td>
+                <td class="c-t">{{ d.do }}</td>
+                <td class="c-mj">{{ d.zavrsna_sluzba }}</td>
+              } @else {
+                <td colspan="6"></td>
+              }
+
+              <td class="c-h c-noc">{{ r.prvi ? g.prvi.nocni_rad : "" }}</td>
+              @if (r.zadnji) {
+                <td class="c-h c-dr">{{ g.prvi.druga_smjena }}</td>
+                <td class="c-h">{{ g.prvi.efektivni_sati }}</td>
+                <td class="c-h sp-total">{{ g.prvi.ukupni_sati }}</td>
+              } @else {
+                <td class="c-h c-dr"></td>
+                <td class="c-h"></td>
+                <td class="c-h"></td>
               }
             </tr>
           }
-        } @empty {
+        </tbody>
+      } @empty {
+        <tbody>
           <tr>
-            <td class="sp-empty" [attr.colspan]="imaDane ? 14 : 13">
+            <td class="sp-empty" colspan="11">
               Nijedna služba ne odgovara filteru.
             </td>
           </tr>
-        }
-      </tbody>
+        </tbody>
+      }
     </table>
   </div>
 
-  <!-- Kartice (usko / mobitel) -->
-  <div class="sp-cards">
-    @for (g of prikazane; track g.broj; let i = $index) {
-      @if (novaSekcija(i); as sekcija) {
-        <div class="sp-card-section">{{ sekcija }}</div>
-      }
-      <article class="sp-card">
-        <header class="sp-card-head">
-          <span class="sp-card-num">{{ g.broj }}</span>
-          <ng-container
-            *ngTemplateOutlet="daniTpl; context: { $implicit: g }"
-          />
-          @if (vrstaTekst(g)) {
-            <span class="sp-kind">{{ vrstaTekst(g) }}</span>
-          }
-          <span class="sp-card-hours">
-            {{ g.prvi.efektivni_sati }} ·
-            <strong>{{ g.prvi.ukupni_sati }}</strong> h
-          </span>
-        </header>
-        @for (d of g.dijelovi; track d.br_sl; let prvi = $first) {
-          <div class="sp-card-part" [class.is-p]="!prvi">
-            <span class="sp-line" [class.is-reserve]="jePricuva(d.linija)">
-              {{ d.linija || "—" }}
-            </span>
-            <div class="sp-card-route">
-              <span class="sp-time">{{ d.od }}</span>
-              <span class="sp-place">{{ d.nastup_sluzbe }}</span>
-              <i class="pi pi-arrow-right sp-muted"></i>
-              <span class="sp-time">{{ d.do }}</span>
-              <span class="sp-place">{{ d.zavrsna_sluzba }}</span>
-              @if (prekoPonoci(d)) {
-                <i class="pi pi-moon sp-night" title="Prelazi ponoć"></i>
-              }
-            </div>
-            <span class="sp-card-meta">
-              @if (!prvi) {
-                <b class="sp-part is-p">P</b>
-              }
-              @if (d.varijanta) {
-                V.R. {{ d.varijanta }} ·
-              }
-              {{ trajanjeTekst(d.trajanje) }}
-            </span>
-          </div>
-        }
-        @if (g.prvi.nocni_rad || g.prvi.druga_smjena) {
-          <footer class="sp-card-foot">
-            Noćni {{ g.prvi.nocni_rad || "–" }} · Dr. smjena
-            {{ g.prvi.druga_smjena || "–" }}
-          </footer>
-        }
-      </article>
-    } @empty {
-      <p class="sp-empty">Nijedna služba ne odgovara filteru.</p>
-    }
-  </div>
-</div>
-
-<ng-template #daniTpl let-g>
-  @for (dan of dani; track dan.kljuc) {
-    @if (g.dani.includes(dan.kljuc)) {
-      <span class="sp-day" [attr.data-dan]="dan.kljuc" [title]="dan.naziv">
-        {{ dan.kratko }}
+  @if (imaDane) {
+    <!-- Legenda kao na zadnjoj stranici PDF-a -->
+    <div class="sp-legend">
+      <span><i data-dan="RADNI_DAN"></i> Radni dan</span>
+      <span><i data-dan="SUBOTA"></i> Subota</span>
+      <span><i data-dan="NEDJELJA"></i> Nedjelja</span>
+      <span class="sp-legend-hint">
+        Dvije boje (BR.SL. + LIN.) = vrijedi za oba dana · P = drugi dio službe
       </span>
-    }
+      <span class="sp-legend-hint sp-narrow-only">
+        Noćni rad i druga smjena vide se kad okreneš mobitel.
+      </span>
+    </div>
   }
-</ng-template>
+</div>
