@@ -26,3 +26,8 @@ export function izvorniHash(vrijednost?: string): string | undefined {
   }
   return vrijednost;
 }
+
+/** Polje iz multipart forme ("true" / "1") kao boolean. */
+export function zastavica(vrijednost?: string): boolean {
+  return vrijednost === 'true' || vrijednost === '1';
+}

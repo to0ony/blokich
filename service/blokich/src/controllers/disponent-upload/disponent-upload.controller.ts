@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { izvorniHash } from 'src/pdf/pdf-input';
+import { izvorniHash, zastavica } from 'src/pdf/pdf-input';
 import { DisponentUploadService } from '../../services/disponent-upload/disponent-upload.service';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { AdminOnly } from 'src/authentication/decorators/admin-only.decorator';
@@ -42,6 +42,7 @@ export class DisponentUploadController {
   async uploadDisponent(
     @UploadedFile() file: Express.Multer.File,
     @Body('izvorni_sha256') izvorni?: string,
+    @Body('prepisi') prepisi?: string,
   ) {
     if (!file) {
       throw new BadRequestException('PDF datoteka nije poslana.');
@@ -51,6 +52,9 @@ export class DisponentUploadController {
       file,
       'rucno',
       izvorniHash(izvorni),
+      {
+        prepisi: zastavica(prepisi),
+      },
     );
   }
 

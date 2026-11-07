@@ -22,6 +22,17 @@ export interface SluzbaPripremaNovo {
   filename: string;
   /** Upozorenja parsera (npr. služba čiji se sati ne slažu). */
   upozorenja: string[];
+  /** Ponovni ručni uvoz istog PDF-a: prepisuje se ova postojeća verzija. */
+  prepisi?: {
+    verzija: string;
+    uploadId: unknown;
+    izvorni_sha256?: string;
+  };
+}
+
+export interface PripremaOpcije {
+  /** Isti PDF se ipak ponovno parsira i prepisuje postojeći uvoz. */
+  prepisi?: boolean;
 }
 
 export type SluzbaPriprema =
@@ -52,9 +63,10 @@ export class SluzbaUploadService {
     file: PdfInput,
     izvor: PdfIzvor = 'rucno',
     izvorniSha256?: string,
+    opcije: PripremaOpcije = {},
   ) {
     try {
-      const priprema = await this.pripremi(file);
+      const priprema = await this.pripremi(file, opcije);
 
       if (priprema.status !== 'novo') {
         // Već učitan PDF može naknadno postati ispravak ZET-ovog originala.
@@ -87,8 +99,14 @@ export class SluzbaUploadService {
     }
   }
 
-  /** Usporedi hash i isparsira PDF. Ne upisuje ništa u bazu. */
-  async pripremi(file: PdfInput): Promise<SluzbaPriprema> {
+  /**
+   * Usporedi hash i isparsira PDF. Ne upisuje ništa u bazu.
+   * S `prepisi` isti PDF se ipak parsira, a spremi() prepisuje njegovu verziju.
+   */
+  async pripremi(
+    file: PdfInput,
+    opcije: PripremaOpcije = {},
+  ): Promise<SluzbaPriprema> {
     const hash = sha256(file.buffer);
 
     const zadnji = await this.sluzbaUploadModel
@@ -96,7 +114,9 @@ export class SluzbaUploadService {
       .sort({ datum_unosa: -1 })
       .lean();
 
-    if (zadnji?.sha256 === hash || zadnji?.izvorni_sha256 === hash) {
+    const isti = zadnji?.sha256 === hash || zadnji?.izvorni_sha256 === hash;
+
+    if (isti && !opcije.prepisi) {
       return {
         status: 'nema_promjene',
         poruka:
@@ -131,6 +151,19 @@ export class SluzbaUploadService {
       sluzbe,
       filename: file.originalname,
       upozorenja,
+      ...(isti && zadnji?.verzija
+        ? {
+            prepisi: {
+              verzija: zadnji.verzija,
+              uploadId: zadnji._id,
+              // Ponovni uvoz ZET originala briše vezu na raniji ispravak.
+              izvorni_sha256:
+                zadnji.izvorni_sha256 === hash
+                  ? undefined
+                  : zadnji.izvorni_sha256,
+            },
+          }
+        : {}),
     };
   }
 
@@ -141,6 +174,11 @@ export class SluzbaUploadService {
     izvorniSha256?: string,
   ) {
     const { sluzbe, sha256: hash } = priprema;
+
+    if (priprema.prepisi) {
+      return this.prepisi(file, priprema, izvor, izvorniSha256);
+    }
+
     const verzija = await this.generateVersion();
 
     await this.sluzbaModel.create({ verzija, sluzbe });
@@ -158,6 +196,49 @@ export class SluzbaUploadService {
     return {
       status: 'obradjeno' as const,
       poruka: `Uspješno spremljeno ${sluzbe.length} službi. Verzija: ${verzija}`,
+      verzija,
+      filename: file.originalname,
+    };
+  }
+
+  /**
+   * Isti PDF ponovno: službe postojeće verzije zamjenjuju se novo izvučenima.
+   * Verzija ostaje ista, pa disponenti koji je koriste ostaju povezani.
+   */
+  private async prepisi(
+    file: PdfInput,
+    priprema: SluzbaPripremaNovo,
+    izvor: PdfIzvor,
+    izvorniSha256?: string,
+  ) {
+    const { sluzbe, sha256: hash } = priprema;
+    const { verzija, uploadId } = priprema.prepisi!;
+
+    const { matchedCount } = await this.sluzbaModel.updateOne(
+      { verzija },
+      { $set: { sluzbe } },
+    );
+    if (!matchedCount) {
+      await this.sluzbaModel.create({ verzija, sluzbe });
+    }
+
+    const izvorni = izvorniSha256 ?? priprema.prepisi!.izvorni_sha256;
+    const set: Record<string, unknown> = {
+      datum_unosa: new Date(),
+      broj_ubacenih: sluzbe.length,
+      original_filename: file.originalname,
+      sha256: hash,
+      izvor,
+    };
+    if (izvorni) set.izvorni_sha256 = izvorni;
+    await this.sluzbaUploadModel.updateOne(
+      { _id: uploadId },
+      izvorni ? { $set: set } : { $set: set, $unset: { izvorni_sha256: 1 } },
+    );
+
+    return {
+      status: 'obradjeno' as const,
+      poruka: `Verzija ${verzija} prepisana: ${sluzbe.length} službi.`,
       verzija,
       filename: file.originalname,
     };

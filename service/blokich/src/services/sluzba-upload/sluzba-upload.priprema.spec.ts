@@ -185,3 +185,109 @@ describe('SluzbaUploadService.getPovijest', () => {
     expect(povijest[1].tjedni).toEqual([]);
   });
 });
+
+describe('SluzbaUploadService – ponovni ručni uvoz (prepisi)', () => {
+  const file = { buffer: Buffer.from('pdf'), originalname: 's.pdf' };
+  const hash = sha256(file.buffer);
+
+  const napravi = (zadnji: any) => {
+    const sluzbaModel = {
+      create: jest.fn(),
+      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1 }),
+    };
+    const uploadModel = {
+      create: jest.fn(),
+      updateOne: jest.fn(),
+      findOne: () => ({
+        sort: () => ({ lean: () => Promise.resolve(zadnji) }),
+      }),
+    };
+    const pdf = {
+      extractSluzba: jest
+        .fn()
+        .mockResolvedValue({ sluzbe: [{ br_sl: '1' }, { br_sl: '1P' }] }),
+    };
+    const rucniUvoz = { zabiljezi: jest.fn() };
+    const service = new SluzbaUploadService(
+      sluzbaModel as any,
+      uploadModel as any,
+      pdf as any,
+      rucniUvoz as any,
+      {} as any,
+    );
+    return { service, pdf, sluzbaModel, uploadModel, rucniUvoz };
+  };
+
+  it('isti PDF s prepisi ponovno parsira i prepisuje postojeću verziju', async () => {
+    const { service, pdf, sluzbaModel, uploadModel, rucniUvoz } = napravi({
+      _id: 'u1',
+      sha256: hash,
+      verzija: '2026-45-1',
+    });
+
+    const rezultat = await service.processPdf(file, 'rucno', undefined, {
+      prepisi: true,
+    });
+
+    expect(pdf.extractSluzba).toHaveBeenCalled();
+    expect(sluzbaModel.updateOne).toHaveBeenCalledWith(
+      { verzija: '2026-45-1' },
+      { $set: { sluzbe: [{ br_sl: '1' }, { br_sl: '1P' }] } },
+    );
+    expect(sluzbaModel.create).not.toHaveBeenCalled();
+    expect(uploadModel.create).not.toHaveBeenCalled();
+    expect(uploadModel.updateOne).toHaveBeenCalledWith(
+      { _id: 'u1' },
+      expect.objectContaining({
+        $set: expect.objectContaining({ broj_ubacenih: 2, sha256: hash }),
+      }),
+    );
+    expect(rezultat).toMatchObject({
+      status: 'obradjeno',
+      verzija: '2026-45-1',
+      poruka: 'Verzija 2026-45-1 prepisana: 2 službi.',
+    });
+    expect(rucniUvoz.zabiljezi).toHaveBeenCalledWith(
+      expect.objectContaining({ dokument: 'sluzba', oznaka: '2026-45-1' }),
+    );
+  });
+
+  it('ispravak zadržava vezu na ZET original', async () => {
+    const { service, uploadModel } = napravi({
+      _id: 'u1',
+      sha256: hash,
+      izvorni_sha256: 'zet-original',
+      verzija: '2026-45-1',
+    });
+
+    await service.processPdf(file, 'rucno', undefined, { prepisi: true });
+
+    const [, update] = uploadModel.updateOne.mock.calls[0];
+    expect(update.$set.izvorni_sha256).toBe('zet-original');
+    expect(update.$unset).toBeUndefined();
+  });
+
+  it('ponovni uvoz ZET originala briše vezu na raniji ispravak', async () => {
+    const { service, uploadModel } = napravi({
+      _id: 'u1',
+      sha256: 'hash-ispravka',
+      izvorni_sha256: hash,
+      verzija: '2026-45-1',
+    });
+
+    await service.processPdf(file, 'rucno', undefined, { prepisi: true });
+
+    const [, update] = uploadModel.updateOne.mock.calls[0];
+    expect(update.$set.sha256).toBe(hash);
+    expect(update.$unset).toEqual({ izvorni_sha256: 1 });
+  });
+
+  it('bez prepisi isti PDF i dalje vraća nema_promjene', async () => {
+    const { service, pdf } = napravi({ sha256: hash, verzija: '2026-45-1' });
+
+    const rezultat = await service.processPdf(file, 'rucno');
+
+    expect(rezultat.status).toBe('nema_promjene');
+    expect(pdf.extractSluzba).not.toHaveBeenCalled();
+  });
+});

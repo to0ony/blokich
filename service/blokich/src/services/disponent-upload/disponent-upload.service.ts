@@ -21,6 +21,13 @@ export interface DisponentPripremaNovo {
   sha256: string;
   parsed: any;
   filename: string;
+  /** Ponovni ručni uvoz istog PDF-a: tjedan se prepisuje. */
+  prepisi?: boolean;
+}
+
+export interface PripremaOpcije {
+  /** Isti PDF se ipak ponovno parsira i prepisuje postojeći tjedan. */
+  prepisi?: boolean;
 }
 
 export type DisponentPriprema =
@@ -101,9 +108,10 @@ export class DisponentUploadService {
     file: PdfInput,
     izvor: PdfIzvor = 'rucno',
     izvorniSha256?: string,
+    opcije: PripremaOpcije = {},
   ) {
     try {
-      const priprema = await this.pripremi(file);
+      const priprema = await this.pripremi(file, opcije);
 
       if (priprema.status !== 'novo') {
         // Već učitan PDF može naknadno postati ispravak ZET-ovog originala.
@@ -136,8 +144,14 @@ export class DisponentUploadService {
     }
   }
 
-  /** Usporedi hash i isparsira PDF. Ne upisuje ništa u bazu. */
-  async pripremi(file: PdfInput): Promise<DisponentPriprema> {
+  /**
+   * Usporedi hash i isparsira PDF. Ne upisuje ništa u bazu.
+   * S `prepisi` isti PDF se ipak parsira, a spremi() prepisuje tjedan.
+   */
+  async pripremi(
+    file: PdfInput,
+    opcije: PripremaOpcije = {},
+  ): Promise<DisponentPriprema> {
     const hash = sha256(file.buffer);
 
     const zadnji = await this.disponentModel
@@ -145,7 +159,9 @@ export class DisponentUploadService {
       .sort({ datum_unosa: -1 })
       .lean();
 
-    if (zadnji?.sha256 === hash || zadnji?.izvorni_sha256 === hash) {
+    const isti = zadnji?.sha256 === hash || zadnji?.izvorni_sha256 === hash;
+
+    if (isti && !opcije.prepisi) {
       return {
         status: 'nema_promjene',
         poruka:
@@ -170,6 +186,7 @@ export class DisponentUploadService {
       sha256: hash,
       parsed,
       filename: file.originalname,
+      prepisi: isti,
     };
   }
 
@@ -184,15 +201,22 @@ export class DisponentUploadService {
     const sviSluzBrojevi = parsed.radnici.map((r: any) => r.radnik);
     await this.addNewDriversToGodisnji(sviSluzBrojevi);
 
-    await this.disponentModel.deleteOne({
-      godina: parsed.godina,
-      brojTjedna: parsed.brojTjedna,
-    });
-
-    const verzijaSluzbi = await this.sluzbaUploadModel
-      .findOne()
-      .sort({ datum_unosa: -1 })
+    const tjedan = { godina: parsed.godina, brojTjedna: parsed.brojTjedna };
+    const postojeci = await this.disponentModel
+      .findOne(tjedan, 'verzija_sluzbe')
       .lean();
+
+    await this.disponentModel.deleteOne(tjedan);
+
+    // Ponovni uvoz istog PDF-a zadržava verziju službi s kojom je tjedan
+    // bio povezan; novi disponent uzima najnoviju.
+    const verzijaSluzbi =
+      priprema.prepisi && postojeci?.verzija_sluzbe
+        ? { verzija: postojeci.verzija_sluzbe }
+        : await this.sluzbaUploadModel
+            .findOne()
+            .sort({ datum_unosa: -1 })
+            .lean();
 
     const doc = await this.disponentModel.create({
       ...parsed,
@@ -217,7 +241,9 @@ export class DisponentUploadService {
 
     return {
       status: 'obradjeno' as const,
-      poruka: `Uspješno spremljeno ${parsed.radnici.length} vozača. Tjedan: ${parsed.brojTjedna}/${parsed.godina}`,
+      poruka: postojeci
+        ? `Tjedan ${parsed.brojTjedna}/${parsed.godina} prepisan: ${parsed.radnici.length} vozača.`
+        : `Uspješno spremljeno ${parsed.radnici.length} vozača. Tjedan: ${parsed.brojTjedna}/${parsed.godina}`,
       brojTjedna: parsed.brojTjedna,
       godina: parsed.godina,
       filename: file.originalname,
