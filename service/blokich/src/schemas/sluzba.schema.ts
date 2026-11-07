@@ -14,6 +14,15 @@ export class SluzbaItem {
   @Prop() druga_smjena: string;
   @Prop() efektivni_sati: string;
   @Prop() ukupni_sati: string;
+  /** RADNI_DAN / SUBOTA / NEDJELJA – iz boja u PDF-u. */
+  @Prop({ type: [String], default: undefined }) dani?: string[];
+  /** Datum važenja sa zaglavlja stranice (YYYY-MM-DD). */
+  @Prop() vazi_od?: string;
+  @Prop() vazi_do?: string;
+  /** Naslov sekcije u PDF-u, npr. "PRIČUVE", "ŠKOLSKI PRIJEVOZ BEZ TURNUSA". */
+  @Prop() sekcija?: string;
+  /** jednodijelna / s_pauzom / dvokratna */
+  @Prop() vrsta?: string;
 }
 
 export const SluzbaItemSchema = SchemaFactory.createForClass(SluzbaItem);

@@ -291,7 +291,9 @@
             </p>
             <div
               *ngFor="let s of povijestSluzbi; let prva = first"
-              class="adm-povijest-red"
+              class="adm-povijest-red adm-povijest-sluzba"
+              [class.is-clickable]="s.verzija"
+              (click)="otvoriSluzbe(s)"
             >
               <span class="adm-povijest-datum">
                 {{ s.datum_unosa | date: "d.M.yyyy. HH:mm" }}
@@ -302,6 +304,25 @@
               <code *ngIf="s.sha256" [title]="s.sha256">{{ s.sha256 | slice: 0 : 12 }}</code>
               <p-tag *ngIf="izvorTekst(s)" [value]="izvorTekst(s)" severity="secondary" />
               <p-tag *ngIf="prva" value="Aktualno" severity="success" />
+              <span class="adm-povijest-tjedni">
+                <ng-container *ngIf="s.tjedni?.length; else nekoristena">
+                  <i class="pi pi-calendar"></i>
+                  <span *ngFor="let t of s.tjedni" class="adm-tjedan">
+                    T{{ t.brojTjedna }}/{{ t.godina }}
+                  </span>
+                </ng-container>
+                <ng-template #nekoristena>
+                  <span class="adm-povijest-datum">Nijedan disponent je ne koristi</span>
+                </ng-template>
+              </span>
+              <p-button
+                *ngIf="s.verzija"
+                label="Pregledaj"
+                icon="pi pi-eye"
+                size="small"
+                [outlined]="true"
+                (onClick)="otvoriSluzbe(s); $event.stopPropagation()"
+              />
             </div>
           </p-tabpanel>
 
@@ -326,6 +347,12 @@
     </div>
   </section>
 </div>
+
+<app-sluzbe-pregled
+  [verzija]="pregledSluzbi?.verzija ?? null"
+  [povijest]="pregledSluzbi"
+  (zatvoreno)="pregledSluzbi = null"
+/>
 
 <ng-template #statSkeleton>
   <p-skeleton width="60%" height="1.9rem" styleClass="mb-2" />

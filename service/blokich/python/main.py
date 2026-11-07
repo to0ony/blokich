@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from disponent_utils import extract_disponent_from_bytes
 from godisnji_utils import extract_godisnji_from_bytes
-from sluzba_utils import extract_sluzba_from_bytes
+from sluzba_utils import extract_sluzba_full
 import pdfplumber
 import fitz  # PyMuPDF
 import io
@@ -35,7 +35,7 @@ async def extract_disponent(file: UploadFile = File(...)):
 async def extract_sluzba(file: UploadFile = File(...)):
     try:
         content = await file.read()
-        result = extract_sluzba_from_bytes(content)
-        return {"sluzbe": result}
+        # {"sluzbe": [...], "upozorenja": [...], "sazetak": {...}}
+        return extract_sluzba_full(content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
