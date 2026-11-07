@@ -187,3 +187,35 @@
   margin: 16px 0;
   background: var(--vz-border);
 }
+
+// Dvodijelna služba: pauza između dijelova, sati jednom za cijelu službu
+.sl-pause {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vz-muted);
+
+  .pi {
+    font-size: 11px;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--vz-border);
+  }
+}
+
+.sl-hours-label {
+  margin-top: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--vz-muted);
+}

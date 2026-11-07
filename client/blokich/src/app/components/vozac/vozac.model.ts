@@ -5,7 +5,13 @@ dayjs.extend(isoWeek);
 
 export type DanKey = 'pon' | 'uto' | 'sri' | 'cet' | 'pet' | 'sub' | 'ned';
 export type TjedanTip = 'trenutni' | 'naredni';
-export type VozacView = 'raspored' | 'kalendar' | 'danas' | 'linije' | 'sluzbe' | 'statistika';
+export type VozacView =
+  | 'raspored'
+  | 'kalendar'
+  | 'danas'
+  | 'linije'
+  | 'sluzbe'
+  | 'statistika';
 
 export const DANI: { key: DanKey; naziv: string; kratko: string }[] = [
   { key: 'pon', naziv: 'Ponedjeljak', kratko: 'Pon' },
@@ -30,6 +36,45 @@ export interface Sluzba {
   druga_smjena?: string;
   efektivni_sati?: string;
   ukupni_sati?: string;
+}
+
+type SatiSluzbe = Pick<
+  Sluzba,
+  'ukupni_sati' | 'efektivni_sati' | 'nocni_rad' | 'druga_smjena'
+>;
+
+/**
+ * Sati (ukupno, efektivno, noćni, druga smjena) vrijede za cijelu službu i
+ * upisani su u svaki njezin dio (308 i 308P) – ovdje se uzimaju jednom.
+ */
+export function satiSluzbe(dijelovi: SatiSluzbe[]): SatiSluzbe {
+  const prvi = (k: keyof SatiSluzbe) =>
+    dijelovi.map((d) => d[k]).find((v) => !!v?.trim());
+  return {
+    ukupni_sati: prvi('ukupni_sati'),
+    efektivni_sati: prvi('efektivni_sati'),
+    nocni_rad: prvi('nocni_rad'),
+    druga_smjena: prvi('druga_smjena'),
+  };
+}
+
+/** Minute od kraja jednog dijela do početka sljedećeg (i preko ponoći). */
+export function pauzaMinuta(kraj?: string, pocetak?: string): number | null {
+  const min = (t?: string) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(t ?? '');
+    return m ? +m[1] * 60 + +m[2] : null;
+  };
+  const a = min(kraj);
+  const b = min(pocetak);
+  return a === null || b === null ? null : (b - a + 1440) % 1440;
+}
+
+/** "30 min", "3 h 40 min", "4 h" */
+export function trajanjeTekst(minute: number): string {
+  const h = Math.floor(minute / 60);
+  const m = minute % 60;
+  if (!h) return `${m} min`;
+  return m ? `${h} h ${m} min` : `${h} h`;
 }
 
 /** Dan bez službe: oznaka iz disponenta (O, Ob, I-GO…). */
@@ -166,7 +211,9 @@ export function kolegaKljuc(k: Kolega): string {
 }
 
 /** Blok u ZET-ovom feedu: linija + V.R. s dvije znamenke (109 + 2 = 10902). */
-export function blokZa(k: Pick<Kolega, 'linija' | 'varijanta' | 'V.R'>): string | null {
+export function blokZa(
+  k: Pick<Kolega, 'linija' | 'varijanta' | 'V.R'>,
+): string | null {
   const linija = (k.linija ?? '').trim();
   const vr = (k['V.R'] ?? k.varijanta ?? '').toString().trim();
   if (!/^\d+$/.test(linija) || !/^\d{1,2}$/.test(vr)) return null;
@@ -182,7 +229,11 @@ function minute(hhmm: string | undefined): number | null {
  * Je li služba sad u tijeku: od `od` do neposredno prije `do` (i preko
  * ponoći). U minuti predaje vozi onaj koji preuzima.
  */
-export function uSmjeniSad(od?: string, doo?: string, sad = new Date()): boolean {
+export function uSmjeniSad(
+  od?: string,
+  doo?: string,
+  sad = new Date(),
+): boolean {
   const a = minute(od);
   const b = minute(doo);
   if (a === null || b === null) return false;
@@ -194,7 +245,10 @@ export function uSmjeniSad(od?: string, doo?: string, sad = new Date()): boolean
  * Tko od kolega trenutno vozi koji blok. Kod predaje smjene (dvije službe
  * istog V.R. se preklapaju) vozi onaj koji je ranije počeo – do zamjene.
  */
-export function aktivniPoBloku(kolege: Kolega[], sad = new Date()): Map<string, Kolega> {
+export function aktivniPoBloku(
+  kolege: Kolega[],
+  sad = new Date(),
+): Map<string, Kolega> {
   const mapa = new Map<string, Kolega>();
   for (const k of kolege) {
     const blok = blokZa(k);
@@ -220,7 +274,9 @@ export interface VoziloUzivo {
 export function opisKasnjenja(sekunde: number, ti = false): string {
   const min = Math.round(Math.abs(sekunde) / 60);
   if (min === 0) return 'na vremenu';
-  return sekunde > 0 ? `${ti ? 'kasniš' : 'kasni'} ${min} min` : `${min} min ranije`;
+  return sekunde > 0
+    ? `${ti ? 'kasniš' : 'kasni'} ${min} min`
+    : `${min} min ranije`;
 }
 
 export function kasniZnatno(sekunde: number): boolean {
@@ -231,7 +287,10 @@ export function kasniZnatno(sekunde: number): boolean {
  * Procjena dolaska: vrijeme iz rasporeda + kašnjenje. Ranije od voznog
  * reda se ne računa – bus na predaju ne stiže prije vremena.
  */
-export function procjenaDolaska(hhmm: string | undefined, sekunde: number): string | null {
+export function procjenaDolaska(
+  hhmm: string | undefined,
+  sekunde: number,
+): string | null {
   const m = minute(hhmm);
   if (m === null) return null;
   const t = (m + Math.round(Math.max(0, sekunde) / 60)) % 1440;
@@ -239,7 +298,10 @@ export function procjenaDolaska(hhmm: string | undefined, sekunde: number): stri
 }
 
 /** Za koliko minuta počinje (0 ako je sad), null ako je već prošlo. */
-export function minutaDo(hhmm: string | undefined, sad = new Date()): number | null {
+export function minutaDo(
+  hhmm: string | undefined,
+  sad = new Date(),
+): number | null {
   const m = minute(hhmm);
   if (m === null) return null;
   const n = sad.getHours() * 60 + sad.getMinutes();

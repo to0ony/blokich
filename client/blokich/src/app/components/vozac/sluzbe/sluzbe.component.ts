@@ -9,7 +9,15 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { MessageModule } from 'primeng/message';
 import { ServiceScheduleService } from '../../../services/service-schedule.service';
 import { KolegaRowComponent } from '../kolega-row/kolega-row.component';
-import { DANI, Kolega, TjedanTip, rutaUrl } from '../vozac.model';
+import {
+  DANI,
+  Kolega,
+  TjedanTip,
+  pauzaMinuta,
+  rutaUrl,
+  satiSluzbe,
+  trajanjeTekst,
+} from '../vozac.model';
 
 interface SluzbaDan {
   dan: string;
@@ -83,7 +91,21 @@ export class SluzbeComponent {
   /** Dijelovi službe; bez polja `dijelovi` (stariji backend) samo prvi dio. */
   get dijelovi(): DioSluzbe[] {
     if (!this.rezultat) return [];
-    return this.rezultat.dijelovi?.length ? this.rezultat.dijelovi : [this.rezultat];
+    return this.rezultat.dijelovi?.length
+      ? this.rezultat.dijelovi
+      : [this.rezultat];
+  }
+
+  /** Sati cijele službe (upisani su u svaki dio) – prikazuju se jednom. */
+  get sati() {
+    return satiSluzbe(this.dijelovi);
+  }
+
+  /** Pauza prije (i+1). dijela, npr. "30 min"; null ako nema razmaka. */
+  pauza(i: number): string | null {
+    const d = this.dijelovi;
+    const min = pauzaMinuta(d[i]?.do, d[i + 1]?.od);
+    return min ? trajanjeTekst(min) : null;
   }
 
   constructor(private serviceScheduleService: ServiceScheduleService) {}
@@ -100,20 +122,22 @@ export class SluzbeComponent {
 
     this.loading = true;
     this.greska = '';
-    this.serviceScheduleService.fetchServiceDrivers(sl, undefined, this.tjedan).subscribe({
-      next: (data) => {
-        this.rezultat = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.rezultat = null;
-        this.greska =
-          err?.status === 404
-            ? `Služba ${sl} ne postoji u voznom redu.`
-            : 'Podatke o službi nije moguće dohvatiti.';
-        this.loading = false;
-      },
-    });
+    this.serviceScheduleService
+      .fetchServiceDrivers(sl, undefined, this.tjedan)
+      .subscribe({
+        next: (data) => {
+          this.rezultat = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.rezultat = null;
+          this.greska =
+            err?.status === 404
+              ? `Služba ${sl} ne postoji u voznom redu.`
+              : 'Podatke o službi nije moguće dohvatiti.';
+          this.loading = false;
+        },
+      });
   }
 
   nazivDana(kratica: string): string {
