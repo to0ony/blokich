@@ -8,8 +8,12 @@ import { Sluzba, SluzbaSchema } from '../../schemas/sluzba.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Disponent.name, schema: DisponentSchema },
-      { name: Sluzba.name, schema: SluzbaSchema },
+      {
+        name: Disponent.name,
+        schema: DisponentSchema,
+        collection: 'disponent',
+      },
+      { name: Sluzba.name, schema: SluzbaSchema, collection: 'sluzba' },
     ]),
   ],
   controllers: [VozacRasporedVoznjeController],

@@ -10,8 +10,12 @@ import { VozacStats, VozacStatsSchema } from '../../schemas/vozac-stats.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Disponent.name, schema: DisponentSchema },
-      { name: Sluzba.name, schema: SluzbaSchema },
+      {
+        name: Disponent.name,
+        schema: DisponentSchema,
+        collection: 'disponent',
+      },
+      { name: Sluzba.name, schema: SluzbaSchema, collection: 'sluzba' },
       { name: Godisnji.name, schema: GodisnjiSchema },
       { name: VozacStats.name, schema: VozacStatsSchema },
     ]),

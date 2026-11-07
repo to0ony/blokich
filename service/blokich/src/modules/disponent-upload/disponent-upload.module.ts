@@ -15,7 +15,11 @@ import { RucniUvozModule } from '../rucni-uvoz/rucni-uvoz.module';
     VozacStatsModule,
     RucniUvozModule,
     MongooseModule.forFeature([
-      { name: Disponent.name, schema: DisponentSchema },
+      {
+        name: Disponent.name,
+        schema: DisponentSchema,
+        collection: 'disponent',
+      },
       { name: 'SluzbaUpload', schema: SluzbaUploadSchema },
       { name: Godisnji.name, schema: GodisnjiSchema },
     ]),

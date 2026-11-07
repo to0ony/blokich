@@ -15,12 +15,18 @@ import { RucniUvozModule } from '../rucni-uvoz/rucni-uvoz.module';
   imports: [
     PdfModule,
     RucniUvozModule,
-    MongooseModule.forFeature([{ name: Sluzba.name, schema: SluzbaSchema }]),
+    MongooseModule.forFeature([
+      { name: Sluzba.name, schema: SluzbaSchema, collection: 'sluzba' },
+    ]),
     MongooseModule.forFeature([
       { name: SluzbaUpload.name, schema: SluzbaUploadSchema },
     ]),
     MongooseModule.forFeature([
-      { name: Disponent.name, schema: DisponentSchema },
+      {
+        name: Disponent.name,
+        schema: DisponentSchema,
+        collection: 'disponent',
+      },
     ]),
   ],
   controllers: [SluzbaUploadController],
