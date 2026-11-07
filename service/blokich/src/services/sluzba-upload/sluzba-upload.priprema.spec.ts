@@ -112,6 +112,24 @@ describe('SluzbaUploadService.pripremi', () => {
     expect(rucniUvoz.zabiljezi).not.toHaveBeenCalled();
   });
 
+  it('prenosi upozorenja parsera u pripremu i poruku', async () => {
+    const { service, pdf } = napravi(null, [{ br_sl: '1', linija: '119' }]);
+    pdf.extractSluzba.mockResolvedValue({
+      sluzbe: [{ br_sl: '1', linija: '119' }],
+      upozorenja: ['služba 1: zbroj dijelova 400 min, EFEK. 06:55'],
+    });
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const rezultat = await service.pripremi(file);
+
+    expect(rezultat).toMatchObject({
+      status: 'novo',
+      poruka: 'Izvučeno službi: 1. Upozorenja: 1.',
+      upozorenja: ['služba 1: zbroj dijelova 400 min, EFEK. 06:55'],
+    });
+    warn.mockRestore();
+  });
+
   it('odbija PDF iz kojeg nije izvučena nijedna služba', async () => {
     const { service } = napravi(null, []);
 

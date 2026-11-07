@@ -19,6 +19,8 @@ export interface SluzbaPripremaNovo {
   sha256: string;
   sluzbe: any[];
   filename: string;
+  /** Upozorenja parsera (npr. služba čiji se sati ne slažu). */
+  upozorenja: string[];
 }
 
 export type SluzbaPriprema =
@@ -105,17 +107,27 @@ export class SluzbaUploadService {
 
     const response = await this.pdfProcessingService.extractSluzba(file);
     const sluzbe: any[] = response.sluzbe;
+    const upozorenja: string[] = response.upozorenja ?? [];
 
     if (!sluzbe?.length) {
       throw new Error('Iz PDF-a službi nije izvučena nijedna služba.');
     }
+    if (upozorenja.length) {
+      console.warn(
+        `PDF službi ${file.originalname}: ${upozorenja.length} upozorenja parsera`,
+        upozorenja,
+      );
+    }
 
     return {
       status: 'novo',
-      poruka: `Izvučeno službi: ${sluzbe.length}.`,
+      poruka:
+        `Izvučeno službi: ${sluzbe.length}.` +
+        (upozorenja.length ? ` Upozorenja: ${upozorenja.length}.` : ''),
       sha256: hash,
       sluzbe,
       filename: file.originalname,
+      upozorenja,
     };
   }
 
