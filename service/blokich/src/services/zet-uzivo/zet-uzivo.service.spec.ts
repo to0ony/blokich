@@ -1,4 +1,4 @@
-import { ZetUzivoService } from './zet-uzivo.service';
+import { ZetUzivoService, uzivoNaBloku } from './zet-uzivo.service';
 
 const SAD = 1_800_000_000;
 
@@ -69,5 +69,32 @@ describe('ZetUzivoService.obradi', () => {
       SAD,
     );
     expect(r.blokovi).toEqual({});
+  });
+});
+
+describe('uzivoNaBloku', () => {
+  it('linija i V.R. su iz bloka, kao u rasporedu vozača', () => {
+    expect(uzivoNaBloku('10910', { vozilo: '3514', kasnjenje: 30, ruta: '109' })).toEqual({
+      linija: '109',
+      vr: '10',
+      kasnjenje: 30,
+    });
+  });
+
+  it('blok koji usput vozi drugu liniju zadrži svoju liniju, a ruta ide zasebno', () => {
+    expect(uzivoNaBloku('11101', { vozilo: '494', kasnjenje: 0, ruta: '162' })).toEqual({
+      linija: '111',
+      vr: '1',
+      kasnjenje: 0,
+      ruta: '162',
+    });
+  });
+
+  it('bez rute iz feeda samo blok', () => {
+    expect(uzivoNaBloku('20102', { vozilo: '268', kasnjenje: -60 })).toEqual({
+      linija: '201',
+      vr: '2',
+      kasnjenje: -60,
+    });
   });
 });

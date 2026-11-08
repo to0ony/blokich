@@ -148,7 +148,8 @@ export class VozniParkComponent implements OnInit, OnDestroy {
         !v.broj.toLowerCase().includes(q) &&
         !v.kratko.toLowerCase().includes(q) &&
         !(v.tablica ?? '').toLowerCase().includes(q) &&
-        !(v.uzivo?.linija ?? '').includes(q)
+        !(v.uzivo?.linija ?? '').includes(q) &&
+        !(v.uzivo?.ruta ?? '').includes(q)
       ) {
         continue;
       }

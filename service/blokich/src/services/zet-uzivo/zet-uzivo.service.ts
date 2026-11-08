@@ -15,7 +15,11 @@ export interface VoziloParka {
   kratko: string;
   model: string;
   tablica: string | null;
-  uzivo: { linija: string; vr: string; kasnjenje: number } | null;
+  /**
+   * linija + V.R. su iz bloka (isto kao u rasporedu vozača); ruta je linija
+   * koju bus trenutno vozi, samo kad se razlikuje od linije bloka.
+   */
+  uzivo: { linija: string; vr: string; kasnjenje: number; ruta?: string } | null;
 }
 
 /** Vozilo koje trenutno vozi na bloku (linija + V.R.). */
@@ -39,6 +43,21 @@ export interface UzivoStanje {
 const CACHE_MS = 20_000;
 /** Stariji podaci se ne prikazuju – bolje ništa nego krivo. */
 const MAX_STAROST_S = 180;
+
+/**
+ * Linija i V.R. iz bloka (10910 -> 109 / 10), kao u rasporedu vozača.
+ * Blok ponekad usput vozi drugu liniju – ta ide zasebno kao ruta.
+ */
+export function uzivoNaBloku(
+  blok: string,
+  v: BlokUzivo,
+): NonNullable<VoziloParka['uzivo']> {
+  const linija = blok.slice(0, -2);
+  const vr = String(Number(blok.slice(-2)));
+  return v.ruta && v.ruta !== linija
+    ? { linija, vr, kasnjenje: v.kasnjenje, ruta: v.ruta }
+    : { linija, vr, kasnjenje: v.kasnjenje };
+}
 
 /**
  * Podaci uživo iz ZET-ovog GTFS-Realtime feeda.
@@ -90,13 +109,7 @@ export class ZetUzivoService {
           kratko: p.kratko,
           model: p.model,
           tablica: p.tablica,
-          uzivo: u
-            ? {
-                linija: u.v.ruta || u.blok.slice(0, -2),
-                vr: String(Number(u.blok.slice(-2))),
-                kasnjenje: u.v.kasnjenje,
-              }
-            : null,
+          uzivo: u ? uzivoNaBloku(u.blok, u.v) : null,
         };
       });
     return { vrijeme: stanje.vrijeme, vozila };

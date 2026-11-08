@@ -85,6 +85,7 @@
               <span class="vp-dot"></span>
               Linija {{ u.linija }}<span class="vp-vr">V.R. {{ u.vr }}</span>
             </span>
+            <span class="vp-ruta" *ngIf="u.ruta">trenutno vozi liniju {{ u.ruta }}</span>
             <span class="vp-delay" [class.is-late]="kasniZnatno(u.kasnjenje)">{{ opisKasnjenja(u.kasnjenje) }}</span>
           </div>
           <ng-template #neVozi>

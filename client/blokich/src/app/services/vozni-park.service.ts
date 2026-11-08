@@ -6,7 +6,8 @@ export interface VoziloParka {
   kratko: string;
   model: string;
   tablica: string | null;
-  uzivo: { linija: string; vr: string; kasnjenje: number } | null;
+  /** linija + V.R. iz bloka (kao u rasporedu); ruta = druga linija koju blok sad vozi. */
+  uzivo: { linija: string; vr: string; kasnjenje: number; ruta?: string } | null;
 }
 
 export interface VozniParkOdgovor {
