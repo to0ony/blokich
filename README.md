@@ -20,6 +20,10 @@
   <img src="https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white" alt="MongoDB" />
 </p>
 
+<p align="center">
+  <img src="docs/mockups/raspored-left.png" alt="Blokich – tjedni raspored" width="560" />
+</p>
+
 ## Značajke
 
 **Za vozače**
@@ -36,9 +40,9 @@
 
 ## Screenshots
 
-| Prijava | Raspored | Smjena | Uživo | Služba |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/login.png" width="160" /> | <img src="docs/screenshots/raspored.png" width="160" /> | <img src="docs/screenshots/smjena.png" width="160" /> | <img src="docs/screenshots/danas-uzivo.png" width="160" /> | <img src="docs/screenshots/sluzba.png" width="160" /> |
+| Raspored | Smjena | Uživo |
+|:---:|:---:|:---:|
+| <img src="docs/mockups/raspored-portrait.png" alt="Tjedni raspored" width="240" /> | <img src="docs/mockups/smjena-portrait.png" alt="Današnja smjena" width="240" /> | <img src="docs/mockups/danas-uzivo-portrait.png" alt="Danas uživo" width="240" /> |
 
 <sub>Prikazani podaci i imena su izmišljeni.</sub>
 
