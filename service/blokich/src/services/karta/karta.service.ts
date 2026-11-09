@@ -63,7 +63,8 @@ export class KartaService {
     private readonly vozaci: VozaciNaBlokuService,
   ) {}
 
-  async vozila(): Promise<KartaStanje> {
+  /** Sva vozila, ili samo ona na zadanim blokovima (npr. kartica vozača). */
+  async vozila(blokovi?: string[]): Promise<KartaStanje> {
     const [stanje, naBloku] = await Promise.all([
       this.uzivo.stanje(),
       this.vozaci.aktivni().catch((err) => {
@@ -72,10 +73,13 @@ export class KartaService {
       }),
     ]);
     const g = this.gtfs.get();
+    const samo = blokovi?.length ? new Set(blokovi) : null;
     return {
       vrijeme: stanje.vrijeme,
       gtfs: g?.verzija ?? null,
-      vozila: stanje.vozila.map((p) => spojiVozilo(p, g, naBloku)),
+      vozila: stanje.vozila
+        .filter((p) => !samo || (p.blok !== null && samo.has(p.blok)))
+        .map((p) => spojiVozilo(p, g, naBloku)),
     };
   }
 

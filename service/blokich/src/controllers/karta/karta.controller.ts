@@ -18,8 +18,16 @@ export class KartaController {
    */
   @Get('vozila')
   @Header('Cache-Control', 'no-store')
-  async vozila() {
-    return this.kartaService.vozila();
+  async vozila(@Query('blokovi') blokovi?: string) {
+    // ?blokovi=10902,13701 – samo vozila na tim blokovima (kartica vozača).
+    const lista = (blokovi ?? '')
+      .split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
+    if (lista.length > 20 || lista.some((b) => !/^\d{3,6}$/.test(b))) {
+      throw new BadRequestException('Neispravan popis blokova.');
+    }
+    return this.kartaService.vozila(lista);
   }
 
   /** GET /api/karta/oblici?id=109_1,109_2 – trase kao nizovi [lat, lon]. */
