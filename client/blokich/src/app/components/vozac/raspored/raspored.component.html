@@ -60,6 +60,9 @@
   </ng-template>
 </section>
 
+<!-- Moja linija na karti: trasa, a dok vozim ili čekam i moj bus uživo -->
+<app-moja-karta *ngIf="!loading && danas?.sluzbe?.length" [dan]="danas" />
+
 <!-- Tjedan: naslov, prekidač i dani u jednoj kartici -->
 <section class="rs-week">
   <div class="rs-week-head">

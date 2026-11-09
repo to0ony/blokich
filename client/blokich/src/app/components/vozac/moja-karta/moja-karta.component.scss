@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.mk {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--vz-border, #e3e8ee);
+  border-radius: 20px;
+  background: var(--vz-surface, #fff);
+  color: var(--vz-text, #0f172a);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mk-okvir {
+  position: relative;
+}
+
+.mk-izvor {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #475569;
+  font-size: 9.5px;
+  pointer-events: none;
+}
+
+.mk-mapa {
+  height: 170px;
+  background: var(--vz-surface-2, #f6f8fa);
+  // Karta je samo za pogled – dodir ide na gumb.
+  pointer-events: none;
+}
+
+.mk-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.mk-ico {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--vz-surface-2, #f6f8fa);
+  color: var(--vz-muted, #64748b);
+
+  &.is-live {
+    background: #2563eb;
+    color: #fff;
+  }
+}
+
+.mk-txt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-size: 15px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  small {
+    overflow: hidden;
+    color: var(--vz-muted, #64748b);
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.mk-go {
+  color: var(--vz-muted, #64748b);
+  font-size: 13px;
+}

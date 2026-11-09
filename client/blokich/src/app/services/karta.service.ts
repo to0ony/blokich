@@ -74,8 +74,10 @@ export interface KartaOdgovor {
 export class KartaService {
   constructor(private api: ApiService) {}
 
-  vozila() {
-    return this.api.get<KartaOdgovor>('karta/vozila');
+  /** Sva vozila, ili samo ona na zadanim blokovima (linija + V.R.). */
+  vozila(blokovi?: string[]) {
+    const params = blokovi?.length ? new HttpParams().set('blokovi', blokovi.join(',')) : undefined;
+    return this.api.get<KartaOdgovor>('karta/vozila', params);
   }
 
   /** Sve linije (za pretragu i kad nijedan bus linije nije vani). */

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import {
   KartaService,
@@ -25,55 +25,17 @@ import {
   stajalistaNaTrasi,
 } from '../../components/karta/kretanje';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
-
-type Tema = 'svijetla' | 'tamna';
-
-const STIL: Record<Tema, string> = {
-  svijetla: 'https://tiles.openfreemap.org/styles/positron',
-  tamna: 'https://tiles.openfreemap.org/styles/dark',
-};
-
-/** Boje karte po temi – vozila su neutralna, ističe se samo Podsused i odabrano. */
-const BOJE: Record<
+import {
+  BOJE,
+  POSTAVKE_KEY,
+  PostavkeKarte,
+  STIL,
   Tema,
-  {
-    podsused: string;
-    podsusedTekst: string;
-    ostali: string;
-    ostaliTekst: string;
-    odabrano: string;
-    rub: string;
-    trasa: string;
-    ime: string;
-    stajalisteIspuna: string;
-    stajalisteNaziv: string;
-  }
-> = {
-  svijetla: {
-    podsused: '#1e293b',
-    podsusedTekst: '#ffffff',
-    ostali: '#94a3b8',
-    ostaliTekst: '#ffffff',
-    odabrano: '#2563eb',
-    rub: '#ffffff',
-    trasa: '#2563eb',
-    ime: '#0f172a',
-    stajalisteIspuna: '#ffffff',
-    stajalisteNaziv: '#1e3a8a',
-  },
-  tamna: {
-    podsused: '#e2e8f0',
-    podsusedTekst: '#0f172a',
-    ostali: '#475569',
-    ostaliTekst: '#e2e8f0',
-    odabrano: '#3b82f6',
-    rub: '#0b1220',
-    trasa: '#60a5fa',
-    ime: '#e2e8f0',
-    stajalisteIspuna: '#0b1220',
-    stajalisteNaziv: '#bfdbfe',
-  },
-};
+  oznakaVozila,
+  sustavTamna,
+  ucitajCss,
+  ucitajPostavke,
+} from '../../components/karta/karta-stil';
 
 /** Dohvat svakih 5 s – nova pozicija brže stigne, kretanje je mirnije. */
 const INTERVAL_MS = 5_000;
@@ -83,13 +45,6 @@ const FRAME_MS = 33;
 const PADDING_KARTICE = 330;
 /** Pozicija starija od ovoga se prikazuje izblijedjelo. */
 const STARO_S = 90;
-const POSTAVKE_KEY = 'karta-postavke';
-
-interface Postavke {
-  samoPodsused: boolean;
-  tramvaji: boolean;
-  tema: Tema | null;
-}
 
 interface Rezultat {
   vrsta: 'linija' | 'vozilo';
@@ -99,70 +54,12 @@ interface Rezultat {
   vozilo?: VoziloKarta;
 }
 
-function ucitajPostavke(): Postavke {
-  try {
-    const p = JSON.parse(localStorage.getItem(POSTAVKE_KEY) ?? '{}');
-    return {
-      samoPodsused: !!p.samoPodsused,
-      tramvaji: p.tramvaji !== false,
-      tema: p.tema === 'svijetla' || p.tema === 'tamna' ? p.tema : null,
-    };
-  } catch {
-    return { samoPodsused: false, tramvaji: true, tema: null };
-  }
-}
-
-function sustavTamna(): boolean {
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  } catch {
-    return false;
-  }
-}
-
 function bezKvacica(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd');
-}
-
-function ucitajCss(): void {
-  if (document.getElementById('maplibre-css')) return;
-  const l = document.createElement('link');
-  l.id = 'maplibre-css';
-  l.rel = 'stylesheet';
-  l.href = 'maplibre.css';
-  document.head.appendChild(l);
-}
-
-/**
- * Oznaka vozila: krug s kljunom u smjeru vožnje (SDF – boja i rub se zadaju
- * u sloju). Središte kruga je točno na sredini slike, pa rotacija ne pomiče
- * vozilo s pozicije.
- */
-function oznakaVozila(): ImageData {
-  const n = 96;
-  const c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d')!;
-  const cx = n / 2;
-  const r = 24;
-  g.fillStyle = '#000';
-  // Kljun: dvije tangente na krug koje se sastaju ispred njega.
-  const vrh = cx - r - 9;
-  const kut = Math.acos(r / (cx - vrh));
-  g.beginPath();
-  g.moveTo(cx, vrh);
-  g.lineTo(cx - r * Math.sin(kut), cx - r * Math.cos(kut));
-  g.lineTo(cx + r * Math.sin(kut), cx - r * Math.cos(kut));
-  g.closePath();
-  g.fill();
-  g.beginPath();
-  g.arc(cx, cx, r, 0, Math.PI * 2);
-  g.fill();
-  return g.getImageData(0, 0, n, n);
 }
 
 /** Karta uživo: sva vozila ZET-a, za AP Podsused i vozač i bus. */
@@ -178,6 +75,13 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   private readonly servis = inject(KartaService);
   private readonly zone = inject(NgZone);
+  /**
+   * Otvaranje s kartice vozača: ?vozilo=374 odabere bus čim stigne u
+   * podatke; ako ga nema, ?linija=137 pokaže rutu linije.
+   */
+  private ciljVozilo: string | null = null;
+  private ciljLinija: string | null = null;
+  private pokusajaVozila = 0;
 
   vozila: VoziloKarta[] = [];
   odabrano: VoziloKarta | null = null;
@@ -222,6 +126,34 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     this.samoPodsused = p.samoPodsused;
     this.tramvaji = p.tramvaji;
     this.tema = p.tema ?? (sustavTamna() ? 'tamna' : 'svijetla');
+
+    const q = inject(ActivatedRoute).snapshot.queryParamMap;
+    this.ciljVozilo = q.get('vozilo');
+    this.ciljLinija = q.get('linija');
+    // Filteri ne smiju sakriti traženo vozilo.
+    if (this.ciljVozilo || this.ciljLinija) this.prviPut = false;
+  }
+
+  /** Nakon svakog dohvata: odaberi traženo vozilo ili, ako ga nema, pokaži liniju. */
+  private ispuniCilj(): void {
+    if (!this.ciljVozilo) return;
+    const v = this.vozila.find((x) => x.id === this.ciljVozilo);
+    if (v && this.spremna) {
+      this.ciljVozilo = null;
+      this.ciljLinija = null;
+      this.samoPodsused = false;
+      this.tramvaji = true;
+      this.odaberi(v, true);
+    } else if (!v && ++this.pokusajaVozila >= 4) {
+      this.ciljVozilo = null;
+      this.prikaziCiljLiniju();
+    }
+  }
+
+  private prikaziCiljLiniju(): void {
+    const l = this.ciljLinija;
+    this.ciljLinija = null;
+    if (l) this.postaviLiniju(l);
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -304,6 +236,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
         }
         this.dohvatiTrase();
         if (this.prviPut && this.spremna) this.pocetniPogled();
+        this.ispuniCilj();
       },
       error: () => {
         this.greska = true;
@@ -340,7 +273,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   private spremiPostavke(): void {
     try {
-      const p: Postavke = { samoPodsused: this.samoPodsused, tramvaji: this.tramvaji, tema: this.tema };
+      const p: PostavkeKarte = { samoPodsused: this.samoPodsused, tramvaji: this.tramvaji, tema: this.tema };
       localStorage.setItem(POSTAVKE_KEY, JSON.stringify(p));
     } catch {}
   }
@@ -697,6 +630,9 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
     this.spremna = true;
     if (this.prviPut && this.vozila.length) this.zone.run(() => this.pocetniPogled());
+    // Otvoreno s kartice vozača: traženo vozilo ili ruta linije.
+    if (this.ciljVozilo) this.zone.run(() => this.ispuniCilj());
+    else if (this.ciljLinija) this.zone.run(() => this.prikaziCiljLiniju());
     this.prikaziTrasu();
     this.nacrtaj();
     if (!this.petljaPokrenuta) {

@@ -20,6 +20,7 @@ import { LineScheduleService } from '../../../services/line-schedule.service';
 import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
+import { MojaKartaComponent } from '../moja-karta/moja-karta.component';
 import {
   DanRasporeda,
   Kolega,
@@ -70,6 +71,7 @@ const MJESECI_GEN = [
     LucideAngularModule,
     KolegeListaComponent,
     SluzbaDetaljiComponent,
+    MojaKartaComponent,
   ],
   templateUrl: './raspored.component.html',
   styleUrl: './raspored.component.scss',
