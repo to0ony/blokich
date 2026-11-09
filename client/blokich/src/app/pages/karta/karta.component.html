@@ -60,7 +60,7 @@
     <header class="km-sheet-head">
       <span class="km-line" [style.background]="bojaKasnjenja(v.kasnjenje)">{{ v.linija ?? '?' }}</span>
       <div class="km-sheet-title">
-        <strong>{{ v.cilj ? '→ ' + v.cilj : 'Linija ' + (v.linija ?? '?') }}</strong>
+        <strong>{{ v.cilj ? 'Smjer ' + v.cilj : 'Linija ' + (v.linija ?? '?') }}</strong>
         <span>
           <ng-container *ngIf="v.vr">
             <ng-container *ngIf="v.linijaBloka && v.linijaBloka !== v.linija">blok {{ v.linijaBloka }} · </ng-container>
@@ -73,6 +73,15 @@
         <i class="pi pi-times"></i>
       </button>
     </header>
+
+    <div class="km-next" *ngIf="sljedece as s">
+      <span class="km-next-ico"><i class="pi pi-map-marker"></i></span>
+      <div class="km-next-txt">
+        <span class="vz-label">{{ s.naStajalistu ? 'Na stajalištu' : 'Sljedeće stajalište' }}</span>
+        <strong>{{ s.naziv }}</strong>
+        <small *ngIf="s.zatim">zatim {{ s.zatim }}</small>
+      </div>
+    </div>
 
     <div class="km-facts">
       <div class="km-fact">

@@ -272,6 +272,41 @@
   border-radius: 50%;
 }
 
+.km-next {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #eff6ff;
+}
+
+.km-next-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+}
+
+.km-next-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 16px;
+  }
+  small {
+    color: var(--vz-muted);
+    font-size: 12.5px;
+  }
+}
+
 .km-facts {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

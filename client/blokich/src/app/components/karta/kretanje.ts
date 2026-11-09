@@ -106,6 +106,57 @@ function smjerIz(dx: number, dy: number): number {
   return ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
 }
 
+/**
+ * Udaljenost svakog stajališta od početka trase, redom. Trasa se zna vratiti
+ * istim putem (okretište), pa se svako stajalište traži od prethodnog naprijed.
+ */
+export function stajalistaNaTrasi(t: Trasa, stajalista: { lat: number; lon: number }[]): number[] {
+  const rez: number[] = [];
+  let zadnje = 0;
+  for (const s of stajalista) {
+    const px = s.lon * KX;
+    const py = s.lat * KY;
+    let najbolji = { d: zadnje, razmak: Infinity };
+    for (let i = 0; i + 1 < t.x.length; i++) {
+      if (t.d[i + 1] < zadnje) continue;
+      const ax = t.x[i];
+      const ay = t.y[i];
+      const dx = t.x[i + 1] - ax;
+      const dy = t.y[i + 1] - ay;
+      const l2 = dx * dx + dy * dy;
+      let k = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0;
+      k = k < 0 ? 0 : k > 1 ? 1 : k;
+      const razmak = Math.hypot(ax + k * dx - px, ay + k * dy - py);
+      const d = Math.max(zadnje, t.d[i] + k * (t.d[i + 1] - t.d[i]));
+      if (razmak < najbolji.razmak) najbolji = { d, razmak };
+      // Prvi prolaz pokraj stajališta je pravi – ne traži dalje (povratak istim putem).
+      if (najbolji.razmak <= 40 && razmak > 150) break;
+    }
+    rez.push(najbolji.d);
+    zadnje = najbolji.d;
+  }
+  return rez;
+}
+
+/** Bus je "na stajalištu" ako je bliže od ovoga. */
+const NA_STAJALISTU_M = 25;
+
+/**
+ * Indeks sljedećeg stajališta za vozilo na `d` metara trase, i je li vozilo
+ * upravo na tom stajalištu. null = prošao je zadnje.
+ */
+export function sljedeceStajaliste(
+  udaljenosti: number[],
+  d: number,
+): { indeks: number; naStajalistu: boolean } | null {
+  for (let i = 0; i < udaljenosti.length; i++) {
+    if (udaljenosti[i] >= d - NA_STAJALISTU_M) {
+      return { indeks: i, naStajalistu: Math.abs(udaljenosti[i] - d) <= NA_STAJALISTU_M };
+    }
+  }
+  return null;
+}
+
 /** Ulaz za jedno vozilo (podskup VoziloKarta). */
 export interface Javljanje {
   id: string;
@@ -161,6 +212,14 @@ export class Kretanje {
   pozicija(id: string, sad: number): Pozicija | null {
     const s = this.stanja.get(id);
     return s ? this.izracunaj(s, sad) : null;
+  }
+
+  /** Koliko je metara vozilo (kako je prikazano) od početka trase; null = nije na trasi. */
+  naTrasi(id: string, sad: number): number | null {
+    const s = this.stanja.get(id);
+    if (!s || !s.poTrasi || !this.trasa(s.oblik)) return null;
+    const k = s.trajanje ? Math.max(0, Math.min(1, (sad - s.pocetak) / s.trajanje)) : 1;
+    return s.odD + k * (s.doD - s.odD);
   }
 
   private izracunaj(s: Stanje, sad: number): Pozicija {

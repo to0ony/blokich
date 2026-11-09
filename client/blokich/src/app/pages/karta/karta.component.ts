@@ -13,7 +13,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import { KartaService, StajalisteKarta, VoziloKarta } from '../../services/karta.service';
-import { Kretanje } from '../../components/karta/kretanje';
+import {
+  Kretanje,
+  sljedeceStajaliste,
+  stajalistaNaTrasi,
+} from '../../components/karta/kretanje';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
 
 const STIL = 'https://tiles.openfreemap.org/styles/positron';
@@ -21,7 +25,7 @@ const INTERVAL_MS = 10_000;
 /** Animacija ne treba više od ~30 sličica u sekundi. */
 const FRAME_MS = 33;
 /** Visina kartice s detaljima – odabrano vozilo se centrira iznad nje. */
-const PADDING_KARTICE = 260;
+const PADDING_KARTICE = 330;
 /** Pozicija starija od ovoga se prikazuje izblijedjelo. */
 const STARO_S = 90;
 
@@ -110,6 +114,8 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   /** Stajališta po trasi – dohvaćaju se tek kad se vozilo odabere. */
   private stajalista = new Map<string, StajalisteKarta[]>();
   private trazenaStajalista = new Set<string>();
+  private udaljenostiStajalista = new Map<string, number[]>();
+  private prikazaniSljedeci = -1;
   private prviPut = true;
   private timer: ReturnType<typeof setInterval> | null = null;
   private sat: ReturnType<typeof setInterval> | null = null;
@@ -160,7 +166,10 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     this.timer = setInterval(() => {
       if (!document.hidden) this.osvjezi();
     }, INTERVAL_MS);
-    this.sat = setInterval(() => (this.sad = Date.now()), 1000);
+    this.sat = setInterval(() => {
+      this.sad = Date.now();
+      this.osvjeziSljedece();
+    }, 1000);
   }
 
   ngOnDestroy(): void {
@@ -385,8 +394,18 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
       type: 'circle',
       source: 'stajalista',
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 14, 4.5, 17, 6.5],
-        'circle-color': '#ffffff',
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          11,
+          ['case', ['get', 'sljedece'], 4.5, 2.5],
+          14,
+          ['case', ['get', 'sljedece'], 7, 4.5],
+          17,
+          ['case', ['get', 'sljedece'], 9, 6.5],
+        ],
+        'circle-color': ['case', ['get', 'sljedece'], '#2563eb', '#ffffff'],
         'circle-stroke-color': '#2563eb',
         'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 2.5],
       },
@@ -522,14 +541,49 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
       });
     }
 
+    const sljedeci = this.sljedece?.indeks ?? -1;
+    this.prikazaniSljedeci = sljedeci;
     izvor.setData({
       type: 'FeatureCollection',
-      features: (lista ?? []).map((s) => ({
+      features: (lista ?? []).map((s, i) => ({
         type: 'Feature',
-        properties: { naziv: s.naziv },
+        properties: { naziv: s.naziv, sljedece: i === sljedeci },
         geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
       })),
     });
+  }
+
+  /** Udaljenosti stajališta po trasi – računa se jednom po trasi. */
+  private udaljenostiZa(oblik: string): number[] | null {
+    const gotovo = this.udaljenostiStajalista.get(oblik);
+    if (gotovo) return gotovo;
+    const t = this.kretanje.trasa(oblik);
+    const lista = this.stajalista.get(oblik);
+    if (!t || !lista?.length) return null;
+    const u = stajalistaNaTrasi(t, lista);
+    this.udaljenostiStajalista.set(oblik, u);
+    return u;
+  }
+
+  /** Sljedeće stajalište odabranog vozila, iz njegove pozicije na trasi. */
+  get sljedece(): { indeks: number; naziv: string; naStajalistu: boolean; zatim: string | null } | null {
+    const v = this.odabrano;
+    if (!v?.oblik) return null;
+    const u = this.udaljenostiZa(v.oblik);
+    const d = this.kretanje.naTrasi(v.id, this.sad);
+    const lista = this.stajalista.get(v.oblik);
+    if (!u || d === null || !lista) return null;
+    const s = sljedeceStajaliste(u, d);
+    if (!s) return null;
+    // Na stajalištu: sljedeće je ono iza njega.
+    const zatim = lista[s.indeks + 1]?.naziv ?? null;
+    return { indeks: s.indeks, naziv: lista[s.indeks].naziv, naStajalistu: s.naStajalistu, zatim };
+  }
+
+  /** Svake sekunde: ako se sljedeće stajalište promijenilo, istakni ga na karti. */
+  private osvjeziSljedece(): void {
+    if (!this.odabrano) return;
+    if ((this.sljedece?.indeks ?? -1) !== this.prikazaniSljedeci) this.prikaziStajalista();
   }
 
   /** requestAnimationFrame izvan Angulara – bez change detectiona svaki frame. */
