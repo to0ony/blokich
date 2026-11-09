@@ -1,0 +1,117 @@
+<div class="vz-app km">
+  <div #mapa class="km-mapa"></div>
+
+  <!-- Gornja traka: natrag, pretraga, filteri -->
+  <div class="km-top">
+    <div class="km-bar">
+      <a routerLink="/login" class="km-btn" aria-label="Natrag na prijavu">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div class="km-search">
+        <i class="pi pi-search"></i>
+        <input
+          type="search"
+          placeholder="Linija, vozač ili garažni broj"
+          autocomplete="off"
+          [(ngModel)]="trazi"
+        />
+      </div>
+    </div>
+
+    <ul class="km-results" *ngIf="rezultati.length">
+      <li *ngFor="let r of rezultati">
+        <button type="button" (click)="odaberiRezultat(r)">
+          <span class="km-res-ico" [class.is-line]="r.vrsta === 'linija'">
+            <i class="pi" [ngClass]="r.vrsta === 'linija' ? 'pi-directions' : 'pi-user'"></i>
+          </span>
+          <span class="km-res-txt">
+            <strong>{{ r.naslov }}</strong>
+            <small>{{ r.opis }}</small>
+          </span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="km-chips">
+      <span class="km-live" [class.is-err]="greska || (ucitano && starostFeeda === null)">
+        <span class="km-dot"></span>
+        <ng-container *ngIf="!greska && starostFeeda !== null">Uživo · {{ opisStarosti(starostFeeda) }}</ng-container>
+        <ng-container *ngIf="greska">Nema veze</ng-container>
+        <ng-container *ngIf="!greska && ucitano && starostFeeda === null">ZET feed nedostupan</ng-container>
+        <ng-container *ngIf="!ucitano">Učitavam…</ng-container>
+      </span>
+      <button
+        type="button"
+        class="km-chip"
+        [class.is-on]="samoPodsused"
+        [attr.aria-pressed]="samoPodsused"
+        (click)="prebaciPodsused()"
+      >
+        Podsused <span>{{ brojPodsused }}</span>
+      </button>
+      <button *ngIf="filterLinija" type="button" class="km-chip is-on" (click)="postaviLiniju(null)">
+        Linija {{ filterLinija }} <i class="pi pi-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Detalji odabranog vozila -->
+  <section class="km-sheet" *ngIf="odabrano as v" aria-live="polite">
+    <header class="km-sheet-head">
+      <span class="km-line" [style.background]="bojaKasnjenja(v.kasnjenje)">{{ v.linija ?? '?' }}</span>
+      <div class="km-sheet-title">
+        <strong>{{ v.cilj ? '→ ' + v.cilj : 'Linija ' + (v.linija ?? '?') }}</strong>
+        <span>
+          <ng-container *ngIf="v.vr">
+            <ng-container *ngIf="v.linijaBloka && v.linijaBloka !== v.linija">blok {{ v.linijaBloka }} · </ng-container>
+            V.R. {{ v.vr }}
+          </ng-container>
+          <ng-container *ngIf="!v.vr">{{ v.tip === 'tramvaj' ? 'Tramvaj' : 'Autobus' }}</ng-container>
+        </span>
+      </div>
+      <button type="button" class="km-btn km-close" aria-label="Zatvori" (click)="zatvori()">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <div class="km-facts">
+      <div class="km-fact">
+        <span class="vz-label">Kašnjenje</span>
+        <strong [style.color]="bojaKasnjenja(v.kasnjenje)">
+          {{ v.kasnjenje === null ? 'nepoznato' : opisKasnjenja(v.kasnjenje) }}
+        </strong>
+      </div>
+      <div class="km-fact">
+        <span class="vz-label">Ažurirano</span>
+        <strong [class.is-old]="starost(v) > 90">{{ opisStarosti(starost(v)) }}</strong>
+      </div>
+      <div class="km-fact">
+        <span class="vz-label">{{ v.tip === 'tramvaj' ? 'Tramvaj' : 'Bus' }}</span>
+        <strong>{{ v.id }}</strong>
+      </div>
+    </div>
+
+    <div class="km-row" *ngIf="v.vozac as d">
+      <span class="km-row-ico"><i class="pi pi-user"></i></span>
+      <div class="km-row-txt">
+        <strong>{{ d.ime ?? 'Služ. br. ' + d.sluz_broj }}</strong>
+        <small>{{ d.sluz_broj }} · služba {{ d.br_sl }} · {{ d.od }}–{{ d.do }}</small>
+      </div>
+      <a *ngIf="d.kontakt" class="km-call" [href]="'tel:' + d.kontakt" aria-label="Nazovi">
+        <i class="pi pi-phone"></i>
+      </a>
+    </div>
+
+    <div class="km-row" *ngIf="v.model">
+      <span class="km-row-ico"><i class="pi pi-car"></i></span>
+      <div class="km-row-txt">
+        <strong>{{ v.model }}</strong>
+        <small>{{ v.id }}<ng-container *ngIf="v.tablica"> · {{ v.tablica }}</ng-container></small>
+      </div>
+    </div>
+
+    <button *ngIf="!prati" type="button" class="km-follow" (click)="pratiOpet()">
+      <i class="pi pi-compass"></i> Prati vozilo
+    </button>
+  </section>
+</div>

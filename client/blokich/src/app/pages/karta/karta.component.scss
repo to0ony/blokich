@@ -1,0 +1,357 @@
+:host {
+  display: block;
+}
+
+.km {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--vz-bg);
+}
+
+.km-mapa {
+  position: absolute;
+  inset: 0;
+}
+
+.km-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+// ---------- Gornja traka ----------
+.km-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: max(12px, env(safe-area-inset-top)) 12px 0;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.km-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.km-bar .km-btn,
+.km-search,
+.km-results,
+.km-chip,
+.km-live {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+}
+
+.km-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  color: var(--vz-muted);
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--vz-text);
+    font-size: 16px;
+  }
+}
+
+.km-results {
+  margin: 8px 0 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--vz-border);
+  border-radius: 16px;
+  background: var(--vz-surface);
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    text-align: left;
+    color: var(--vz-text);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--vz-surface-2);
+    }
+  }
+}
+
+.km-res-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--vz-surface-2);
+  color: var(--vz-muted);
+
+  &.is-line {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+}
+
+.km-res-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 14px;
+  }
+  small {
+    color: var(--vz-muted);
+    font-size: 12.5px;
+  }
+}
+
+.km-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.km-live,
+.km-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--vz-border);
+  border-radius: 999px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.km-chip {
+  cursor: pointer;
+
+  span {
+    color: var(--vz-muted);
+    font-weight: 500;
+  }
+
+  &.is-on {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #fff;
+
+    span {
+      color: #cbd5e1;
+    }
+  }
+}
+
+.km-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+  animation: km-puls 2s infinite;
+}
+
+.km-live.is-err .km-dot {
+  background: #dc2626;
+  animation: none;
+}
+
+@keyframes km-puls {
+  70% {
+    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+// ---------- Detalji vozila ----------
+.km-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+  border: 1px solid var(--vz-border);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--vz-surface);
+  box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.16);
+  animation: km-gore 0.22s ease-out;
+}
+
+@keyframes km-gore {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+.km-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.km-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.km-sheet-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-size: 16px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  span {
+    color: var(--vz-muted);
+    font-size: 13px;
+  }
+}
+
+.km-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.km-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0 6px;
+}
+
+.km-fact {
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+
+  strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .is-old {
+    color: #b45309;
+  }
+}
+
+.km-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 2px 0;
+}
+
+.km-row-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--vz-surface-2);
+  color: var(--vz-muted);
+}
+
+.km-row-txt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 15px;
+  }
+  small {
+    color: var(--vz-muted);
+    font-size: 12.5px;
+  }
+}
+
+.km-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  text-decoration: none;
+}
+
+.km-follow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  font-weight: 600;
+  cursor: pointer;
+}
