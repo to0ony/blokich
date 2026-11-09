@@ -255,7 +255,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
         this.ucitano = true;
         this.smjer = tockaNa(this.trasa, 20).smjer;
         this.postaviTrasu();
-        if (this.nacin === 'gps') this.pokreniGps();
+        // GPS tek kad vozač potvrdi upozorenje.
+        if (this.nacin === 'gps' && this.upozorenjePrihvaceno) this.pokreniGps();
         this.petlja();
       },
       error: () => (this.greska = 'Trasa se ne može učitati.'),
@@ -336,8 +337,22 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.ubrzanje = u;
   }
 
+  /**
+   * Upozorenje prije navigacije: gledaj cestu, ne diraj telefon u vožnji,
+   * navigacija nije uvijek točna. Prikazuje se pri svakom pokretanju.
+   */
+  upozorenjePrihvaceno = false;
+
+  prihvatiUpozorenje(): void {
+    this.upozorenjePrihvaceno = true;
+    if (this.ucitano && this.watchId === null) this.pokreniGps();
+    // Dodir je i dopuštenje za glas (iOS ne govori bez dodira korisnika).
+    if (this.glas !== 'ne') this.reci('Navigacija je pokrenuta. Pazi na cestu.');
+  }
+
   /** Bez GPS-a (ili kod kuće): ista trasa kao probna vožnja. */
   probnaVoznja(): void {
+    this.upozorenjePrihvaceno = true;
     this.zaustaviGps();
     this.nacin = 'proba';
     this.gpsGreska = null;

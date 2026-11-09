@@ -95,6 +95,24 @@
     </button>
   </div>
 
+  <!-- Upozorenje prije navigacije (svaki put) -->
+  <div class="nv-sigurnost" *ngIf="nacin === 'gps' && !upozorenjePrihvaceno" role="dialog" aria-modal="true" aria-labelledby="nv-sig-naslov">
+    <div class="nv-sigurnost-kartica">
+      <span class="nv-sigurnost-ico"><i class="pi pi-exclamation-triangle"></i></span>
+      <h2 id="nv-sig-naslov">Prije polaska</h2>
+      <ul>
+        <li><strong>Gledaj cestu.</strong> Navigacija je samo pomoć – prednost uvijek imaju promet, signalizacija i upute ZET-a.</li>
+        <li><strong>Ne koristi telefon u vožnji.</strong> Postavi ga u držač i namjesti sve prije polaska; tijekom vožnje ga ne diraj.</li>
+        <li><strong>Nije uvijek 100 % točna.</strong> GPS zna griješiti, a trasa i skretanja dolaze iz voznog reda i karte koji ne moraju odgovarati stanju na cesti (radovi, obilasci).</li>
+      </ul>
+      <button type="button" class="nv-sigurnost-da" (click)="prihvatiUpozorenje()">Razumijem, pokreni</button>
+      <div class="nv-sigurnost-ostalo">
+        <button type="button" (click)="probnaVoznja()">Probna vožnja</button>
+        <button type="button" (click)="izadi()">Odustani</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Dolje: linija i smjer, poruke, kontrole probne vožnje -->
   <section class="nv-dno">
     <div class="nv-poruka" *ngIf="greska">{{ greska }}</div>

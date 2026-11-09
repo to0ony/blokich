@@ -43,6 +43,8 @@ const INTERVAL_MS = 5_000;
 const FRAME_MS = 33;
 /** Visina kartice s detaljima – odabrano vozilo se centrira iznad nje. */
 const PADDING_KARTICE = 330;
+/** Spuštena kartica pokazuje samo zaglavlje (ručka + linija + smjer). */
+const VIRI_KARTICA = 92;
 /** Pozicija starija od ovoga se prikazuje izblijedjelo. */
 const STARO_S = 90;
 
@@ -395,6 +397,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     this.filterLinija = l;
     this.ruta = null;
     this.smjerRute = 0;
+    this.spusteno = false;
     this.zatvori();
     if (!l) return;
 
@@ -448,6 +451,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   odaberi(v: VoziloKarta, priblizi: boolean): void {
     this.odabrano = v;
     this.prati = true;
+    this.spusteno = false;
     this.prikaziTrasu();
     const p = this.kretanje.pozicija(v.id, Date.now());
     if (p && this.mapa) {
@@ -469,6 +473,60 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   pratiOpet(): void {
     this.prati = true;
+  }
+
+  // ---------- Kartica na povlačenje ----------
+
+  /** Kartica spuštena: vidi se samo zaglavlje, ostatak ekrana je karta. */
+  spusteno = false;
+  /** Pomak prsta dok se kartica vuče (px); null = ne vuče se. */
+  povlacenje: number | null = null;
+  private pocetakY = 0;
+  private visinaKartice = 0;
+
+  pocniPovlacenje(e: PointerEvent, kartica: HTMLElement): void {
+    // Gumbi i linkovi u kartici rade normalno.
+    if ((e.target as HTMLElement).closest('button, a, input')) return;
+    this.pocetakY = e.clientY;
+    this.visinaKartice = kartica.offsetHeight;
+    this.povlacenje = 0;
+    kartica.setPointerCapture?.(e.pointerId);
+  }
+
+  povuci(e: PointerEvent): void {
+    if (this.povlacenje === null) return;
+    this.povlacenje = e.clientY - this.pocetakY;
+  }
+
+  pustiPovlacenje(e: PointerEvent): void {
+    if (this.povlacenje === null) return;
+    const dy = this.povlacenje;
+    this.povlacenje = null;
+    const naRucki = !!(e.target as HTMLElement).closest?.('.km-rucka');
+    if (Math.abs(dy) < 6) {
+      // Dodir: spuštenu karticu podigni; podignutu spusti samo dodirom ručke.
+      if (this.spusteno || naRucki) this.spusteno = !this.spusteno;
+    } else if (!this.spusteno && dy > 60) {
+      this.spusteno = true;
+    } else if (this.spusteno && dy < -40) {
+      this.spusteno = false;
+    }
+    // Odabrano vozilo ostaje iznad kartice, i kad je spuštena.
+    if (this.odabrano && this.mapa) {
+      this.mapa.easeTo({
+        padding: { top: 0, left: 0, right: 0, bottom: this.spusteno ? VIRI_KARTICA + 20 : PADDING_KARTICE },
+        duration: 300,
+      });
+    }
+  }
+
+  /** Pomak kartice dok je prst vuče; inače CSS (spuštena/podignuta). */
+  pomakKartice(): string | null {
+    if (this.povlacenje === null) return null;
+    const najvise = Math.max(0, this.visinaKartice - VIRI_KARTICA);
+    const osnova = this.spusteno ? najvise : 0;
+    const y = Math.max(0, Math.min(najvise, osnova + this.povlacenje));
+    return `translateY(${y}px)`;
   }
 
   /** Navigacija (GPS) ili probna vožnja po trasi. */

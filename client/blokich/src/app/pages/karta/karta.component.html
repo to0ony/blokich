@@ -74,7 +74,20 @@
   </div>
 
   <!-- Ruta linije iz pretrage (dok nije odabrano vozilo) -->
-  <section class="km-sheet km-route" *ngIf="filterLinija && !odabrano" aria-live="polite">
+  <section
+    #karticaRute
+    class="km-sheet km-route"
+    *ngIf="filterLinija && !odabrano"
+    aria-live="polite"
+    [class.is-spusteno]="spusteno"
+    [class.is-vuce]="povlacenje !== null"
+    [style.transform]="pomakKartice()"
+    (pointerdown)="pocniPovlacenje($event, karticaRute)"
+    (pointermove)="povuci($event)"
+    (pointerup)="pustiPovlacenje($event)"
+    (pointercancel)="pustiPovlacenje($event)"
+  >
+    <div class="km-rucka" role="button" [attr.aria-label]="spusteno ? 'Podigni karticu' : 'Spusti karticu'"></div>
     <header class="km-sheet-head">
       <span class="km-line">{{ filterLinija }}</span>
       <div class="km-sheet-title">
@@ -119,7 +132,20 @@
   </section>
 
   <!-- Detalji odabranog vozila -->
-  <section class="km-sheet" *ngIf="odabrano as v" aria-live="polite">
+  <section
+    #karticaVozila
+    class="km-sheet"
+    *ngIf="odabrano as v"
+    aria-live="polite"
+    [class.is-spusteno]="spusteno"
+    [class.is-vuce]="povlacenje !== null"
+    [style.transform]="pomakKartice()"
+    (pointerdown)="pocniPovlacenje($event, karticaVozila)"
+    (pointermove)="povuci($event)"
+    (pointerup)="pustiPovlacenje($event)"
+    (pointercancel)="pustiPovlacenje($event)"
+  >
+    <div class="km-rucka" role="button" [attr.aria-label]="spusteno ? 'Podigni karticu' : 'Spusti karticu'"></div>
     <header class="km-sheet-head">
       <span class="km-line" [class.is-other]="!v.podsused">{{ v.linija ?? '?' }}</span>
       <div class="km-sheet-title">

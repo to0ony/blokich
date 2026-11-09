@@ -254,6 +254,82 @@
   }
 }
 
+// ---------- Upozorenje prije polaska ----------
+.nv-sigurnost {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.nv-sigurnost-kartica {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--nv-panel);
+  box-shadow: 0 12px 40px var(--nv-shadow);
+
+  h2 {
+    margin: 10px 0 8px;
+    font-size: 21px;
+    font-weight: 800;
+  }
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 18px;
+    padding: 0 0 0 18px;
+    font-size: 14.5px;
+    line-height: 1.4;
+  }
+}
+
+.nv-sigurnost-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 20px;
+}
+
+.nv-sigurnost-da {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--nv-accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nv-sigurnost-ostalo {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+
+  button {
+    padding: 8px 4px;
+    border: 0;
+    background: none;
+    color: var(--nv-muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}
+
 // ---------- Dolje ----------
 .nv-dno {
   position: absolute;

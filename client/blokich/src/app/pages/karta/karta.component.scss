@@ -254,7 +254,7 @@
   z-index: 3;
   max-width: 560px;
   margin: 0 auto;
-  padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+  padding: 6px 16px max(16px, env(safe-area-inset-bottom));
   border: 1px solid var(--vz-border);
   border-bottom: 0;
   border-radius: 22px 22px 0 0;
@@ -262,6 +262,35 @@
   color: var(--vz-text);
   box-shadow: 0 -8px 30px var(--km-shadow);
   animation: km-gore 0.22s ease-out;
+  // Povlačenje prstom ne smije skrolati stranicu.
+  touch-action: none;
+  transition: transform 0.25s ease;
+
+  // Spuštena: vidi se samo ručka i zaglavlje.
+  &.is-spusteno {
+    transform: translateY(calc(100% - 92px));
+  }
+  // Dok prst vuče, kartica ga prati bez kašnjenja.
+  &.is-vuce {
+    transition: none;
+  }
+}
+
+.km-rucka {
+  width: 44px;
+  height: 5px;
+  margin: 2px auto 12px;
+  border-radius: 3px;
+  background: var(--vz-border);
+  cursor: grab;
+
+  // Veća površina za prst nego što se vidi.
+  position: relative;
+  &::before {
+    position: absolute;
+    inset: -12px -40px;
+    content: '';
+  }
 }
 
 @keyframes km-gore {
