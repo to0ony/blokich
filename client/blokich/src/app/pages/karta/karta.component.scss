@@ -175,11 +175,22 @@
   font-size: 14px;
 }
 
+// Oznake u jednom redu – na uskom ekranu se pomiču vodoravno, ne lome u dva reda.
 .km-chips {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin: 8px -12px 0;
+  padding: 0 12px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    flex: 0 0 auto;
+  }
 }
 
 .km-live,
