@@ -7,10 +7,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { KartaService } from '../../services/karta/karta.service';
+import { NavigacijaService } from '../../services/karta/navigacija.service';
 
 @Controller('karta')
 export class KartaController {
-  constructor(private readonly kartaService: KartaService) {}
+  constructor(
+    private readonly kartaService: KartaService,
+    private readonly navigacijaService: NavigacijaService,
+  ) {}
 
   /**
    * GET /api/karta/vozila – sva vozila ZET-a sa svježom pozicijom.
@@ -71,5 +75,20 @@ export class KartaController {
     const l = this.kartaService.linija(broj);
     if (!l) throw new NotFoundException('Linija nije pronađena.');
     return l;
+  }
+
+  /**
+   * GET /api/karta/navigacija?oblik=137_3 – skretanja po trasi za navigaciju:
+   * s imenima ulica ako je postavljen OSRM_URL, inače iz oblika trase.
+   */
+  @Get('navigacija')
+  @Header('Cache-Control', 'private, max-age=3600')
+  async navigacija(@Query('oblik') oblik?: string) {
+    if (!oblik || !/^[\w.-]{1,40}$/.test(oblik)) {
+      throw new BadRequestException('Neispravna trasa.');
+    }
+    const n = this.navigacijaService.navigacija(oblik);
+    if (!n) throw new NotFoundException('Trasa nije pronađena.');
+    return n;
   }
 }

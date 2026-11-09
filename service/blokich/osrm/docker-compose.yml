@@ -1,0 +1,14 @@
+# OSRM za navigaciju u Blokichu (skretanja s imenima ulica).
+# Prije prvog pokretanja pripremi podatke: ./pripremi.sh (vidi README.md).
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    restart: unless-stopped
+    command: >
+      osrm-routed --algorithm mld --max-viaroute-size 500
+      /data/croatia-latest.osrm
+    volumes:
+      - ./data:/data
+    # Samo lokalno – NestJS ga zove preko OSRM_URL=http://127.0.0.1:5000
+    ports:
+      - "127.0.0.1:5000:5000"
