@@ -1,0 +1,299 @@
+:host {
+  display: block;
+}
+
+.nv {
+  --nv-panel: #ffffff;
+  --nv-panel-2: #f1f5f9;
+  --nv-text: #0f172a;
+  --nv-muted: #64748b;
+  --nv-border: #e2e8f0;
+  --nv-accent: #2563eb;
+  --nv-shadow: rgba(15, 23, 42, 0.18);
+
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #e5e7eb;
+  color: var(--nv-text);
+
+  &.is-dark {
+    --nv-panel: #111a2b;
+    --nv-panel-2: #1a2539;
+    --nv-text: #e2e8f0;
+    --nv-muted: #94a3b8;
+    --nv-border: #24324a;
+    --nv-accent: #3b82f6;
+    --nv-shadow: rgba(0, 0, 0, 0.5);
+
+    background: #0b1220;
+  }
+}
+
+.nv-mapa {
+  position: absolute;
+  inset: 0;
+}
+
+.nv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--nv-border);
+  border-radius: 14px;
+  background: var(--nv-panel);
+  color: var(--nv-text);
+  font-size: 17px;
+  box-shadow: 0 4px 14px var(--nv-shadow);
+  cursor: pointer;
+
+  &.is-off {
+    color: var(--nv-muted);
+  }
+  &.is-accent {
+    background: var(--nv-accent);
+    border-color: var(--nv-accent);
+    color: #fff;
+  }
+}
+
+// ---------- Gore ----------
+.nv-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: max(12px, env(safe-area-inset-top)) 12px 0;
+}
+
+.nv-izlaz {
+  flex: 0 0 auto;
+}
+
+// Manevar: velik i taman, čitljiv na brzinu (kao na navigacijama).
+.nv-manevar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: #14532d;
+  color: #fff;
+  box-shadow: 0 6px 20px var(--nv-shadow);
+}
+
+.nv-strelica {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+
+  svg {
+    width: 48px;
+    height: 48px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.3s;
+  }
+  .pi {
+    font-size: 34px;
+  }
+}
+
+.nv-manevar-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  span {
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0.92;
+  }
+}
+
+.nv-upozorenje {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px var(--nv-shadow);
+
+  &.is-kraj {
+    background: #1e293b;
+  }
+}
+
+// ---------- Desno ----------
+.nv-tools {
+  position: absolute;
+  top: calc(max(12px, env(safe-area-inset-top)) + 96px);
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// ---------- Dolje ----------
+.nv-dno {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 12px max(12px, env(safe-area-inset-bottom));
+}
+
+.nv-poruka {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--nv-panel);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px var(--nv-shadow);
+
+  &.is-err {
+    color: #b91c1c;
+  }
+}
+
+.nv-link {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nv-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.nv-stajaliste {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--nv-panel);
+  box-shadow: 0 -4px 20px var(--nv-shadow);
+}
+
+.nv-linija {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: var(--nv-accent);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.nv-stajaliste-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-size: 21px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  small {
+    color: var(--nv-muted);
+    font-size: 13px;
+  }
+}
+
+.nv-proba {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: var(--nv-panel);
+  box-shadow: 0 4px 14px var(--nv-shadow);
+
+  .nv-btn {
+    width: 44px;
+    height: 44px;
+    box-shadow: none;
+  }
+}
+
+.nv-proba-oznaka {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.nv-brzine {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--nv-border);
+  border-radius: 12px;
+
+  button {
+    padding: 10px 12px;
+    border: 0;
+    background: var(--nv-panel-2);
+    color: var(--nv-text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &.is-on {
+      background: var(--nv-accent);
+      color: #fff;
+    }
+  }
+}
+
+.nv-izvor {
+  color: var(--nv-muted);
+  font-size: 11.5px;
+  text-align: center;
+  text-shadow: 0 0 4px var(--nv-panel);
+}

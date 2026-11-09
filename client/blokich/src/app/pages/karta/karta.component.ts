@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import {
   KartaService,
@@ -75,6 +75,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   private readonly servis = inject(KartaService);
   private readonly zone = inject(NgZone);
+  private readonly router = inject(Router);
   /**
    * Otvaranje s kartice vozača: ?vozilo=374 odabere bus čim stigne u
    * podatke; ako ga nema, ?linija=137 pokaže rutu linije.
@@ -468,6 +469,15 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   pratiOpet(): void {
     this.prati = true;
+  }
+
+  /** Navigacija (GPS) ili probna vožnja po trasi. */
+  navigiraj(oblik: string, linija: string | null, cilj: string | null, proba: boolean): void {
+    const queryParams: Record<string, string> = { oblik };
+    if (linija) queryParams['linija'] = linija;
+    if (cilj) queryParams['cilj'] = cilj;
+    if (proba) queryParams['proba'] = '1';
+    this.router.navigate(['/navigacija'], { queryParams });
   }
 
   private pocetniPogled(): void {

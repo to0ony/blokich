@@ -107,6 +107,15 @@
         <span>{{ s.cilj || 'Smjer ' + (i + 1) }}</span>
       </button>
     </div>
+
+    <div class="km-nav" *ngIf="ruta?.smjerovi?.[smjerRute] as s">
+      <button type="button" class="km-nav-btn is-main" (click)="navigiraj(s.oblik, ruta!.broj, s.cilj, false)">
+        <i class="pi pi-send"></i> Navigacija
+      </button>
+      <button type="button" class="km-nav-btn" (click)="navigiraj(s.oblik, ruta!.broj, s.cilj, true)">
+        <i class="pi pi-play"></i> Probna vožnja
+      </button>
+    </div>
   </section>
 
   <!-- Detalji odabranog vozila -->
@@ -171,6 +180,15 @@
         <strong>{{ v.model }}</strong>
         <small>{{ v.id }}<ng-container *ngIf="v.tablica"> · {{ v.tablica }}</ng-container></small>
       </div>
+    </div>
+
+    <div class="km-nav" *ngIf="v.oblik">
+      <button type="button" class="km-nav-btn is-main" (click)="navigiraj(v.oblik, v.linija, v.cilj, false)">
+        <i class="pi pi-send"></i> Navigacija
+      </button>
+      <button type="button" class="km-nav-btn" (click)="navigiraj(v.oblik, v.linija, v.cilj, true)">
+        <i class="pi pi-play"></i> Probna vožnja
+      </button>
     </div>
 
     <button *ngIf="!prati" type="button" class="km-follow" (click)="pratiOpet()">

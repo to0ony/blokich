@@ -354,6 +354,34 @@
   }
 }
 
+.km-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.km-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+  color: var(--vz-text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &.is-main {
+    border-color: var(--km-accent);
+    background: var(--km-accent);
+    color: #fff;
+  }
+}
+
 .km-close {
   width: 36px;
   height: 36px;

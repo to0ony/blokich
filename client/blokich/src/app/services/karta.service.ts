@@ -64,6 +64,28 @@ export interface LinijaKarta {
   }[];
 }
 
+/** Skretanje na trasi (vidi /api/karta/navigacija). */
+export interface ManevarKarta {
+  /** Metri od početka trase. */
+  d: number;
+  tip:
+    | 'lijevo'
+    | 'desno'
+    | 'blago-lijevo'
+    | 'blago-desno'
+    | 'ostro-lijevo'
+    | 'ostro-desno'
+    | 'polukruzno'
+    | 'kruzni';
+  ulica: string | null;
+  izlaz?: number;
+}
+
+export interface NavigacijaKarta {
+  izvor: 'osrm' | 'geometrija';
+  manevri: ManevarKarta[];
+}
+
 export interface KartaOdgovor {
   vrijeme: string | null;
   gtfs: string | null;
@@ -89,6 +111,12 @@ export class KartaService {
   linija(broj: string) {
     const params = new HttpParams().set('broj', broj);
     return this.api.get<LinijaKarta>('karta/linija', params);
+  }
+
+  /** Skretanja po trasi za navigaciju. */
+  navigacija(oblik: string) {
+    const params = new HttpParams().set('oblik', oblik);
+    return this.api.get<NavigacijaKarta>('karta/navigacija', params);
   }
 
   /** Stajališta trase, redom kojim ih vožnja obilazi. */
