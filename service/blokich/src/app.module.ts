@@ -21,6 +21,7 @@ import { VozacStatsModule } from './modules/vozac-stats/vozac-stats.module';
 import { ZetSyncModule } from './modules/zet-sync/zet-sync.module';
 import { RucniUvozModule } from './modules/rucni-uvoz/rucni-uvoz.module';
 import { ZetUzivoModule } from './modules/zet-uzivo/zet-uzivo.module';
+import { KartaModule } from './modules/karta/karta.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ZetUzivoModule } from './modules/zet-uzivo/zet-uzivo.module';
     VozacStatsModule,
     ZetSyncModule,
     ZetUzivoModule,
+    KartaModule,
   ],
   providers: [AdminService],
 })

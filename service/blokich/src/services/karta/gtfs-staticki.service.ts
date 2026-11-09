@@ -1,0 +1,244 @@
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import { strFromU8, unzipSync } from 'fflate';
+
+/** Linija iz routes.txt. */
+export interface RutaGtfs {
+  id: string;
+  /** Broj linije kakav piše na busu (route_short_name). */
+  naziv: string;
+  /** Npr. "Črnomerec - Savišće". */
+  opis: string;
+  /** GTFS route_type: 0 = tramvaj, 3 = autobus. */
+  tip: number;
+}
+
+/** Vožnja iz trips.txt – trip_id je isti kao u GTFS-RT feedu. */
+export interface VoznjaGtfs {
+  ruta: string;
+  oblik: string | null;
+  smjer: number | null;
+  cilj: string | null;
+}
+
+/** Trasa kao niz [lat, lon]. */
+export type Oblik = [number, number][];
+
+export interface GtfsPodaci {
+  verzija: string | null;
+  rute: Map<string, RutaGtfs>;
+  voznje: Map<string, VoznjaGtfs>;
+  oblici: Map<string, Oblik>;
+}
+
+const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt'];
+/** ZET objavljuje novi GTFS otprilike jednom dnevno. */
+const OSVJEZI_MS = 6 * 60 * 60 * 1000;
+/** Točke trase bliže od ovoga pravcu između susjeda se izbacuju. */
+const TOLERANCIJA_M = 1.5;
+
+/**
+ * Statični GTFS ZET-a (vozni red): linije, vožnje i trase za kartu.
+ * Drži se u memoriji; stop_times.txt (~80 MB) se ni ne raspakirava.
+ */
+@Injectable()
+export class GtfsStatickiService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(GtfsStatickiService.name);
+  private readonly url: string;
+  private podaci: GtfsPodaci | null = null;
+  private ucitavanje: Promise<void> | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(
+    private readonly http: HttpService,
+    private readonly config: ConfigService,
+  ) {
+    this.url =
+      this.config.get<string>('ZET_GTFS_URL') ||
+      'https://www.zet.hr/gtfs-scheduled/latest';
+  }
+
+  onModuleInit(): void {
+    // Ne blokira start aplikacije – karta je bez trasa dok se ne učita.
+    void this.osvjezi();
+    this.timer = setInterval(() => void this.osvjezi(), OSVJEZI_MS);
+    this.timer.unref?.();
+  }
+
+  onModuleDestroy(): void {
+    if (this.timer) clearInterval(this.timer);
+  }
+
+  /** Trenutni podaci ili null ako GTFS još nije učitan. */
+  get(): GtfsPodaci | null {
+    return this.podaci;
+  }
+
+  osvjezi(): Promise<void> {
+    if (!this.ucitavanje) {
+      this.ucitavanje = this.ucitaj().finally(() => (this.ucitavanje = null));
+    }
+    return this.ucitavanje;
+  }
+
+  private async ucitaj(): Promise<void> {
+    try {
+      const res = await firstValueFrom(
+        this.http.get<ArrayBuffer>(this.url, {
+          responseType: 'arraybuffer',
+          timeout: 60_000,
+        }),
+      );
+      const podaci = obradiGtfs(new Uint8Array(res.data));
+      this.podaci = podaci;
+      this.logger.log(
+        `GTFS ${podaci.verzija ?? '?'}: ${podaci.rute.size} linija, ` +
+          `${podaci.voznje.size} vožnji, ${podaci.oblici.size} trasa`,
+      );
+    } catch (err: any) {
+      // Stari podaci ostaju – bolje jučerašnje trase nego nikakve.
+      this.logger.warn(`ZET GTFS nije dostupan: ${err?.message}`);
+    }
+  }
+}
+
+/** Raspakira ZET-ov GTFS zip i složi ga za kartu. Izdvojeno radi testiranja. */
+export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
+  const datoteke = unzipSync(zip, {
+    filter: (f) => DATOTEKE.includes(f.name.split('/').pop() ?? ''),
+  });
+  const tekst = (ime: string): string => {
+    const kljuc = Object.keys(datoteke).find((k) => k.split('/').pop() === ime);
+    return kljuc ? strFromU8(datoteke[kljuc]) : '';
+  };
+
+  const verzija = redovi(tekst('feed_info.txt'))[0]?.feed_version || null;
+
+  const rute = new Map<string, RutaGtfs>();
+  for (const r of redovi(tekst('routes.txt'))) {
+    if (!r.route_id) continue;
+    rute.set(r.route_id, {
+      id: r.route_id,
+      naziv: r.route_short_name || r.route_id,
+      opis: r.route_long_name || '',
+      tip: Number(r.route_type ?? 3),
+    });
+  }
+
+  const voznje = new Map<string, VoznjaGtfs>();
+  for (const t of redovi(tekst('trips.txt'))) {
+    if (!t.trip_id) continue;
+    const smjer = t.direction_id === '' || t.direction_id == null ? null : Number(t.direction_id);
+    voznje.set(t.trip_id, {
+      ruta: t.route_id,
+      oblik: t.shape_id || null,
+      smjer: Number.isFinite(smjer) ? smjer : null,
+      cilj: t.trip_headsign || null,
+    });
+  }
+
+  const sirovo = new Map<string, { seq: number; lat: number; lon: number }[]>();
+  for (const s of redovi(tekst('shapes.txt'))) {
+    const lat = Number(s.shape_pt_lat);
+    const lon = Number(s.shape_pt_lon);
+    if (!s.shape_id || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    let lista = sirovo.get(s.shape_id);
+    if (!lista) sirovo.set(s.shape_id, (lista = []));
+    lista.push({ seq: Number(s.shape_pt_sequence), lat, lon });
+  }
+  const oblici = new Map<string, Oblik>();
+  for (const [id, tocke] of sirovo) {
+    tocke.sort((a, b) => a.seq - b.seq);
+    oblici.set(id, pojednostavi(tocke.map((t) => [t.lat, t.lon] as [number, number])));
+  }
+
+  return { verzija, rute, voznje, oblici };
+}
+
+/** CSV s navodnicima (GTFS) -> objekti po zaglavlju. */
+export function redovi(csv: string): Record<string, string>[] {
+  const linije = parsirajCsv(csv.replace(/^﻿/, ''));
+  const zaglavlje = linije.shift()?.map((h) => h.trim()) ?? [];
+  return linije
+    .filter((l) => l.length > 1 || (l[0] ?? '') !== '')
+    .map((l) => Object.fromEntries(zaglavlje.map((h, i) => [h, l[i] ?? ''])));
+}
+
+function parsirajCsv(csv: string): string[][] {
+  const rez: string[][] = [];
+  let red: string[] = [];
+  let polje = '';
+  let uNavodnicima = false;
+  for (let i = 0; i < csv.length; i++) {
+    const c = csv[i];
+    if (uNavodnicima) {
+      if (c === '"') {
+        if (csv[i + 1] === '"') {
+          polje += '"';
+          i++;
+        } else uNavodnicima = false;
+      } else polje += c;
+    } else if (c === '"') uNavodnicima = true;
+    else if (c === ',') {
+      red.push(polje);
+      polje = '';
+    } else if (c === '\n' || c === '\r') {
+      if (c === '\r' && csv[i + 1] === '\n') i++;
+      red.push(polje);
+      rez.push(red);
+      red = [];
+      polje = '';
+    } else polje += c;
+  }
+  if (polje !== '' || red.length) {
+    red.push(polje);
+    rez.push(red);
+  }
+  return rez;
+}
+
+/** Douglas–Peucker u metrima; koordinate zaokružene na 5 decimala (~1 m). */
+export function pojednostavi(tocke: Oblik, tolerancija = TOLERANCIJA_M): Oblik {
+  const zaokruzi = (t: [number, number]): [number, number] => [
+    Math.round(t[0] * 1e5) / 1e5,
+    Math.round(t[1] * 1e5) / 1e5,
+  ];
+  if (tocke.length <= 2) return tocke.map(zaokruzi);
+
+  const kx = 111_320 * Math.cos((tocke[0][0] * Math.PI) / 180);
+  const ky = 110_540;
+  const xy = tocke.map(([lat, lon]) => [lon * kx, lat * ky]);
+  const zadrzi = new Uint8Array(tocke.length);
+  zadrzi[0] = zadrzi[tocke.length - 1] = 1;
+
+  const stog: [number, number][] = [[0, tocke.length - 1]];
+  while (stog.length) {
+    const [a, b] = stog.pop()!;
+    let max = 0;
+    let idx = -1;
+    const [ax, ay] = xy[a];
+    const [bx, by] = xy[b];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const d2 = dx * dx + dy * dy;
+    for (let i = a + 1; i < b; i++) {
+      const [px, py] = xy[i];
+      let t = d2 ? ((px - ax) * dx + (py - ay) * dy) / d2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const ex = ax + t * dx - px;
+      const ey = ay + t * dy - py;
+      const d = ex * ex + ey * ey;
+      if (d > max) {
+        max = d;
+        idx = i;
+      }
+    }
+    if (idx >= 0 && max > tolerancija * tolerancija) {
+      zadrzi[idx] = 1;
+      stog.push([a, idx], [idx, b]);
+    }
+  }
+  return tocke.filter((_, i) => zadrzi[i]).map(zaokruzi);
+}
