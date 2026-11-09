@@ -13,6 +13,8 @@ const gtfs: GtfsPodaci = {
     ['0_1_1203_12_1', { ruta: '12', oblik: '12_3', smjer: 0, cilj: 'Ljubljanica' }],
   ]),
   oblici: new Map(),
+  stajalista: new Map(),
+  stajalistaOblika: new Map(),
 };
 
 const pozicija = (vozilo: string, tripId: string, blok: string) => ({

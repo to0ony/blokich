@@ -4,7 +4,13 @@ import {
   VOZNI_PARK,
   ZetUzivoService,
 } from '../zet-uzivo/zet-uzivo.service';
-import { GtfsPodaci, GtfsStatickiService, Oblik, RutaGtfs } from './gtfs-staticki.service';
+import {
+  GtfsPodaci,
+  GtfsStatickiService,
+  Oblik,
+  RutaGtfs,
+  StajalisteGtfs,
+} from './gtfs-staticki.service';
 import { VozacNaBloku, VozaciNaBlokuService } from './vozaci-na-bloku.service';
 
 /** Vozilo na karti. Model i vozač postoje samo za AP Podsused. */
@@ -83,6 +89,15 @@ export class KartaService {
       if (o) rez[id] = o;
     }
     return rez;
+  }
+
+  /** Stajališta trase redom kojim ih vožnja obilazi. */
+  stajalista(oblik: string): StajalisteGtfs[] {
+    const g = this.gtfs.get();
+    const ids = g?.stajalistaOblika.get(oblik) ?? [];
+    return ids
+      .map((id) => g!.stajalista.get(id))
+      .filter((s): s is StajalisteGtfs => !!s);
   }
 
   rute(): RutaGtfs[] {

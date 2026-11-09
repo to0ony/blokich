@@ -21,7 +21,15 @@ describe('obradiGtfs', () => {
         '"109_1",45.81,15.95,10002,\n' +
         '"109_1",45.80,15.94,10001,\n' +
         '"109_1",45.82,15.96,10003,\n',
-      'stop_times.txt': 'ovo se ne čita\n',
+      'stops.txt':
+        'stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon\n' +
+        '"98_1","1","Črnomerec",,45.815002,15.934932\n' +
+        '"99_2","2","Dubrava",,45.82,15.96\n',
+      'stop_times.txt':
+        'trip_id,arrival_time,departure_time,stop_id,stop_sequence\r\n' +
+        '"0_11_10902_109_1","05:10:00","05:10:00","99_2",2\r\n' +
+        '"0_11_10902_109_1","05:00:00","05:00:00","98_1",1\r\n' +
+        '"0_11_99999_109_9","06:00:00","06:00:00","98_1",1\r\n',
     }),
   );
 
@@ -38,6 +46,16 @@ describe('obradiGtfs', () => {
       smjer: 0,
       cilj: 'Dubrava',
     });
+  });
+
+  it('stajališta i stajališta trase po redoslijedu', () => {
+    expect(g.stajalista.get('98_1')).toEqual({
+      id: '98_1',
+      naziv: 'Črnomerec',
+      lat: 45.815,
+      lon: 15.93493,
+    });
+    expect(g.stajalistaOblika.get('109_1')).toEqual(['98_1', '99_2']);
   });
 
   it('točke trase po redoslijedu', () => {

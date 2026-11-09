@@ -29,6 +29,16 @@ export class KartaController {
     return { oblici: this.kartaService.oblici(ids) };
   }
 
+  /** GET /api/karta/stajalista?oblik=109_1 – stajališta trase, redom. */
+  @Get('stajalista')
+  @Header('Cache-Control', 'private, max-age=3600')
+  stajalista(@Query('oblik') oblik?: string) {
+    if (!oblik || !/^[\w.-]{1,40}$/.test(oblik)) {
+      throw new BadRequestException('Neispravna trasa.');
+    }
+    return { stajalista: this.kartaService.stajalista(oblik) };
+  }
+
   /** GET /api/karta/rute – sve linije (broj, naziv, tramvaj/autobus). */
   @Get('rute')
   @Header('Cache-Control', 'private, max-age=3600')

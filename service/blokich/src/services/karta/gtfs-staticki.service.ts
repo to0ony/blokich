@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { strFromU8, unzipSync } from 'fflate';
+import { Unzip, UnzipInflate, strFromU8, unzipSync } from 'fflate';
 
 /** Linija iz routes.txt. */
 export interface RutaGtfs {
@@ -26,14 +26,25 @@ export interface VoznjaGtfs {
 /** Trasa kao niz [lat, lon]. */
 export type Oblik = [number, number][];
 
+/** Stajalište iz stops.txt. */
+export interface StajalisteGtfs {
+  id: string;
+  naziv: string;
+  lat: number;
+  lon: number;
+}
+
 export interface GtfsPodaci {
   verzija: string | null;
   rute: Map<string, RutaGtfs>;
   voznje: Map<string, VoznjaGtfs>;
   oblici: Map<string, Oblik>;
+  stajalista: Map<string, StajalisteGtfs>;
+  /** shape_id -> stop_id redom kojim ih vožnja te trase obilazi. */
+  stajalistaOblika: Map<string, string[]>;
 }
 
-const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt'];
+const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt', 'stops.txt'];
 /** ZET objavljuje novi GTFS otprilike jednom dnevno. */
 const OSVJEZI_MS = 6 * 60 * 60 * 1000;
 /** Točke trase bliže od ovoga pravcu između susjeda se izbacuju. */
@@ -41,7 +52,8 @@ const TOLERANCIJA_M = 1.5;
 
 /**
  * Statični GTFS ZET-a (vozni red): linije, vožnje i trase za kartu.
- * Drži se u memoriji; stop_times.txt (~80 MB) se ni ne raspakirava.
+ * Drži se u memoriji. stop_times.txt (~80 MB) se čita u komadima i iz njega
+ * se uzima samo po jedna vožnja za svaku trasu – za popis stajališta.
  */
 @Injectable()
 export class GtfsStatickiService implements OnModuleInit, OnModuleDestroy {
@@ -95,7 +107,8 @@ export class GtfsStatickiService implements OnModuleInit, OnModuleDestroy {
       this.podaci = podaci;
       this.logger.log(
         `GTFS ${podaci.verzija ?? '?'}: ${podaci.rute.size} linija, ` +
-          `${podaci.voznje.size} vožnji, ${podaci.oblici.size} trasa`,
+          `${podaci.voznje.size} vožnji, ${podaci.oblici.size} trasa, ` +
+          `${podaci.stajalista.size} stajališta`,
       );
     } catch (err: any) {
       // Stari podaci ostaju – bolje jučerašnje trase nego nikakve.
@@ -128,8 +141,11 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
   }
 
   const voznje = new Map<string, VoznjaGtfs>();
+  /** Po jedna vožnja za svaku trasu – iz nje se čitaju stajališta trase. */
+  const predstavnici = new Map<string, string>();
   for (const t of redovi(tekst('trips.txt'))) {
     if (!t.trip_id) continue;
+    if (t.shape_id && !predstavnici.has(t.shape_id)) predstavnici.set(t.shape_id, t.trip_id);
     const smjer = t.direction_id === '' || t.direction_id == null ? null : Number(t.direction_id);
     voznje.set(t.trip_id, {
       ruta: t.route_id,
@@ -154,7 +170,81 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
     oblici.set(id, pojednostavi(tocke.map((t) => [t.lat, t.lon] as [number, number])));
   }
 
-  return { verzija, rute, voznje, oblici };
+  const stajalista = new Map<string, StajalisteGtfs>();
+  for (const s of redovi(tekst('stops.txt'))) {
+    const lat = Number(s.stop_lat);
+    const lon = Number(s.stop_lon);
+    if (!s.stop_id || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    stajalista.set(s.stop_id, {
+      id: s.stop_id,
+      naziv: s.stop_name || '',
+      lat: Math.round(lat * 1e5) / 1e5,
+      lon: Math.round(lon * 1e5) / 1e5,
+    });
+  }
+
+  const poVoznji = stajalistaVoznji(zip, new Set(predstavnici.values()));
+  const stajalistaOblika = new Map<string, string[]>();
+  for (const [oblik, trip] of predstavnici) {
+    const lista = poVoznji.get(trip);
+    if (lista?.length) stajalistaOblika.set(oblik, lista);
+  }
+
+  return { verzija, rute, voznje, oblici, stajalista, stajalistaOblika };
+}
+
+/**
+ * Stajališta odabranih vožnji iz stop_times.txt, redom. Datoteka se
+ * raspakirava i čita u komadima – cijela bi zauzela ~80 MB memorije.
+ */
+function stajalistaVoznji(zip: Uint8Array, voznje: Set<string>): Map<string, string[]> {
+  const sirovo = new Map<string, { seq: number; stop: string }[]>();
+  const bez = (v: string | undefined) => (v ?? '').trim().replace(/^"|"$/g, '');
+  let stupci: { trip: number; stop: number; seq: number } | null = null;
+  let ostatak = '';
+  const dekoder = new TextDecoder();
+
+  const redak = (l: string) => {
+    if (!l) return;
+    if (!stupci) {
+      const h = l.replace(/^\uFEFF/, '').split(',').map((x) => bez(x));
+      stupci = { trip: h.indexOf('trip_id'), stop: h.indexOf('stop_id'), seq: h.indexOf('stop_sequence') };
+      return;
+    }
+    // Brza provjera prije dijeljenja retka – zanima nas samo mali dio redaka.
+    if (stupci.trip === 0 && !voznje.has(bez(l.slice(0, l.indexOf(','))))) return;
+    const d = l.split(',');
+    const trip = bez(d[stupci.trip]);
+    if (!voznje.has(trip)) return;
+    let lista = sirovo.get(trip);
+    if (!lista) sirovo.set(trip, (lista = []));
+    lista.push({ seq: Number(bez(d[stupci.seq])), stop: bez(d[stupci.stop]) });
+  };
+
+  const uz = new Unzip((f) => {
+    if (f.name.split('/').pop() !== 'stop_times.txt') return;
+    f.ondata = (err, komad, kraj) => {
+      if (err) throw err;
+      const tekst = ostatak + dekoder.decode(komad, { stream: !kraj });
+      const linije = tekst.split('\n').map((x) => (x.endsWith('\r') ? x.slice(0, -1) : x));
+      ostatak = kraj ? '' : (linije.pop() ?? '');
+      for (const l of linije) redak(l);
+    };
+    f.start();
+  });
+  uz.register(UnzipInflate);
+  // U komadima – inače se cijela datoteka raspakira odjednom.
+  const KOMAD = 64 * 1024;
+  for (let i = 0; i < zip.length; i += KOMAD) {
+    uz.push(zip.subarray(i, i + KOMAD), i + KOMAD >= zip.length);
+  }
+
+  const rez = new Map<string, string[]>();
+  for (const [trip, lista] of sirovo) {
+    lista.sort((a, b) => a.seq - b.seq);
+    rez.set(trip, lista.map((x) => x.stop));
+  }
+  return rez;
 }
 
 /** CSV s navodnicima (GTFS) -> objekti po zaglavlju. */
