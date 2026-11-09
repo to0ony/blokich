@@ -1,4 +1,3 @@
-/// <reference types="geojson" />
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from './api.service';
@@ -42,32 +41,12 @@ export interface KartaOdgovor {
   vozila: VoziloKarta[];
 }
 
-/** Zatvorena cesta ili gradski radovi (svojstva GeoJSON featurea). */
-export interface RadoviSvojstva {
-  vrsta: 'zatvaranje' | 'radovi';
-  naslov: string;
-  opis: string | null;
-  od: string | null;
-  do: string | null;
-  /** BOTH_DIRECTIONS / ONE_DIRECTION (samo zatvaranja). */
-  smjer: string | null;
-  url: string | null;
-  aktivno: boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class KartaService {
   constructor(private api: ApiService) {}
 
   vozila() {
     return this.api.get<KartaOdgovor>('karta/vozila');
-  }
-
-  /** Zatvorene ceste (linije) i gradski radovi (točke) kao GeoJSON. */
-  radovi() {
-    return this.api.get<GeoJSON.FeatureCollection<GeoJSON.Geometry, RadoviSvojstva>>(
-      'karta/radovi',
-    );
   }
 
   /** Trase po shape_id, kao nizovi [lat, lon]. */

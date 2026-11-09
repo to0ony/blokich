@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
-import { KartaService, RadoviSvojstva, VoziloKarta } from '../../services/karta.service';
+import { KartaService, VoziloKarta } from '../../services/karta.service';
 import { Kretanje } from '../../components/karta/kretanje';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
 
@@ -74,73 +74,6 @@ function strelica(): ImageData {
   return g.getImageData(0, 0, n, n);
 }
 
-/** Znak zabrane prometa (crveni krug, bijela traka) – na sredini zatvorene ceste. */
-function zabrana(): ImageData {
-  const n = 48;
-  const c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d')!;
-  g.fillStyle = '#ffffff';
-  g.beginPath();
-  g.arc(24, 24, 23, 0, Math.PI * 2);
-  g.fill();
-  g.fillStyle = '#dc2626';
-  g.beginPath();
-  g.arc(24, 24, 20, 0, Math.PI * 2);
-  g.fill();
-  g.fillStyle = '#ffffff';
-  g.fillRect(11, 20, 26, 8);
-  return g.getImageData(0, 0, n, n);
-}
-
-/** Radovi: narančasti romb s čunjem, kao na navigacijama. */
-function radoviZnak(): ImageData {
-  const n = 52;
-  const c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d')!;
-  const romb = (r: number) => {
-    g.beginPath();
-    g.moveTo(26, 26 - r);
-    g.lineTo(26 + r, 26);
-    g.lineTo(26, 26 + r);
-    g.lineTo(26 - r, 26);
-    g.closePath();
-  };
-  g.lineJoin = 'round';
-  g.fillStyle = '#ffffff';
-  romb(25);
-  g.fill();
-  g.fillStyle = '#f97316';
-  romb(21);
-  g.fill();
-  // Čunj
-  g.fillStyle = '#1e293b';
-  g.beginPath();
-  g.moveTo(26, 13);
-  g.lineTo(33, 34);
-  g.lineTo(19, 34);
-  g.closePath();
-  g.fill();
-  g.fillRect(16, 34, 20, 4);
-  g.fillStyle = '#ffffff';
-  g.fillRect(22, 22, 8, 3);
-  g.fillRect(20.5, 28, 11, 3);
-  return g.getImageData(0, 0, n, n);
-}
-
-const RADOVI_SLOJEVI = ['zatvaranja-linija', 'zatvaranja-crte', 'zatvaranja-znak', 'radovi-znak'];
-const RADOVI_KEY = 'karta-radovi-skriveni';
-const RADOVI_INTERVAL_MS = 15 * 60 * 1000;
-
-function procitajSkriveneRadove(): boolean {
-  try {
-    return localStorage.getItem(RADOVI_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
 /** Karta uživo: sva vozila ZET-a, za AP Podsused i vozač i bus. */
 @Component({
   selector: 'app-karta',
@@ -164,10 +97,6 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   samoPodsused = false;
   filterLinija: string | null = null;
   prati = true;
-  /** Odabrana zatvorena cesta ili radovi (umjesto vozila). */
-  odabraniRadovi: RadoviSvojstva | null = null;
-  prikaziRadove = !procitajSkriveneRadove();
-  brojRadova = 0;
   /** Otkucava svake sekunde – za "prije X s". */
   sad = Date.now();
 
@@ -181,8 +110,6 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   private prviPut = true;
   private timer: ReturnType<typeof setInterval> | null = null;
   private sat: ReturnType<typeof setInterval> | null = null;
-  private radoviTimer: ReturnType<typeof setInterval> | null = null;
-  private radovi: GeoJSON.FeatureCollection | null = null;
   private frame = 0;
   private zadnjiFrame = 0;
   private unisten = false;
@@ -217,20 +144,9 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
           { layers: ['vozila-krug'] },
         );
         const id = f[0]?.properties?.['id'] as string | undefined;
-        // Vozilo ima prednost; inače zatvorena cesta ili radovi ispod prsta.
-        const r = id
-          ? []
-          : mapa.queryRenderedFeatures(
-              [
-                [p.x - 12, p.y - 12],
-                [p.x + 12, p.y + 12],
-              ],
-              { layers: RADOVI_SLOJEVI.filter((l) => mapa.getLayer(l)) },
-            );
         this.zone.run(() => {
           const v = id ? this.vozila.find((x) => x.id === id) : undefined;
           if (v) this.odaberi(v, false);
-          else if (r.length) this.odaberiRadove(r[0].properties as RadoviSvojstva);
           else this.zatvori();
         });
       });
@@ -242,72 +158,14 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
       if (!document.hidden) this.osvjezi();
     }, INTERVAL_MS);
     this.sat = setInterval(() => (this.sad = Date.now()), 1000);
-    this.ucitajRadove();
-    this.radoviTimer = setInterval(() => this.ucitajRadove(), RADOVI_INTERVAL_MS);
   }
 
   ngOnDestroy(): void {
     this.unisten = true;
     if (this.timer) clearInterval(this.timer);
     if (this.sat) clearInterval(this.sat);
-    if (this.radoviTimer) clearInterval(this.radoviTimer);
     cancelAnimationFrame(this.frame);
     this.mapa?.remove();
-  }
-
-  // ---------- Radovi ----------
-
-  private ucitajRadove(): void {
-    this.servis.radovi().subscribe({
-      next: (fc) => {
-        this.radovi = fc;
-        this.brojRadova = fc?.features?.length ?? 0;
-        this.postaviRadove();
-      },
-      // Radovi su dodatak – bez njih karta radi normalno.
-      error: () => {},
-    });
-  }
-
-  private postaviRadove(): void {
-    const izvor = this.mapa?.getSource('radovi') as GeoJSONSource | undefined;
-    if (izvor && this.radovi) izvor.setData(this.radovi);
-  }
-
-  prebaciRadove(): void {
-    this.prikaziRadove = !this.prikaziRadove;
-    try {
-      localStorage.setItem(RADOVI_KEY, this.prikaziRadove ? '0' : '1');
-    } catch {}
-    if (!this.prikaziRadove) this.odabraniRadovi = null;
-    this.vidljivostRadova();
-  }
-
-  private vidljivostRadova(): void {
-    if (!this.mapa) return;
-    for (const l of RADOVI_SLOJEVI) {
-      if (this.mapa.getLayer(l)) {
-        this.mapa.setLayoutProperty(l, 'visibility', this.prikaziRadove ? 'visible' : 'none');
-      }
-    }
-  }
-
-  odaberiRadove(r: RadoviSvojstva): void {
-    if (this.odabrano) this.zatvori();
-    this.odabraniRadovi = r;
-  }
-
-  /** "u oba smjera", "do 15. 3. 2027." … */
-  opisRoka(r: RadoviSvojstva): string | null {
-    const dan = (iso: string) => {
-      const d = new Date(iso);
-      const godina = d.getFullYear() !== new Date(this.sad).getFullYear() ? ` ${d.getFullYear()}.` : '';
-      return `${d.getDate()}. ${d.getMonth() + 1}.${godina}`;
-    };
-    if (r.od && !r.aktivno && r.do) return `od ${dan(r.od)} do ${dan(r.do)}`;
-    if (r.od && !r.aktivno) return `od ${dan(r.od)}`;
-    if (r.do) return `do ${dan(r.do)}`;
-    return null;
   }
 
   // ---------- Podaci ----------
@@ -442,7 +300,6 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   }
 
   odaberi(v: VoziloKarta, priblizi: boolean): void {
-    this.odabraniRadovi = null;
     this.odabrano = v;
     this.prati = true;
     this.prikaziTrasu();
@@ -461,7 +318,6 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   zatvori(): void {
     if (this.odabrano) this.mapa?.easeTo({ padding: { top: 0, left: 0, right: 0, bottom: 0 }, duration: 300 });
     this.odabrano = null;
-    this.odabraniRadovi = null;
     this.prikaziTrasu();
   }
 
@@ -500,67 +356,6 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     mapa.addImage('strelica', strelica(), { sdf: true, pixelRatio: 2 });
     mapa.addSource('trasa', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     mapa.addSource('vozila', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    mapa.addImage('zabrana', zabrana(), { pixelRatio: 2 });
-    mapa.addImage('radovi', radoviZnak(), { pixelRatio: 2 });
-    mapa.addSource('radovi', {
-      type: 'geojson',
-      data: this.radovi ?? { type: 'FeatureCollection', features: [] },
-    });
-
-    // Zatvorena cesta: crvena s bijelim crtama i znakom zabrane, kao na navigaciji.
-    const zatvaranje = ['all', ['==', ['geometry-type'], 'LineString']] as any;
-    const sirina = (a: number, b: number) =>
-      ['interpolate', ['linear'], ['zoom'], 11, a, 16, b] as any;
-    // Zatvaranje koje tek počinje je blijeđe.
-    const prozirnost = ['case', ['get', 'aktivno'], 1, 0.5] as any;
-    mapa.addLayer({
-      id: 'zatvaranja-linija',
-      type: 'line',
-      source: 'radovi',
-      filter: zatvaranje,
-      layout: { 'line-join': 'round', 'line-cap': 'butt' },
-      paint: { 'line-color': '#dc2626', 'line-width': sirina(4, 11), 'line-opacity': prozirnost },
-    });
-    mapa.addLayer({
-      id: 'zatvaranja-crte',
-      type: 'line',
-      source: 'radovi',
-      filter: zatvaranje,
-      layout: { 'line-join': 'round', 'line-cap': 'butt' },
-      paint: {
-        'line-color': '#ffffff',
-        'line-width': sirina(1.5, 4),
-        'line-dasharray': [1.2, 1.2],
-        'line-opacity': prozirnost,
-      },
-    });
-    mapa.addLayer({
-      id: 'zatvaranja-znak',
-      type: 'symbol',
-      source: 'radovi',
-      filter: zatvaranje,
-      layout: {
-        'symbol-placement': 'line-center',
-        'icon-image': 'zabrana',
-        'icon-size': sirina(0.75, 1.1),
-        'icon-allow-overlap': true,
-        'icon-rotation-alignment': 'viewport',
-      },
-      paint: { 'icon-opacity': prozirnost },
-    });
-    mapa.addLayer({
-      id: 'radovi-znak',
-      type: 'symbol',
-      source: 'radovi',
-      filter: ['==', ['geometry-type'], 'Point'],
-      layout: {
-        'icon-image': 'radovi',
-        'icon-size': sirina(0.7, 1.05),
-        'icon-allow-overlap': true,
-      },
-      paint: { 'icon-opacity': prozirnost },
-    });
-    this.vidljivostRadova();
 
     mapa.addLayer({
       id: 'trasa-rub',
