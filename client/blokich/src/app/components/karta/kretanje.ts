@@ -1,10 +1,13 @@
 /**
- * Glatko kretanje vozila po karti.
+ * Glatko i točno kretanje vozila po karti.
  *
- * Feed javlja poziciju svakih ~20–30 s. Umjesto skakanja, vozilo se od
- * prikazane pozicije do nove vozi kroz vrijeme između dva javljanja – po
- * trasi linije, pa skreće po ulicama. Ne pogađa se unaprijed (nema vraćanja
- * unatrag kad bus stane na stajalištu); cijena je zaostatak od jednog javljanja.
+ * Vozilo javlja poziciju otprilike svakih 11 s (ponekad 20 s), a na kartu
+ * stiže s ~15 s kašnjenja i nepravilno. Umjesto da se svaka nova točka
+ * animira od trenutka kad stigne (pa bus stane i čeka sljedeću), svako
+ * vozilo ima svoj "sat reprodukcije" koji kasni malo iza zadnjeg javljanja –
+ * kao video s međuspremnikom. Između dva stvarna javljanja vozilo vozi po
+ * trasi linije, brzinom iz podataka: stoji kad je stvarno stajalo, ubrzava
+ * kad je ubrzalo. Ništa se ne pogađa unaprijed.
  */
 
 /** Trasa u metrima (lokalna ravnina oko Zagreba) s kumulativnom duljinom. */
@@ -30,10 +33,15 @@ const KY = 110_540;
 const MAX_OD_TRASE_M = 60;
 /** Manji pomak unatrag na istoj vožnji je GPS šum – vozilo stoji. */
 const SUM_UNATRAG_M = 80;
-/** Veći skokovi se ne animiraju – vozilo se samo premjesti. */
+/** Veći skokovi se ne voze – vozilo se premjesti. */
 const MAX_SKOK_M = 3_000;
-const MIN_TRAJANJE_MS = 3_000;
-const MAX_TRAJANJE_MS = 35_000;
+/**
+ * Koliko sekundi reprodukcija kasni iza zadnjeg javljanja. Pokriva i duže
+ * razmake između javljanja (p90 ~20 s), pa vozilo ne stane čekajući podatke.
+ */
+const MEDUSPREMNIK_S = 20;
+/** Koliko javljanja po vozilu pamtimo. */
+const MAX_UZORAKA = 8;
 
 export function napraviTrasu(tocke: [number, number][]): Trasa {
   const n = tocke.length;
@@ -87,7 +95,6 @@ export function tockaNa(t: Trasa, d: number): Pozicija {
   const n = t.x.length;
   if (n === 1) return { lat: t.tocke[0][0], lon: t.tocke[0][1], smjer: 0 };
   d = Math.max(0, Math.min(t.duljina, d));
-  // Binarno traženje segmenta.
   let lo = 0;
   let hi = n - 1;
   while (hi - lo > 1) {
@@ -104,6 +111,11 @@ export function tockaNa(t: Trasa, d: number): Pozicija {
 
 function smjerIz(dx: number, dy: number): number {
   return ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
+}
+
+/** Najkraći kut od a do b (−180…180). */
+function razlikaKuta(a: number, b: number): number {
+  return ((b - a + 540) % 360) - 180;
 }
 
 /**
@@ -162,22 +174,31 @@ export interface Javljanje {
   id: string;
   lat: number;
   lon: number;
+  /** Kad je vozilo javilo poziciju (unix sekunde). */
   ts: number;
   oblik: string | null;
 }
 
+interface Uzorak {
+  t: number;
+  lat: number;
+  lon: number;
+  /** Metri po trasi; null = izvan trase. */
+  d: number | null;
+}
+
 interface Stanje {
-  ts: number;
   oblik: string | null;
-  /** Animacija po trasi (od/do = metri) ili ravno (od/do = lat/lon). */
-  poTrasi: boolean;
-  odD: number;
-  doD: number;
-  od: Pozicija;
-  do: Pozicija;
-  pocetak: number;
-  trajanje: number;
+  uzorci: Uzorak[];
+  /** Procjena: lokalno vrijeme (s) − vrijeme javljanja. Pokriva kašnjenje feeda i razliku satova. */
+  pomak: number;
+  /** Vrijeme reprodukcije (u vremenu javljanja, s). */
+  sat: number;
+  /** Lokalno vrijeme zadnjeg pomaka sata (ms). */
+  zadnje: number;
   smjer: number;
+  /** Zadnja izračunata pozicija po trasi (za sljedeće stajalište). */
+  d: number | null;
 }
 
 export class Kretanje {
@@ -189,115 +210,162 @@ export class Kretanje {
   }
 
   dodajTrasu(id: string, tocke: [number, number][]): void {
-    if (tocke.length) this.trase.set(id, napraviTrasu(tocke));
+    if (!tocke.length) return;
+    const t = napraviTrasu(tocke);
+    this.trase.set(id, t);
+    // Vozila koja su već vozila bez ove trase: smjesti njihova javljanja na nju.
+    for (const s of this.stanja.values()) {
+      if (s.oblik !== id) continue;
+      let prethodno: number | undefined;
+      for (const u of s.uzorci) {
+        const p = projiciraj(t, u.lat, u.lon, prethodno);
+        u.d = p.razmak <= MAX_OD_TRASE_M ? Math.max(p.d, prethodno ?? 0) : null;
+        if (u.d !== null) prethodno = u.d;
+      }
+    }
   }
 
   trasa(id: string | null): Trasa | undefined {
     return id ? this.trase.get(id) : undefined;
   }
 
-  /** Nova javljanja; vozila kojih više nema se brišu. */
+  /** Nova javljanja (sad = lokalno vrijeme u ms); vozila kojih više nema se brišu. */
   azuriraj(javljanja: Javljanje[], sad: number): void {
     const vidjeni = new Set<string>();
     for (const j of javljanja) {
       vidjeni.add(j.id);
-      const s = this.stanja.get(j.id);
-      if (s && s.ts === j.ts && s.oblik === j.oblik) continue;
-      this.stanja.set(j.id, this.novoStanje(j, s, sad));
+      this.dodaj(j, sad);
     }
     for (const id of this.stanja.keys()) if (!vidjeni.has(id)) this.stanja.delete(id);
   }
 
-  /** Gdje je vozilo sad na ekranu. */
+  /** Gdje je vozilo sad na ekranu. Pomiče sat reprodukcije – zove se svaki frame. */
   pozicija(id: string, sad: number): Pozicija | null {
     const s = this.stanja.get(id);
-    return s ? this.izracunaj(s, sad) : null;
+    if (!s) return null;
+    this.pomakniSat(s, sad);
+    return this.izracunaj(s);
   }
 
-  /** Koliko je metara vozilo (kako je prikazano) od početka trase; null = nije na trasi. */
-  naTrasi(id: string, sad: number): number | null {
-    const s = this.stanja.get(id);
-    if (!s || !s.poTrasi || !this.trasa(s.oblik)) return null;
-    const k = s.trajanje ? Math.max(0, Math.min(1, (sad - s.pocetak) / s.trajanje)) : 1;
-    return s.odD + k * (s.doD - s.odD);
+  /** Metri po trasi na kojima je vozilo zadnji put nacrtano; null = nije na trasi. */
+  naTrasi(id: string): number | null {
+    return this.stanja.get(id)?.d ?? null;
   }
 
-  private izracunaj(s: Stanje, sad: number): Pozicija {
-    const k = s.trajanje ? Math.max(0, Math.min(1, (sad - s.pocetak) / s.trajanje)) : 1;
-    const t = s.poTrasi ? this.trasa(s.oblik) : undefined;
-    if (t) {
-      // Na trasi je smjer uvijek smjer trase – i kad vozilo stoji.
-      return tockaNa(t, s.odD + k * (s.doD - s.odD));
-    }
-    return {
-      lat: s.od.lat + k * (s.do.lat - s.od.lat),
-      lon: s.od.lon + k * (s.do.lon - s.od.lon),
-      smjer: s.smjer,
-    };
-  }
-
-  private novoStanje(j: Javljanje, s: Stanje | undefined, sad: number): Stanje {
+  private dodaj(j: Javljanje, sad: number): void {
+    const s = this.stanja.get(j.id);
     const t = this.trasa(j.oblik);
-    const istaTrasa = !!s && s.oblik === j.oblik && s.poTrasi;
-    const proj = t ? projiciraj(t, j.lat, j.lon, istaTrasa ? s!.doD : undefined) : null;
-    const naTrasi = !!proj && proj.razmak <= MAX_OD_TRASE_M;
-    const trajanje = s
-      ? Math.max(MIN_TRAJANJE_MS, Math.min(MAX_TRAJANJE_MS, (j.ts - s.ts) * 1000))
-      : 0;
-    const sada = s ? this.izracunaj(s, sad) : null;
+    const sadS = sad / 1000;
 
-    if (t && naTrasi) {
-      let cilj = proj!.d;
-      let odD = cilj;
-      let anim = false;
-      if (s && istaTrasa) {
-        const trenutno = s.odD + Math.min(1, (sad - s.pocetak) / (s.trajanje || 1)) * (s.doD - s.odD);
-        if (cilj < trenutno && trenutno - cilj < SUM_UNATRAG_M) cilj = trenutno;
-        if (cilj >= trenutno && cilj - trenutno <= MAX_SKOK_M) {
-          odD = trenutno;
-          anim = true;
-        }
-      }
-      const p = tockaNa(t, cilj);
-      return {
-        ts: j.ts,
+    // Prvo javljanje ili nova vožnja: kreni od nule.
+    if (!s || s.oblik !== j.oblik) {
+      const d = t ? this.naTrasu(t, j) : null;
+      this.stanja.set(j.id, {
         oblik: j.oblik,
-        poTrasi: true,
-        odD,
-        doD: cilj,
-        od: p,
-        do: p,
-        pocetak: sad,
-        trajanje: anim ? trajanje : 0,
-        smjer: p.smjer,
+        uzorci: [{ t: j.ts, lat: j.lat, lon: j.lon, d }],
+        pomak: sadS - j.ts,
+        sat: j.ts,
+        zadnje: sad,
+        smjer: s?.smjer ?? (t && d !== null ? tockaNa(t, d).smjer : 0),
+        d,
+      });
+      return;
+    }
+
+    const zadnji = s.uzorci[s.uzorci.length - 1];
+    if (j.ts <= zadnji.t) return; // isto ili starije javljanje
+
+    // Kašnjenje feeda se mijenja polako – izgladi ga.
+    s.pomak = s.pomak * 0.8 + (sadS - j.ts) * 0.2;
+
+    let d = t ? this.naTrasu(t, j, zadnji.d ?? undefined) : null;
+    if (d !== null && zadnji.d !== null) {
+      if (d < zadnji.d && zadnji.d - d < SUM_UNATRAG_M) d = zadnji.d; // stoji, GPS šeta
+      if (d < zadnji.d - SUM_UNATRAG_M || d - zadnji.d > MAX_SKOK_M) {
+        // Skok (GPS se vratio, krug na okretištu): premjesti bez vožnje.
+        s.uzorci = [{ t: j.ts, lat: j.lat, lon: j.lon, d }];
+        s.sat = j.ts;
+        return;
+      }
+    } else {
+      const m = Math.hypot((j.lon - zadnji.lon) * KX, (j.lat - zadnji.lat) * KY);
+      if (m > MAX_SKOK_M) {
+        s.uzorci = [{ t: j.ts, lat: j.lat, lon: j.lon, d }];
+        s.sat = j.ts;
+        return;
+      }
+    }
+
+    s.uzorci.push({ t: j.ts, lat: j.lat, lon: j.lon, d });
+    if (s.uzorci.length > MAX_UZORAKA) s.uzorci.shift();
+  }
+
+  private naTrasu(t: Trasa, j: Javljanje, oko?: number): number | null {
+    const p = projiciraj(t, j.lat, j.lon, oko);
+    return p.razmak <= MAX_OD_TRASE_M ? p.d : null;
+  }
+
+  /**
+   * Sat reprodukcije teče kao pravo vrijeme, a lagano se primiče cilju
+   * (zadnje javljanje − međuspremnik). Ne ide unatrag i ne prelazi zadnje
+   * javljanje – tada vozilo stoji gdje je zadnje javljeno.
+   */
+  private pomakniSat(s: Stanje, sad: number): void {
+    const dt = Math.max(0, Math.min(1, (sad - s.zadnje) / 1000));
+    s.zadnje = sad;
+    const cilj = sad / 1000 - s.pomak - MEDUSPREMNIK_S;
+    const prvi = s.uzorci[0].t;
+    const zadnji = s.uzorci[s.uzorci.length - 1].t;
+
+    if (Math.abs(cilj - s.sat) > 60) {
+      s.sat = cilj; // tab je bio u pozadini – ne vozi minutu ubrzano
+    } else {
+      // Kad ponestaje podataka, sat usporava umjesto da vozilo naglo stane.
+      const preostalo = zadnji - s.sat;
+      const brzina = preostalo < 6 ? Math.max(0.2, preostalo / 6) : 1;
+      // Pravo vrijeme + blago primicanje cilju (~5 s da se razlika prepolovi).
+      s.sat += dt * brzina + (cilj - s.sat) * Math.min(1, dt * 0.14);
+    }
+    s.sat = Math.max(prvi, Math.min(zadnji, s.sat));
+
+    // Stariji uzorci više ne trebaju.
+    while (s.uzorci.length > 2 && s.uzorci[1].t <= s.sat) s.uzorci.shift();
+  }
+
+  private izracunaj(s: Stanje): Pozicija {
+    const u = s.uzorci;
+    let a = u[0];
+    let b = u[0];
+    for (let i = 0; i + 1 < u.length; i++) {
+      if (u[i + 1].t >= s.sat) {
+        a = u[i];
+        b = u[i + 1];
+        break;
+      }
+      a = b = u[i + 1];
+    }
+    const k = b.t > a.t ? Math.max(0, Math.min(1, (s.sat - a.t) / (b.t - a.t))) : 1;
+    const t = this.trasa(s.oblik);
+
+    let p: Pozicija;
+    if (t && a.d !== null && b.d !== null) {
+      const d = a.d + k * (b.d - a.d);
+      s.d = d;
+      p = tockaNa(t, d);
+      // Kad stoji, ne okreći se.
+      if (b.d - a.d < 1) p.smjer = s.smjer;
+    } else {
+      s.d = null;
+      const dx = (b.lon - a.lon) * KX;
+      const dy = (b.lat - a.lat) * KY;
+      p = {
+        lat: a.lat + k * (b.lat - a.lat),
+        lon: a.lon + k * (b.lon - a.lon),
+        smjer: Math.hypot(dx, dy) > 5 ? smjerIz(dx, dy) : s.smjer,
       };
     }
-
-    // Bez trase: ravno od prikazane do nove pozicije, ako nije predaleko.
-    const cilj: Pozicija = { lat: j.lat, lon: j.lon, smjer: s?.smjer ?? 0 };
-    let od = cilj;
-    let anim = false;
-    if (sada) {
-      const dx = (j.lon - sada.lon) * KX;
-      const dy = (j.lat - sada.lat) * KY;
-      const m = Math.hypot(dx, dy);
-      if (m <= MAX_SKOK_M) {
-        od = sada;
-        anim = m > 0;
-      }
-      if (m > 5) cilj.smjer = smjerIz(dx, dy);
-    }
-    return {
-      ts: j.ts,
-      oblik: j.oblik,
-      poTrasi: false,
-      odD: 0,
-      doD: 0,
-      od,
-      do: cilj,
-      pocetak: sad,
-      trajanje: anim ? trajanje : 0,
-      smjer: cilj.smjer,
-    };
+    // Glatko okretanje – bez naglog skretanja na lomu trase.
+    s.smjer = (s.smjer + razlikaKuta(s.smjer, p.smjer) * 0.25 + 360) % 360;
+    return { lat: p.lat, lon: p.lon, smjer: s.smjer };
   }
 }

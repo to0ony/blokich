@@ -1,4 +1,4 @@
-<div class="vz-app km">
+<div class="vz-app km" [class.is-dark]="tema === 'tamna'">
   <div #mapa class="km-mapa"></div>
 
   <!-- Gornja traka: natrag, pretraga, filteri -->
@@ -16,6 +16,14 @@
           [(ngModel)]="trazi"
         />
       </div>
+      <button
+        type="button"
+        class="km-btn"
+        [attr.aria-label]="tema === 'tamna' ? 'Svijetla karta' : 'Tamna karta'"
+        (click)="prebaciTemu()"
+      >
+        <i class="pi" [ngClass]="tema === 'tamna' ? 'pi-sun' : 'pi-moon'"></i>
+      </button>
     </div>
 
     <ul class="km-results" *ngIf="rezultati.length">
@@ -47,7 +55,17 @@
         [attr.aria-pressed]="samoPodsused"
         (click)="prebaciPodsused()"
       >
-        Podsused <span>{{ brojPodsused }}</span>
+        Samo Podsused <span>{{ brojPodsused }}</span>
+      </button>
+      <button
+        *ngIf="brojTramvaja"
+        type="button"
+        class="km-chip"
+        [class.is-off]="!tramvaji"
+        [attr.aria-pressed]="tramvaji"
+        (click)="prebaciTramvaje()"
+      >
+        Tramvaji <span>{{ brojTramvaja }}</span>
       </button>
       <button *ngIf="filterLinija" type="button" class="km-chip is-on" (click)="postaviLiniju(null)">
         Linija {{ filterLinija }} <i class="pi pi-times"></i>
@@ -58,7 +76,7 @@
   <!-- Detalji odabranog vozila -->
   <section class="km-sheet" *ngIf="odabrano as v" aria-live="polite">
     <header class="km-sheet-head">
-      <span class="km-line" [style.background]="bojaKasnjenja(v.kasnjenje)">{{ v.linija ?? '?' }}</span>
+      <span class="km-line" [class.is-other]="!v.podsused">{{ v.linija ?? '?' }}</span>
       <div class="km-sheet-title">
         <strong>{{ v.cilj ? 'Smjer ' + v.cilj : 'Linija ' + (v.linija ?? '?') }}</strong>
         <span>
@@ -86,7 +104,7 @@
     <div class="km-facts">
       <div class="km-fact">
         <span class="vz-label">Kašnjenje</span>
-        <strong [style.color]="bojaKasnjenja(v.kasnjenje)">
+        <strong [ngClass]="klasaKasnjenja(v.kasnjenje)">
           {{ v.kasnjenje === null ? 'nepoznato' : opisKasnjenja(v.kasnjenje) }}
         </strong>
       </div>
