@@ -42,6 +42,15 @@ export interface GtfsPodaci {
   stajalista: Map<string, StajalisteGtfs>;
   /** shape_id -> stop_id redom kojim ih vožnja te trase obilazi. */
   stajalistaOblika: Map<string, string[]>;
+  /** route_id -> glavna trasa za svaki smjer (ona kojom ide najviše vožnji). */
+  glavneTrase: Map<string, GlavnaTrasa[]>;
+}
+
+/** Najčešća trasa linije u jednom smjeru. */
+export interface GlavnaTrasa {
+  smjer: number | null;
+  oblik: string;
+  cilj: string | null;
 }
 
 const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt', 'stops.txt'];
@@ -190,7 +199,43 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
     if (lista?.length) stajalistaOblika.set(oblik, lista);
   }
 
-  return { verzija, rute, voznje, oblici, stajalista, stajalistaOblika };
+  return {
+    verzija,
+    rute,
+    voznje,
+    oblici,
+    stajalista,
+    stajalistaOblika,
+    glavneTrase: glavneTraseLinija(voznje),
+  };
+}
+
+/**
+ * Za svaku liniju i smjer trasa kojom ide najviše vožnji – to je "ruta
+ * linije" kakvu vozač očekuje, bez rijetkih varijanti (garaža, skraćene).
+ */
+export function glavneTraseLinija(voznje: Map<string, VoznjaGtfs>): Map<string, GlavnaTrasa[]> {
+  const brojac = new Map<string, Map<string, { n: number; cilj: string | null }>>();
+  for (const v of voznje.values()) {
+    if (!v.oblik) continue;
+    const kljuc = `${v.ruta}|${v.smjer ?? ''}`;
+    let poObliku = brojac.get(kljuc);
+    if (!poObliku) brojac.set(kljuc, (poObliku = new Map()));
+    const b = poObliku.get(v.oblik) ?? { n: 0, cilj: v.cilj };
+    b.n++;
+    poObliku.set(v.oblik, b);
+  }
+
+  const rez = new Map<string, GlavnaTrasa[]>();
+  for (const [kljuc, poObliku] of brojac) {
+    const [ruta, smjerTekst] = kljuc.split('|');
+    const [oblik, b] = [...poObliku].sort((x, y) => y[1].n - x[1].n)[0];
+    const lista = rez.get(ruta) ?? [];
+    lista.push({ smjer: smjerTekst === '' ? null : Number(smjerTekst), oblik, cilj: b.cilj });
+    rez.set(ruta, lista);
+  }
+  for (const lista of rez.values()) lista.sort((a, b) => (a.smjer ?? 0) - (b.smjer ?? 0));
+  return rez;
 }
 
 /**

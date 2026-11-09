@@ -1,5 +1,5 @@
-import { spojiVozilo } from './karta.service';
-import { GtfsPodaci } from './gtfs-staticki.service';
+import { KartaService, spojiVozilo } from './karta.service';
+import { GtfsPodaci, glavneTraseLinija } from './gtfs-staticki.service';
 import { VOZNI_PARK } from '../zet-uzivo/zet-uzivo.service';
 
 const gtfs: GtfsPodaci = {
@@ -15,6 +15,7 @@ const gtfs: GtfsPodaci = {
   oblici: new Map(),
   stajalista: new Map(),
   stajalistaOblika: new Map(),
+  glavneTrase: new Map(),
 };
 
 const pozicija = (vozilo: string, tripId: string, blok: string) => ({
@@ -70,5 +71,59 @@ describe('spojiVozilo', () => {
   it('bez GTFS-a linija iz feeda, bez trase', () => {
     const v = spojiVozilo(pozicija('22112', '0_1_1203_12_1', '1203'), null, new Map());
     expect(v).toMatchObject({ linija: '12', tip: null, oblik: null });
+  });
+});
+
+describe('glavneTraseLinija', () => {
+  it('po smjeru trasa s najviše vožnji', () => {
+    const v = (oblik: string, smjer: number, cilj: string) => ({ ruta: '109', oblik, smjer, cilj });
+    const g = glavneTraseLinija(
+      new Map([
+        ['a', v('109_1', 0, 'Dugave')],
+        ['b', v('109_1', 0, 'Dugave')],
+        ['c', v('109_9', 0, 'Garaža')],
+        ['d', v('109_2', 1, 'Črnomerec')],
+      ]),
+    );
+    expect(g.get('109')).toEqual([
+      { smjer: 0, oblik: '109_1', cilj: 'Dugave' },
+      { smjer: 1, oblik: '109_2', cilj: 'Črnomerec' },
+    ]);
+  });
+});
+
+describe('KartaService.linija', () => {
+  const tocke: [number, number][] = [
+    [45.8, 15.9],
+    [45.81, 15.91],
+  ];
+  const podaci: GtfsPodaci = {
+    ...gtfs,
+    oblici: new Map([['109_1', tocke]]),
+    stajalista: new Map([['s1', { id: 's1', naziv: 'Črnomerec', lat: 45.8, lon: 15.9 }]]),
+    stajalistaOblika: new Map([['109_1', ['s1']]]),
+    glavneTrase: new Map([['109', [{ smjer: 0, oblik: '109_1', cilj: 'Dubrava' }]]]),
+  };
+  const s = new KartaService({} as any, { get: () => podaci } as any, {} as any);
+
+  it('trasa i stajališta po smjeru', () => {
+    expect(s.linija('109')).toEqual({
+      broj: '109',
+      opis: 'Črnomerec - Dubrava',
+      tip: 'autobus',
+      smjerovi: [
+        {
+          smjer: 0,
+          cilj: 'Dubrava',
+          oblik: '109_1',
+          tocke,
+          stajalista: [{ id: 's1', naziv: 'Črnomerec', lat: 45.8, lon: 15.9 }],
+        },
+      ],
+    });
+  });
+
+  it('nepoznata linija = null', () => {
+    expect(s.linija('999')).toBeNull();
   });
 });

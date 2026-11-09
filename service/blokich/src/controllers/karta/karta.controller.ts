@@ -1,4 +1,11 @@
-import { BadRequestException, Controller, Get, Header, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Header,
+  NotFoundException,
+  Query,
+} from '@nestjs/common';
 import { KartaService } from '../../services/karta/karta.service';
 
 @Controller('karta')
@@ -44,5 +51,17 @@ export class KartaController {
   @Header('Cache-Control', 'private, max-age=3600')
   rute() {
     return { rute: this.kartaService.rute() };
+  }
+
+  /** GET /api/karta/linija?broj=109 – ruta linije: glavna trasa i stajališta po smjeru. */
+  @Get('linija')
+  @Header('Cache-Control', 'private, max-age=3600')
+  linija(@Query('broj') broj?: string) {
+    if (!broj || !/^[\w.-]{1,10}$/.test(broj)) {
+      throw new BadRequestException('Neispravan broj linije.');
+    }
+    const l = this.kartaService.linija(broj);
+    if (!l) throw new NotFoundException('Linija nije pronađena.');
+    return l;
   }
 }

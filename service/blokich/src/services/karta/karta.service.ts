@@ -104,6 +104,41 @@ export class KartaService {
     const g = this.gtfs.get();
     return g ? [...g.rute.values()] : [];
   }
+
+  /**
+   * Ruta linije po broju (kao na busu): za svaki smjer glavna trasa i
+   * njena stajališta. null = linija ne postoji (ili GTFS još nije učitan).
+   */
+  linija(broj: string): LinijaKarta | null {
+    const g = this.gtfs.get();
+    if (!g) return null;
+    const ruta = [...g.rute.values()].find((r) => r.naziv === broj) ?? g.rute.get(broj);
+    if (!ruta) return null;
+    const smjerovi = (g.glavneTrase.get(ruta.id) ?? [])
+      .map((t) => ({
+        smjer: t.smjer,
+        cilj: t.cilj,
+        oblik: t.oblik,
+        tocke: g.oblici.get(t.oblik) ?? [],
+        stajalista: this.stajalista(t.oblik),
+      }))
+      .filter((s) => s.tocke.length > 1);
+    return { broj: ruta.naziv, opis: ruta.opis, tip: ruta.tip === 0 ? 'tramvaj' : 'autobus', smjerovi };
+  }
+}
+
+/** Ruta linije za kartu. */
+export interface LinijaKarta {
+  broj: string;
+  opis: string;
+  tip: 'tramvaj' | 'autobus';
+  smjerovi: {
+    smjer: number | null;
+    cilj: string | null;
+    oblik: string;
+    tocke: Oblik;
+    stajalista: StajalisteGtfs[];
+  }[];
 }
 
 /** Izdvojeno radi testiranja. */
