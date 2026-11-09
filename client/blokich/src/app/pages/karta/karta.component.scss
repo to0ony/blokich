@@ -204,6 +204,53 @@
   }
 }
 
+.km-chip-radovi.is-on {
+  border-color: #f97316;
+  background: #f97316;
+
+  span {
+    color: #ffedd5;
+  }
+}
+
+.km-rad-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f97316;
+  color: #fff;
+  font-size: 18px;
+
+  &.is-closed {
+    background: #dc2626;
+  }
+}
+
+.km-rad-opis {
+  max-height: 34vh;
+  margin: 14px 0 0;
+  overflow-y: auto;
+  color: var(--vz-text);
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.km-rad-izvor {
+  display: block;
+  margin-top: 8px;
+  color: var(--vz-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+a.km-follow {
+  text-decoration: none;
+}
+
 // ---------- Detalji vozila ----------
 .km-sheet {
   position: absolute;

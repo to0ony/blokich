@@ -49,11 +49,50 @@
       >
         Podsused <span>{{ brojPodsused }}</span>
       </button>
+      <button
+        *ngIf="brojRadova"
+        type="button"
+        class="km-chip km-chip-radovi"
+        [class.is-on]="prikaziRadove"
+        [attr.aria-pressed]="prikaziRadove"
+        (click)="prebaciRadove()"
+      >
+        Radovi <span>{{ brojRadova }}</span>
+      </button>
       <button *ngIf="filterLinija" type="button" class="km-chip is-on" (click)="postaviLiniju(null)">
         Linija {{ filterLinija }} <i class="pi pi-times"></i>
       </button>
     </div>
   </div>
+
+  <!-- Detalji zatvorene ceste / radova -->
+  <section class="km-sheet" *ngIf="odabraniRadovi as r" aria-live="polite">
+    <header class="km-sheet-head">
+      <span class="km-rad-ico" [class.is-closed]="r.vrsta === 'zatvaranje'">
+        <i class="pi" [ngClass]="r.vrsta === 'zatvaranje' ? 'pi-ban' : 'pi-wrench'"></i>
+      </span>
+      <div class="km-sheet-title">
+        <strong>{{ r.naslov }}</strong>
+        <span>
+          <ng-container *ngIf="r.vrsta === 'zatvaranje'">
+            Zatvoreno {{ r.smjer === 'ONE_DIRECTION' ? 'u jednom smjeru' : 'u oba smjera' }}
+          </ng-container>
+          <ng-container *ngIf="r.vrsta === 'radovi'">{{ r.aktivno ? 'Radovi u tijeku' : 'Planirani radovi' }}</ng-container>
+          <ng-container *ngIf="opisRoka(r) as rok"> · {{ rok }}</ng-container>
+        </span>
+      </div>
+      <button type="button" class="km-btn km-close" aria-label="Zatvori" (click)="zatvori()">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <p class="km-rad-opis" *ngIf="r.opis">{{ r.opis }}</p>
+
+    <a *ngIf="r.url" class="km-follow" [href]="r.url" target="_blank" rel="noopener">
+      <i class="pi pi-external-link"></i> Više o radovima
+    </a>
+    <small class="km-rad-izvor">Izvor: Grad Zagreb</small>
+  </section>
 
   <!-- Detalji odabranog vozila -->
   <section class="km-sheet" *ngIf="odabrano as v" aria-live="polite">
