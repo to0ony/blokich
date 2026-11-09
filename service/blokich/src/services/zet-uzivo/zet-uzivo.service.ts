@@ -59,8 +59,8 @@ export interface UzivoStanje {
   vozila: PozicijaUzivo[];
 }
 
-/** ZET osvježava feed otprilike svakih 11 s – češće nema smisla. */
-const CACHE_MS = 10_000;
+/** ZET osvježava feed otprilike svakih 11 s; 5 s da nova pozicija brzo stigne na kartu. */
+const CACHE_MS = 5_000;
 /** Stariji podaci se ne prikazuju – bolje ništa nego krivo. */
 const MAX_STAROST_S = 180;
 
@@ -135,7 +135,7 @@ export class ZetUzivoService {
     return { vrijeme: stanje.vrijeme, vozila };
   }
 
-  /** Feed se dohvaća najviše jednom u 10 s, bez obzira na broj vozača. */
+  /** Feed se dohvaća najviše jednom u 5 s, bez obzira na broj vozača. */
   stanje(): Promise<UzivoStanje> {
     const sad = Date.now();
     if (!this.cache || this.cache.do < sad) {
