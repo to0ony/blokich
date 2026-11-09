@@ -8,5 +8,6 @@ import { ZetUzivoService } from '../../services/zet-uzivo/zet-uzivo.service';
   imports: [HttpModule],
   controllers: [ZetUzivoController, VozniParkController],
   providers: [ZetUzivoService],
+  exports: [ZetUzivoService],
 })
 export class ZetUzivoModule {}

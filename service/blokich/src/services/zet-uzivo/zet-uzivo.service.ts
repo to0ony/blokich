@@ -6,7 +6,7 @@ import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import * as vozniParkPodsused from '../../vozni-park/podsused.json';
 
 /** Garažni broj -> kratko ime modela (izvor: autobusi.org, vidi scripts/vozni-park). */
-const VOZNI_PARK: Record<string, { kratko: string; model: string; tablica: string | null }> =
+export const VOZNI_PARK: Record<string, { kratko: string; model: string; tablica: string | null }> =
   vozniParkPodsused as any;
 
 /** Bus iz voznog parka AP Podsused sa stanjem uživo (ako vozi). */
@@ -34,13 +34,33 @@ export interface BlokUzivo {
   ruta?: string;
 }
 
+/** Pozicija jednog vozila iz feeda (sve linije, ne samo AP Podsused). */
+export interface PozicijaUzivo {
+  /** Garažni broj vozila. */
+  vozilo: string;
+  lat: number;
+  lon: number;
+  /** Kad je vozilo javilo poziciju (unix sekunde). */
+  ts: number;
+  tripId: string;
+  /** Linija koju vožnja vozi (route_id). */
+  ruta: string | null;
+  /** Blok iz trip_id (linija + V.R.), ako je u očekivanom obliku. */
+  blok: string | null;
+  /** Kašnjenje u sekundama ili null ako ga feed nema za ovu vožnju. */
+  kasnjenje: number | null;
+}
+
 export interface UzivoStanje {
   /** Vrijeme ZET-ovog feeda (ISO) ili null ako podaci nisu dostupni. */
   vrijeme: string | null;
   blokovi: Record<string, BlokUzivo>;
+  /** Sva vozila sa svježom pozicijom (za kartu). */
+  vozila: PozicijaUzivo[];
 }
 
-const CACHE_MS = 20_000;
+/** ZET osvježava feed otprilike svakih 11 s – češće nema smisla. */
+const CACHE_MS = 10_000;
 /** Stariji podaci se ne prikazuju – bolje ništa nego krivo. */
 const MAX_STAROST_S = 180;
 
@@ -80,7 +100,7 @@ export class ZetUzivoService {
       'https://www.zet.hr/gtfs-rt-protobuf';
   }
 
-  async zaBlokove(blokovi: string[]): Promise<UzivoStanje> {
+  async zaBlokove(blokovi: string[]): Promise<Omit<UzivoStanje, 'vozila'>> {
     const stanje = await this.stanje();
     const odabrani: Record<string, BlokUzivo> = {};
     for (const b of blokovi) {
@@ -115,15 +135,15 @@ export class ZetUzivoService {
     return { vrijeme: stanje.vrijeme, vozila };
   }
 
-  /** Feed se dohvaća najviše jednom u 20 s, bez obzira na broj vozača. */
-  private stanje(): Promise<UzivoStanje> {
+  /** Feed se dohvaća najviše jednom u 10 s, bez obzira na broj vozača. */
+  stanje(): Promise<UzivoStanje> {
     const sad = Date.now();
     if (!this.cache || this.cache.do < sad) {
       this.cache = {
         do: sad + CACHE_MS,
         stanje: this.dohvati().catch((err) => {
           this.logger.warn(`ZET GTFS-RT nije dostupan: ${err?.message}`);
-          return { vrijeme: null, blokovi: {} };
+          return { vrijeme: null, blokovi: {}, vozila: [] };
         }),
       };
     }
@@ -148,7 +168,7 @@ export class ZetUzivoService {
   obradi(feed: any, sadSek: number): UzivoStanje {
     const vrijemeFeeda = Number(feed.header?.timestamp ?? 0);
     if (!vrijemeFeeda || sadSek - vrijemeFeeda > MAX_STAROST_S) {
-      return { vrijeme: null, blokovi: {} };
+      return { vrijeme: null, blokovi: {}, vozila: [] };
     }
 
     // Kašnjenje po vožnji: prva sljedeća stanica u trip_update.
@@ -164,6 +184,7 @@ export class ZetUzivoService {
 
     const blokovi: Record<string, BlokUzivo> = {};
     const dvostruki = new Set<string>();
+    const vozila: PozicijaUzivo[] = [];
 
     for (const e of feed.entity ?? []) {
       const v = e.vehicle;
@@ -175,12 +196,28 @@ export class ZetUzivoService {
       const ts = Number(v.timestamp ?? 0);
       if (!ts || sadSek - ts > MAX_STAROST_S) continue;
 
-      const blok = tripId.split('_')[2];
+      const dio = tripId.split('_')[2];
+      const blok = dio && /^\d+$/.test(dio) ? dio : null;
       const kasnjenje = kasnjenjePoVoznji.get(tripId);
-      if (!blok || !/^\d+$/.test(blok) || kasnjenje === undefined) continue;
-
-      if (blokovi[blok]) dvostruki.add(blok);
       const ruta: string | undefined = v.trip?.routeId || tripId.split('_')[3];
+
+      const lat = Number(v.position.latitude);
+      const lon = Number(v.position.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && (lat || lon)) {
+        vozila.push({
+          vozilo,
+          lat,
+          lon,
+          ts,
+          tripId,
+          ruta: ruta || null,
+          blok,
+          kasnjenje: kasnjenje ?? null,
+        });
+      }
+
+      if (!blok || kasnjenje === undefined) continue;
+      if (blokovi[blok]) dvostruki.add(blok);
       blokovi[blok] = ruta ? { vozilo, kasnjenje, ruta } : { vozilo, kasnjenje };
     }
 
@@ -190,6 +227,7 @@ export class ZetUzivoService {
     return {
       vrijeme: new Date(vrijemeFeeda * 1000).toISOString(),
       blokovi,
+      vozila,
     };
   }
 }
