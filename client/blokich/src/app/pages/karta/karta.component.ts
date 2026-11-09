@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
-import { KartaService, VoziloKarta } from '../../services/karta.service';
+import { KartaService, StajalisteKarta, VoziloKarta } from '../../services/karta.service';
 import { Kretanje } from '../../components/karta/kretanje';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
 
@@ -107,6 +107,9 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   private spremna = false;
   private readonly kretanje = new Kretanje();
   private trazeneTrase = new Set<string>();
+  /** Stajališta po trasi – dohvaćaju se tek kad se vozilo odabere. */
+  private stajalista = new Map<string, StajalisteKarta[]>();
+  private trazenaStajalista = new Set<string>();
   private prviPut = true;
   private timer: ReturnType<typeof setInterval> | null = null;
   private sat: ReturnType<typeof setInterval> | null = null;
@@ -372,6 +375,38 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
       paint: { 'line-color': '#2563eb', 'line-width': 4, 'line-opacity': 0.75 },
     });
 
+    // Stajališta na trasi odabranog vozila: bijele točke s plavim rubom.
+    mapa.addSource('stajalista', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+    mapa.addLayer({
+      id: 'stajalista-tocka',
+      type: 'circle',
+      source: 'stajalista',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 14, 4.5, 17, 6.5],
+        'circle-color': '#ffffff',
+        'circle-stroke-color': '#2563eb',
+        'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 2.5],
+      },
+    });
+    mapa.addLayer({
+      id: 'stajalista-naziv',
+      type: 'symbol',
+      source: 'stajalista',
+      minzoom: 14,
+      layout: {
+        'text-field': ['get', 'naziv'],
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 11.5,
+        'text-anchor': 'left',
+        'text-offset': [0.9, 0],
+        'text-optional': true,
+      },
+      paint: { 'text-color': '#1e3a8a', 'text-halo-color': '#ffffff', 'text-halo-width': 1.5 },
+    });
+
     const velicina = (podsused: number, ostali: number) =>
       ['case', ['get', 'podsused'], podsused, ostali] as any;
 
@@ -465,6 +500,35 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
             },
           ]
         : [],
+    });
+    this.prikaziStajalista();
+  }
+
+  /** Stajališta trase odabranog vozila (bez odabira se ne prikazuju). */
+  private prikaziStajalista(): void {
+    const izvor = this.mapa?.getSource('stajalista') as GeoJSONSource | undefined;
+    if (!izvor) return;
+    const oblik = this.odabrano?.oblik ?? null;
+    const lista = oblik ? this.stajalista.get(oblik) : undefined;
+
+    if (oblik && !lista && !this.trazenaStajalista.has(oblik)) {
+      this.trazenaStajalista.add(oblik);
+      this.servis.stajalista(oblik).subscribe({
+        next: (res) => {
+          this.stajalista.set(oblik, res.stajalista ?? []);
+          if (this.odabrano?.oblik === oblik) this.prikaziStajalista();
+        },
+        error: () => this.trazenaStajalista.delete(oblik),
+      });
+    }
+
+    izvor.setData({
+      type: 'FeatureCollection',
+      features: (lista ?? []).map((s) => ({
+        type: 'Feature',
+        properties: { naziv: s.naziv },
+        geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
+      })),
     });
   }
 

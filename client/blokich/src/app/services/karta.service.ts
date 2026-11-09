@@ -35,6 +35,13 @@ export interface VoziloKarta {
   vozac?: VozacKarta;
 }
 
+export interface StajalisteKarta {
+  id: string;
+  naziv: string;
+  lat: number;
+  lon: number;
+}
+
 export interface KartaOdgovor {
   vrijeme: string | null;
   gtfs: string | null;
@@ -47,6 +54,12 @@ export class KartaService {
 
   vozila() {
     return this.api.get<KartaOdgovor>('karta/vozila');
+  }
+
+  /** Stajališta trase, redom kojim ih vožnja obilazi. */
+  stajalista(oblik: string) {
+    const params = new HttpParams().set('oblik', oblik);
+    return this.api.get<{ stajalista: StajalisteKarta[] }>('karta/stajalista', params);
   }
 
   /** Trase po shape_id, kao nizovi [lat, lon]. */
