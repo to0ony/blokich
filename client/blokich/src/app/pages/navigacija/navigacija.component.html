@@ -1,42 +1,61 @@
 <div class="nv" [class.is-dark]="tema === 'tamna'">
   <div #mapa class="nv-mapa"></div>
 
-  <!-- Gore: sljedeći manevar -->
+  <!-- Gore: sljedeća stvar na ruti (skretanje ili stajalište) i ona iza nje -->
   <header class="nv-top">
     <button type="button" class="nv-btn nv-izlaz" aria-label="Izađi iz navigacije" (click)="izadi()">
       <i class="pi pi-times"></i>
     </button>
 
-    <div class="nv-manevar" *ngIf="ucitano && !izvanRute && !kraj">
-      <ng-container *ngIf="sljedeciManevar as m; else ravno">
-        <span class="nv-strelica" aria-hidden="true">
-          <i *ngIf="m.tip === 'kruzni'" class="pi pi-sync"></i>
-          <svg *ngIf="m.tip !== 'kruzni'" viewBox="0 0 48 48" [style.transform]="'rotate(' + kutStrelice(m.tip) + 'deg)'">
-            <path d="M24 44V14" />
-            <path d="M12 24L24 10l12 14" />
-          </svg>
-        </span>
-        <div class="nv-manevar-txt">
-          <strong>{{ opisUdaljenosti(doManevra) }}</strong>
-          <span>{{ opisManevra(m) }}<ng-container *ngIf="m.ulica"> · {{ m.ulica }}</ng-container></span>
+    <div class="nv-kartice">
+      <div class="nv-upozorenje" *ngIf="izvanRute">
+        <i class="pi pi-exclamation-triangle"></i> Izvan rute – vrati se na trasu
+      </div>
+      <div class="nv-upozorenje is-kraj" *ngIf="kraj && !izvanRute">
+        <i class="pi pi-flag"></i> Kraj rute<ng-container *ngIf="cilj"> · {{ cilj }}</ng-container>
+      </div>
+
+      <ng-container *ngIf="ucitano && !izvanRute && !kraj">
+        <div
+          *ngFor="let e of dogadaji; let i = index"
+          class="nv-kartica"
+          [class.is-druga]="i > 0"
+          [class.is-stajaliste]="e.vrsta === 'stajaliste'"
+        >
+          <span class="nv-ikona" aria-hidden="true">
+            <ng-container *ngIf="e.vrsta === 'skretanje'">
+              <i *ngIf="e.manevar.tip === 'kruzni'" class="pi pi-sync"></i>
+              <svg
+                *ngIf="e.manevar.tip !== 'kruzni'"
+                viewBox="0 0 48 48"
+                [style.transform]="'rotate(' + kutStrelice(e.manevar.tip) + 'deg)'"
+              >
+                <path d="M24 44V14" />
+                <path d="M12 24L24 10l12 14" />
+              </svg>
+            </ng-container>
+            <i *ngIf="e.vrsta === 'stajaliste'" class="pi pi-map-marker"></i>
+          </span>
+          <div class="nv-kartica-txt">
+            <small *ngIf="i > 0">Zatim</small>
+            <strong>{{ opisUdaljenosti(e.do) }}</strong>
+            <span *ngIf="e.vrsta === 'skretanje'"
+              >{{ opisManevra(e.manevar) }}<ng-container *ngIf="e.manevar.ulica"> · {{ e.manevar.ulica }}</ng-container></span
+            >
+            <span *ngIf="e.vrsta === 'stajaliste'">{{ e.zadnje ? 'Zadnje stajalište' : 'Stajalište' }} · {{ e.naziv }}</span>
+          </div>
+        </div>
+
+        <div class="nv-kartica" *ngIf="!dogadaji.length">
+          <span class="nv-ikona" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M24 44V14" /><path d="M12 24L24 10l12 14" /></svg>
+          </span>
+          <div class="nv-kartica-txt">
+            <strong>Ravno</strong>
+            <span>Slijedi rutu</span>
+          </div>
         </div>
       </ng-container>
-      <ng-template #ravno>
-        <span class="nv-strelica" aria-hidden="true">
-          <svg viewBox="0 0 48 48"><path d="M24 44V14" /><path d="M12 24L24 10l12 14" /></svg>
-        </span>
-        <div class="nv-manevar-txt">
-          <strong>Ravno</strong>
-          <span>Slijedi rutu</span>
-        </div>
-      </ng-template>
-    </div>
-
-    <div class="nv-upozorenje" *ngIf="izvanRute">
-      <i class="pi pi-exclamation-triangle"></i> Izvan rute – vrati se na trasu
-    </div>
-    <div class="nv-upozorenje is-kraj" *ngIf="kraj">
-      <i class="pi pi-flag"></i> Kraj rute<ng-container *ngIf="cilj"> · {{ cilj }}</ng-container>
     </div>
   </header>
 
@@ -45,21 +64,38 @@
     <button type="button" class="nv-btn" [attr.aria-pressed]="treceD" (click)="prebaciTreceD()">
       <b>{{ treceD ? '3D' : '2D' }}</b>
     </button>
-    <button
-      type="button"
-      class="nv-btn"
-      [class.is-off]="!glas"
-      [attr.aria-label]="glas ? 'Isključi glas' : 'Uključi glas'"
-      (click)="prebaciGlas()"
-    >
-      <i class="pi" [ngClass]="glas ? 'pi-volume-up' : 'pi-volume-off'"></i>
-    </button>
+    <div class="nv-glas">
+      <button
+        type="button"
+        class="nv-btn"
+        [class.is-off]="glas === 'ne'"
+        aria-label="Glasovne najave"
+        [attr.aria-expanded]="izborGlasa"
+        (click)="prebaciIzborGlasa()"
+      >
+        <i class="pi" [ngClass]="glas === 'ne' ? 'pi-volume-off' : glas === 'skretanja' ? 'pi-volume-down' : 'pi-volume-up'"></i>
+      </button>
+      <ul class="nv-glas-izbor" *ngIf="izborGlasa" role="menu">
+        <li *ngFor="let o of opcijeGlasa">
+          <button
+            type="button"
+            role="menuitemradio"
+            [attr.aria-checked]="glas === o.vrijednost"
+            [class.is-on]="glas === o.vrijednost"
+            (click)="postaviGlas(o.vrijednost)"
+          >
+            <strong>{{ o.naziv }}</strong>
+            <small>{{ o.opis }}</small>
+          </button>
+        </li>
+      </ul>
+    </div>
     <button *ngIf="!pratim" type="button" class="nv-btn is-accent" aria-label="Centriraj" (click)="centriraj()">
       <i class="pi pi-compass"></i>
     </button>
   </div>
 
-  <!-- Dolje: stajališta, linija, kontrole probne vožnje -->
+  <!-- Dolje: linija i smjer, poruke, kontrole probne vožnje -->
   <section class="nv-dno">
     <div class="nv-poruka" *ngIf="greska">{{ greska }}</div>
     <div class="nv-poruka" *ngIf="!greska && !ucitano">Učitavam trasu…</div>
@@ -69,35 +105,34 @@
       <button type="button" class="nv-link" (click)="probnaVoznja()">Probna vožnja</button>
     </div>
 
-    <div class="nv-stajaliste" *ngIf="ucitano && sljedeceStajaliste">
+    <div class="nv-traka" *ngIf="ucitano && (linija || cilj || nacin === 'proba')">
       <span class="nv-linija" *ngIf="linija">{{ linija }}</span>
-      <div class="nv-stajaliste-txt">
-        <small>Sljedeće stajalište · {{ opisUdaljenosti(doStajalista) }}</small>
-        <strong>{{ sljedeceStajaliste }}</strong>
-        <small *ngIf="zatimStajaliste">zatim {{ zatimStajaliste }}</small>
-      </div>
-    </div>
-
-    <div class="nv-proba" *ngIf="nacin === 'proba' && ucitano">
-      <span class="nv-proba-oznaka">Probna vožnja</span>
-      <button type="button" class="nv-btn" [attr.aria-label]="pauza ? 'Nastavi' : 'Pauza'" (click)="prebaciPauzu()">
-        <i class="pi" [ngClass]="pauza ? 'pi-play' : 'pi-pause'"></i>
-      </button>
-      <div class="nv-brzine" role="group" aria-label="Brzina">
-        <button
-          *ngFor="let u of ubrzanja"
-          type="button"
-          [class.is-on]="u === ubrzanje"
-          (click)="postaviUbrzanje(u)"
-        >
-          {{ u }}×
+      <span class="nv-smjer" *ngIf="cilj">Smjer {{ cilj }}</span>
+      <span class="nv-razmak"></span>
+      <ng-container *ngIf="nacin === 'proba'">
+        <button type="button" class="nv-btn" [attr.aria-label]="pauza ? 'Nastavi' : 'Pauza'" (click)="prebaciPauzu()">
+          <i class="pi" [ngClass]="pauza ? 'pi-play' : 'pi-pause'"></i>
         </button>
-      </div>
-      <button type="button" class="nv-btn" aria-label="Ispočetka" (click)="ispocetka()">
-        <i class="pi pi-replay"></i>
-      </button>
+        <div class="nv-brzine" role="group" aria-label="Brzina probne vožnje">
+          <button
+            *ngFor="let u of ubrzanja"
+            type="button"
+            [class.is-on]="u === ubrzanje"
+            (click)="postaviUbrzanje(u)"
+          >
+            {{ u }}×
+          </button>
+        </div>
+        <button type="button" class="nv-btn" aria-label="Ispočetka" (click)="ispocetka()">
+          <i class="pi pi-replay"></i>
+        </button>
+      </ng-container>
     </div>
 
-    <small class="nv-izvor" *ngIf="izvorSkretanja === 'geometrija'">Skretanja procijenjena iz trase</small>
+    <small class="nv-izvor">
+      <ng-container *ngIf="nacin === 'proba'">Probna vožnja · </ng-container>
+      <ng-container *ngIf="izvorSkretanja === 'geometrija'">Skretanja procijenjena iz trase · </ng-container>
+      © OpenFreeMap · © OpenStreetMap
+    </small>
   </section>
 </div>

@@ -45,19 +45,50 @@ const NAJAVA_DALEKO_M = 250;
 const NAJAVA_BLIZU_M = 45;
 const NAJAVA_STAJALISTA_M = 180;
 
+/** Ono što slijedi na ruti: skretanje ili stajalište, s udaljenošću. */
+export type Dogadaj =
+  | { vrsta: 'skretanje'; d: number; do: number; manevar: ManevarKarta }
+  | { vrsta: 'stajaliste'; d: number; do: number; naziv: string; zadnje: boolean };
+
+/** Glasovne najave: sve, samo skretanja ili ništa. */
+export type Glas = 'sve' | 'skretanja' | 'ne';
+
 interface Postavke {
   treceD: boolean;
-  glas: boolean;
+  glas: Glas;
 }
 
 function ucitajPostavke(): Postavke {
   try {
     const p = JSON.parse(localStorage.getItem(POSTAVKE_KEY) ?? '{}');
-    return { treceD: p.treceD !== false, glas: p.glas !== false };
+    // Starije postavke: glas je bio true/false.
+    const glas: Glas =
+      p.glas === 'sve' || p.glas === 'skretanja' || p.glas === 'ne' ? p.glas : p.glas === false ? 'ne' : 'sve';
+    return { treceD: p.treceD !== false, glas };
   } catch {
-    return { treceD: true, glas: true };
+    return { treceD: true, glas: 'sve' };
   }
 }
+
+/** Vrh strelice skretanja (SDF – boja i rub se zadaju u sloju), pokazuje prema gore. */
+function vrhStrelice(): ImageData {
+  const n = 64;
+  const c = document.createElement('canvas');
+  c.width = c.height = n;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#000';
+  g.beginPath();
+  g.moveTo(32, 8);
+  g.lineTo(54, 46);
+  g.lineTo(10, 46);
+  g.closePath();
+  g.fill();
+  return g.getImageData(0, 0, n, n);
+}
+
+/** Strelica skretanja: ovoliko trase prije i poslije raskrižja. */
+const STRELICA_PRIJE_M = 30;
+const STRELICA_POSLIJE_M = 22;
 
 function razlikaKuta(a: number, b: number): number {
   return ((b - a + 540) % 360) - 180;
@@ -86,7 +117,13 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   readonly cilj: string | null;
   nacin: Nacin;
   treceD: boolean;
-  glas: boolean;
+  glas: Glas;
+  izborGlasa = false;
+  readonly opcijeGlasa: { vrijednost: Glas; naziv: string; opis: string }[] = [
+    { vrijednost: 'sve', naziv: 'Skretanja i stajališta', opis: 'Najavljuje skretanja i sljedeće stajalište' },
+    { vrijednost: 'skretanja', naziv: 'Samo skretanja', opis: 'Bez najave stajališta' },
+    { vrijednost: 'ne', naziv: 'Isključeno', opis: 'Bez glasa' },
+  ];
   readonly tema: Tema = temaKarte();
 
   ucitano = false;
@@ -102,6 +139,9 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   pauza = false;
   ubrzanje = 4;
   readonly ubrzanja = [1, 4, 8];
+
+  /** Dvije kartice gore: sljedeće skretanje ili stajalište, i ono iza njega. */
+  dogadaji: Dogadaj[] = [];
 
   // Prikaz (osvježava se ~3× u sekundi, ne svaki frame)
   sljedeciManevar: ManevarKarta | null = null;
@@ -128,6 +168,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   private sirovo: { lat: number; lon: number } | null = null;
   private smjer = 0;
   private stajanjeDo = 0;
+  /** Indeks prvog skretanja ispred vozača kad su strelice zadnji put nacrtane. */
+  private prikazaniPrvi = -1;
   private izgovoreno = new Set<string>();
 
   private watchId: number | null = null;
@@ -167,7 +209,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
         center: [15.93, 45.81],
         zoom: 15,
         pitch: this.treceD ? 55 : 0,
-        attributionControl: { compact: true },
+        // Izvor karte piše sitno ispod donje trake (.nv-izvor).
+        attributionControl: false,
       });
       mapa.on('style.load', () => this.postaviSlojeve(mapa));
       // Vozač pomakne kartu → prestani pratiti dok ne stisne "Centriraj".
@@ -222,6 +265,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       next: (n) => {
         this.manevri = n.manevri ?? [];
         this.izvorSkretanja = n.izvor;
+        this.prikazaniPrvi = -1;
+        this.crtajStrelice();
       },
       error: () => {},
     });
@@ -327,16 +372,19 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  prebaciGlas(): void {
-    this.glas = !this.glas;
+  prebaciIzborGlasa(): void {
+    this.izborGlasa = !this.izborGlasa;
+  }
+
+  postaviGlas(g: Glas): void {
+    this.glas = g;
+    this.izborGlasa = false;
     this.spremi();
-    if (!this.glas) {
-      try {
-        speechSynthesis.cancel();
-      } catch {}
-    } else {
-      this.reci('Glasovne najave uključene.');
-    }
+    try {
+      speechSynthesis.cancel();
+    } catch {}
+    if (g === 'sve') this.reci('Najavljujem skretanja i stajališta.');
+    if (g === 'skretanja') this.reci('Najavljujem samo skretanja.');
   }
 
   centriraj(): void {
@@ -359,7 +407,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   // ---------- Glas ----------
 
   private reci(tekst: string): void {
-    if (!this.glas || typeof speechSynthesis === 'undefined') return;
+    if (this.glas === 'ne' || typeof speechSynthesis === 'undefined') return;
     try {
       const u = new SpeechSynthesisUtterance(tekst);
       u.lang = 'hr-HR';
@@ -385,6 +433,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
         this.reci(govorManevra(m, do_));
       }
     }
+    if (this.glas !== 'sve') return;
     const i = this.udaljenosti.findIndex((u) => u > this.d + 10);
     if (i >= 0 && this.udaljenosti[i] - this.d <= NAJAVA_STAJALISTA_M && !this.izgovoreno.has(`s${i}`)) {
       this.izgovoreno.add(`s${i}`);
@@ -405,6 +454,29 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.doStajalista = i >= 0 ? this.udaljenosti[i] - this.d : 0;
     this.zatimStajaliste = i >= 0 ? (this.stajalista[i + 1]?.naziv ?? null) : null;
     this.kraj = this.d >= this.trasa.duljina - 15;
+
+    // Skretanja i stajališta ispred, po udaljenosti – prva dva idu u kartice.
+    const ispred: Dogadaj[] = [];
+    for (const m of this.manevri) {
+      if (m.d > this.d + 5) ispred.push({ vrsta: 'skretanje', d: m.d, do: m.d - this.d, manevar: m });
+      if (ispred.length >= 2) break;
+    }
+    let dodano = 0;
+    this.udaljenosti.forEach((u, j) => {
+      if (u > this.d + 10 && dodano < 2) {
+        dodano++;
+        ispred.push({
+          vrsta: 'stajaliste',
+          d: u,
+          do: u - this.d,
+          naziv: this.stajalista[j].naziv,
+          zadnje: j === this.stajalista.length - 1,
+        });
+      }
+    });
+    this.dogadaji = ispred.sort((a, b) => a.d - b.d).slice(0, 2);
+
+    this.crtajStrelice();
     this.najave();
   }
 
@@ -457,6 +529,44 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       layout: { 'line-join': 'round', 'line-cap': 'round' },
       paint: { 'line-color': b.trasa, 'line-width': 8 },
     });
+
+    // Strelice na svakom sljedećem skretanju: bijela s tamnim rubom, vrh u smjeru izlaza.
+    if (!mapa.hasImage('vrh')) mapa.addImage('vrh', vrhStrelice(), { sdf: true, pixelRatio: 2 });
+    for (const izvor of ['strelice', 'strelice-vrh']) {
+      if (!mapa.getSource(izvor)) mapa.addSource(izvor, { type: 'geojson', data: prazno });
+    }
+    const rubStrelice = this.tema === 'tamna' ? '#0b1220' : '#1e3a8a';
+    mapa.addLayer({
+      id: 'strelice-rub',
+      type: 'line',
+      source: 'strelice',
+      layout: { 'line-join': 'round', 'line-cap': 'butt' },
+      paint: { 'line-color': rubStrelice, 'line-width': ['case', ['get', 'prvi'], 13, 10] },
+    });
+    mapa.addLayer({
+      id: 'strelice',
+      type: 'line',
+      source: 'strelice',
+      layout: { 'line-join': 'round', 'line-cap': 'butt' },
+      paint: { 'line-color': '#ffffff', 'line-width': ['case', ['get', 'prvi'], 7, 5] },
+    });
+    mapa.addLayer({
+      id: 'strelice-vrh',
+      type: 'symbol',
+      source: 'strelice-vrh',
+      layout: {
+        'icon-image': 'vrh',
+        'icon-rotate': ['get', 'smjer'],
+        'icon-rotation-alignment': 'map',
+        'icon-pitch-alignment': 'map',
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-size': ['case', ['get', 'prvi'], 0.85, 0.65],
+      },
+      paint: { 'icon-color': '#ffffff', 'icon-halo-color': rubStrelice, 'icon-halo-width': 2 },
+    });
+    this.prikazaniPrvi = -1;
+    this.crtajStrelice();
     mapa.addLayer({
       id: 'stajalista',
       type: 'circle',
@@ -498,6 +608,54 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       paint: { 'icon-color': b.odabrano, 'icon-halo-color': '#ffffff', 'icon-halo-width': 2.5 },
     });
     this.postaviTrasu();
+  }
+
+  /**
+   * Strelice na skretanjima ispred vozača: komad trase oko raskrižja i vrh u
+   * smjeru izlaza. Prođena skretanja nestaju; najbliže je malo veće.
+   */
+  private crtajStrelice(): void {
+    const mapa = this.mapa;
+    const t = this.trasa;
+    const linije = mapa?.getSource('strelice') as GeoJSONSource | undefined;
+    const vrhovi = mapa?.getSource('strelice-vrh') as GeoJSONSource | undefined;
+    if (!t || !linije || !vrhovi) return;
+
+    const ispred = this.manevri.filter((m) => m.d > this.d + 5);
+    const prvi = ispred[0] ? this.manevri.indexOf(ispred[0]) : this.manevri.length;
+    if (prvi === this.prikazaniPrvi) return;
+    this.prikazaniPrvi = prvi;
+
+    const crte: GeoJSON.Feature[] = [];
+    const vrh: GeoJSON.Feature[] = [];
+    ispred.forEach((m, i) => {
+      const od = Math.max(this.d, m.d - STRELICA_PRIJE_M);
+      const doo = Math.min(t.duljina, m.d + STRELICA_POSLIJE_M);
+      if (doo - od < 10) return;
+      const koordinate: [number, number][] = [];
+      for (let x = od; x < doo; x += 4) {
+        const p = tockaNa(t, x);
+        koordinate.push([p.lon, p.lat]);
+      }
+      const kraj = tockaNa(t, doo);
+      koordinate.push([kraj.lon, kraj.lat]);
+      const svojstva = { prvi: i === 0 };
+      crte.push({ type: 'Feature', properties: svojstva, geometry: { type: 'LineString', coordinates: koordinate } });
+      // Vrh: smjer zadnjih metara strelice.
+      const prije = tockaNa(t, doo - 6);
+      const smjer =
+        ((Math.atan2((kraj.lon - prije.lon) * Math.cos((kraj.lat * Math.PI) / 180), kraj.lat - prije.lat) * 180) /
+          Math.PI +
+          360) %
+        360;
+      vrh.push({
+        type: 'Feature',
+        properties: { ...svojstva, smjer },
+        geometry: { type: 'Point', coordinates: [kraj.lon, kraj.lat] },
+      });
+    });
+    linije.setData({ type: 'FeatureCollection', features: crte });
+    vrhovi.setData({ type: 'FeatureCollection', features: vrh });
   }
 
   /** Stajališta (jednom) – trasa ispred/iza se crta u svakom frameu. */
@@ -616,7 +774,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
         pitch: this.treceD ? 55 : 0,
         zoom: mapa.getZoom() + (zoom - mapa.getZoom()) * Math.min(1, dt),
         // Vozilo u donjem dijelu ekrana – više se vidi ispred.
-        padding: { top: h * 0.42, bottom: 0, left: 0, right: 0 },
+        padding: { top: h * 0.42, bottom: 90, left: 0, right: 0 },
       });
     }
   }
