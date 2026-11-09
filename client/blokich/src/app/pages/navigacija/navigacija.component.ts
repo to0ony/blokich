@@ -183,6 +183,9 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   private zadnjiFix = 0;
   /** Sirova GPS pozicija kad vozač nije na ruti. */
   private sirovo: { lat: number; lon: number } | null = null;
+  /** Zadnji dobar GPS fiks i oznaka vozača koja mu se glatko primiče. */
+  private gpsTocka: { lat: number; lon: number } | null = null;
+  private prikazGps: { lat: number; lon: number } | null = null;
   private smjer = 0;
   private stajanjeDo = 0;
   /** Indeks prvog skretanja ispred vozača kad su strelice zadnji put nacrtane. */
@@ -391,6 +394,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.status = s.status;
     // Loš fiks ne pomiče prikaz.
     if (!(s.netocnost <= 40)) return;
+    this.gpsTocka = { lat, lon };
 
     if (s.status === 'na-ruti' && s.d !== null) {
       this.sirovo = null;
@@ -833,25 +837,48 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     const t = this.trasa;
     if (!mapa || !t || !mapa.getSource('ja')) return;
 
+    // Točka na trasi (napredak) i smjer trase tamo.
+    const naTrasi = tockaNa(t, this.d);
+    const ispredT = tockaNa(t, Math.min(t.duljina, this.d + 25));
+    const smjerTrase = smjerIzmedu(naTrasi, ispredT);
+    const kretanje = this.pracenje?.smjerKretanja ?? null;
+    const vozi = this.brzina > 1.5;
+
     let lat: number;
     let lon: number;
-    if (this.sirovo) {
-      ({ lat, lon } = this.sirovo);
-      const k = this.pracenje?.smjerKretanja;
-      if (k !== null && k !== undefined) {
-        this.smjer = (this.smjer + razlikaKuta(this.smjer, k) * Math.min(1, dt * 2.5) + 360) % 360;
+    let ciljSmjer: number | null;
+    if (this.nacin === 'gps' && this.gpsTocka) {
+      // Oznaka na stvarnoj GPS poziciji (ZET-ova crta zna biti pokraj ceste),
+      // glatko i malo procijenjena brzinom da ne kasni za busom.
+      let cilj = this.gpsTocka;
+      if (vozi && kretanje !== null) {
+        const m = this.brzina * Math.min(1.5, (performance.now() - this.zadnjiFix) / 1000);
+        const r = (kretanje * Math.PI) / 180;
+        cilj = {
+          lat: cilj.lat + (m * Math.cos(r)) / 110_540,
+          lon: cilj.lon + (m * Math.sin(r)) / (111_320 * Math.cos((cilj.lat * Math.PI) / 180)),
+        };
       }
+      if (!this.prikazGps || udaljenost(this.prikazGps, cilj) > 150) {
+        this.prikazGps = { ...cilj };
+      } else {
+        const k = Math.min(1, dt * 4);
+        this.prikazGps = {
+          lat: this.prikazGps.lat + (cilj.lat - this.prikazGps.lat) * k,
+          lon: this.prikazGps.lon + (cilj.lon - this.prikazGps.lon) * k,
+        };
+      }
+      ({ lat, lon } = this.prikazGps);
+      // Smjer: kamo stvarno vozi; kad stoji, smjer trase (ako je na njoj).
+      ciljSmjer = vozi && kretanje !== null ? kretanje : this.status === 'na-ruti' ? smjerTrase : kretanje;
     } else {
-      const p = tockaNa(t, this.d);
-      lat = p.lat;
-      lon = p.lon;
-      // Smjer kamere: trasa malo ispred, glatko – bez trzanja na lomovima.
-      const ispred = tockaNa(t, Math.min(t.duljina, this.d + 25));
-      const cilj = Math.atan2((ispred.lon - lon) * Math.cos((lat * Math.PI) / 180), ispred.lat - lat);
-      const smjer = ((cilj * 180) / Math.PI + 360) % 360;
-      if (Math.abs(ispred.lat - lat) + Math.abs(ispred.lon - lon) > 1e-6) {
-        this.smjer = (this.smjer + razlikaKuta(this.smjer, smjer) * Math.min(1, dt * 2.5) + 360) % 360;
-      }
+      // Probna vožnja (ili još bez GPS-a): po trasi.
+      lat = naTrasi.lat;
+      lon = naTrasi.lon;
+      ciljSmjer = udaljenost(naTrasi, ispredT) > 0.1 ? smjerTrase : null;
+    }
+    if (ciljSmjer !== null) {
+      this.smjer = (this.smjer + razlikaKuta(this.smjer, ciljSmjer) * Math.min(1, dt * 2.5) + 360) % 360;
     }
 
     (mapa.getSource('ja') as GeoJSONSource).setData({
@@ -889,7 +916,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     // Trasa: prijeđeni dio blijedo, ostatak jako.
     const idx = t.d.findIndex((x) => x > this.d);
     const rez = idx < 0 ? t.tocke.length : idx;
-    const tu = [lon, lat];
+    // Granica prijeđenog dijela je na trasi, ne na GPS oznaci (koja zna biti pokraj crte).
+    const tu = [naTrasi.lon, naTrasi.lat];
     const iza = [...t.tocke.slice(0, rez).map(([a, o]) => [o, a]), tu];
     const ispred = [tu, ...t.tocke.slice(rez).map(([a, o]) => [o, a])];
     (mapa.getSource('iza') as GeoJSONSource).setData({
