@@ -42,6 +42,28 @@ export interface StajalisteKarta {
   lon: number;
 }
 
+/** Linija iz GTFS-a (za pretragu). */
+export interface RutaKarta {
+  id: string;
+  naziv: string;
+  opis: string;
+  tip: number;
+}
+
+/** Ruta linije: za svaki smjer glavna trasa i stajališta. */
+export interface LinijaKarta {
+  broj: string;
+  opis: string;
+  tip: 'tramvaj' | 'autobus';
+  smjerovi: {
+    smjer: number | null;
+    cilj: string | null;
+    oblik: string;
+    tocke: [number, number][];
+    stajalista: StajalisteKarta[];
+  }[];
+}
+
 export interface KartaOdgovor {
   vrijeme: string | null;
   gtfs: string | null;
@@ -54,6 +76,17 @@ export class KartaService {
 
   vozila() {
     return this.api.get<KartaOdgovor>('karta/vozila');
+  }
+
+  /** Sve linije (za pretragu i kad nijedan bus linije nije vani). */
+  rute() {
+    return this.api.get<{ rute: RutaKarta[] }>('karta/rute');
+  }
+
+  /** Ruta linije po broju. */
+  linija(broj: string) {
+    const params = new HttpParams().set('broj', broj);
+    return this.api.get<LinijaKarta>('karta/linija', params);
   }
 
   /** Stajališta trase, redom kojim ih vožnja obilazi. */

@@ -311,6 +311,49 @@
   }
 }
 
+.km-dirs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.km-dir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+  color: var(--vz-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .pi {
+    color: var(--vz-muted);
+    font-size: 12px;
+  }
+
+  &.is-on {
+    border-color: var(--km-accent);
+    background: var(--km-accent-soft);
+
+    .pi {
+      color: var(--km-accent);
+    }
+  }
+}
+
 .km-close {
   width: 36px;
   height: 36px;

@@ -73,6 +73,42 @@
     </div>
   </div>
 
+  <!-- Ruta linije iz pretrage (dok nije odabrano vozilo) -->
+  <section class="km-sheet km-route" *ngIf="filterLinija && !odabrano" aria-live="polite">
+    <header class="km-sheet-head">
+      <span class="km-line">{{ filterLinija }}</span>
+      <div class="km-sheet-title">
+        <strong>{{ ruta?.opis || 'Linija ' + filterLinija }}</strong>
+        <span>
+          <ng-container *ngIf="ucitavaRutu">Učitavam rutu…</ng-container>
+          <ng-container *ngIf="!ucitavaRutu">
+            {{ prikazana.length ? prikazana.length + ' na karti' : 'Nitko sad ne vozi' }}
+            <ng-container *ngIf="ruta && ruta.smjerovi[smjerRute]?.stajalista?.length">
+              · {{ ruta.smjerovi[smjerRute].stajalista.length }} stajališta
+            </ng-container>
+          </ng-container>
+        </span>
+      </div>
+      <button type="button" class="km-btn km-close" aria-label="Zatvori liniju" (click)="postaviLiniju(null)">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <div class="km-dirs" *ngIf="ruta && ruta.smjerovi.length > 1" role="group" aria-label="Smjer">
+      <button
+        *ngFor="let s of ruta.smjerovi; let i = index"
+        type="button"
+        class="km-dir"
+        [class.is-on]="i === smjerRute"
+        [attr.aria-pressed]="i === smjerRute"
+        (click)="odaberiSmjer(i)"
+      >
+        <i class="pi pi-arrow-right"></i>
+        <span>{{ s.cilj || 'Smjer ' + (i + 1) }}</span>
+      </button>
+    </div>
+  </section>
+
   <!-- Detalji odabranog vozila -->
   <section class="km-sheet" *ngIf="odabrano as v" aria-live="polite">
     <header class="km-sheet-head">

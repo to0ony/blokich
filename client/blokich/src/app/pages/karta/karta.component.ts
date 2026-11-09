@@ -12,7 +12,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
-import { KartaService, StajalisteKarta, VoziloKarta } from '../../services/karta.service';
+import {
+  KartaService,
+  LinijaKarta,
+  RutaKarta,
+  StajalisteKarta,
+  VoziloKarta,
+} from '../../services/karta.service';
 import {
   Kretanje,
   sljedeceStajaliste,
@@ -183,6 +189,11 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   tramvaji: boolean;
   tema: Tema;
   filterLinija: string | null = null;
+  /** Ruta linije odabrane u pretrazi i koji je smjer prikazan. */
+  ruta: LinijaKarta | null = null;
+  smjerRute = 0;
+  ucitavaRutu = false;
+  private sveRute: RutaKarta[] = [];
   prati = true;
   /** Otkucava svake sekunde – za "prije X s". */
   sad = Date.now();
@@ -256,6 +267,10 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     });
 
     this.osvjezi();
+    this.servis.rute().subscribe({
+      next: (res) => (this.sveRute = res.rute ?? []),
+      error: () => {},
+    });
     this.timer = setInterval(() => {
       if (!document.hidden) this.osvjezi();
     }, INTERVAL_MS);
@@ -400,18 +415,22 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     if (!q) return [];
     const rez: Rezultat[] = [];
 
-    const linije = new Map<string, number>();
+    // Sve linije iz voznog reda, i one kojima sad nijedan bus nije vani.
+    const naKarti = new Map<string, number>();
     for (const v of this.vozila) {
-      if (v.linija && bezKvacica(v.linija).startsWith(q)) {
-        linije.set(v.linija, (linije.get(v.linija) ?? 0) + 1);
-      }
+      if (v.linija) naKarti.set(v.linija, (naKarti.get(v.linija) ?? 0) + 1);
     }
+    const opisi = new Map(this.sveRute.map((r) => [r.naziv, r.opis]));
+    const linije = new Set([...opisi.keys(), ...naKarti.keys()]);
     [...linije]
-      .sort((a, b) => a[0].length - b[0].length || a[0].localeCompare(b[0], 'hr', { numeric: true }))
+      .filter((l) => bezKvacica(l).startsWith(q))
+      .sort((a, b) => a.length - b.length || a.localeCompare(b, 'hr', { numeric: true }))
       .slice(0, 4)
-      .forEach(([l, n]) =>
-        rez.push({ vrsta: 'linija', naslov: `Linija ${l}`, opis: `${n} na karti`, linija: l }),
-      );
+      .forEach((l) => {
+        const n = naKarti.get(l) ?? 0;
+        const opis = [opisi.get(l), n ? `${n} na karti` : 'nitko ne vozi'].filter(Boolean).join(' · ');
+        rez.push({ vrsta: 'linija', naslov: `Linija ${l}`, opis, linija: l });
+      });
 
     for (const v of this.vozila) {
       const ime = v.vozac?.ime ? bezKvacica(v.vozac.ime) : '';
@@ -437,10 +456,59 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /** Linija iz pretrage: samo njeni busevi i njena ruta (trasa + stajališta). */
   postaviLiniju(l: string | null): void {
     this.filterLinija = l;
+    this.ruta = null;
+    this.smjerRute = 0;
     this.zatvori();
-    if (l) this.prilagodiPogled(this.prikazana);
+    if (!l) return;
+
+    this.ucitavaRutu = true;
+    this.servis.linija(l).subscribe({
+      next: (r) => {
+        this.ucitavaRutu = false;
+        if (this.filterLinija !== l) return;
+        this.ruta = r?.smjerovi?.length ? r : null;
+        this.prikaziTrasu();
+        this.pogledNaRutu();
+      },
+      error: () => {
+        this.ucitavaRutu = false;
+        // Bez rute barem pokaži buseve linije.
+        if (this.filterLinija === l) this.prilagodiPogled(this.prikazana);
+      },
+    });
+  }
+
+  odaberiSmjer(i: number): void {
+    this.smjerRute = i;
+    this.prikaziTrasu();
+  }
+
+  /** Smjer rute koji se prikazuje (dok vozilo nije odabrano). */
+  private get prikazaniSmjer(): LinijaKarta['smjerovi'][number] | null {
+    return this.ruta?.smjerovi[this.smjerRute] ?? this.ruta?.smjerovi[0] ?? null;
+  }
+
+  private pogledNaRutu(): void {
+    if (!this.mapa || !this.ruta) return;
+    let [w, s, e, n] = [180, 90, -180, -90];
+    for (const sm of this.ruta.smjerovi) {
+      for (const [lat, lon] of sm.tocke) {
+        w = Math.min(w, lon);
+        e = Math.max(e, lon);
+        s = Math.min(s, lat);
+        n = Math.max(n, lat);
+      }
+    }
+    this.mapa.fitBounds(
+      [
+        [w, s],
+        [e, n],
+      ],
+      { padding: { top: 130, bottom: 210, left: 30, right: 30 }, maxZoom: 15, duration: 700 },
+    );
   }
 
   odaberi(v: VoziloKarta, priblizi: boolean): void {
@@ -640,15 +708,18 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   private prikaziTrasu(): void {
     const izvor = this.mapa?.getSource('trasa') as GeoJSONSource | undefined;
     if (!izvor) return;
-    const t = this.odabrano ? this.kretanje.trasa(this.odabrano.oblik) : undefined;
+    // Odabrano vozilo ima prednost; inače ruta linije iz pretrage.
+    const tocke = this.odabrano
+      ? this.kretanje.trasa(this.odabrano.oblik)?.tocke
+      : this.prikazaniSmjer?.tocke;
     izvor.setData({
       type: 'FeatureCollection',
-      features: t
+      features: tocke
         ? [
             {
               type: 'Feature',
               properties: {},
-              geometry: { type: 'LineString', coordinates: t.tocke.map(([lat, lon]) => [lon, lat]) },
+              geometry: { type: 'LineString', coordinates: tocke.map(([lat, lon]) => [lon, lat]) },
             },
           ]
         : [],
@@ -660,7 +731,20 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   private prikaziStajalista(): void {
     const izvor = this.mapa?.getSource('stajalista') as GeoJSONSource | undefined;
     if (!izvor) return;
-    const oblik = this.odabrano?.oblik ?? null;
+    if (!this.odabrano) {
+      // Ruta linije: stajališta prikazanog smjera, bez "sljedećeg".
+      this.prikazaniSljedeci = -1;
+      izvor.setData({
+        type: 'FeatureCollection',
+        features: (this.prikazaniSmjer?.stajalista ?? []).map((s) => ({
+          type: 'Feature',
+          properties: { naziv: s.naziv, sljedece: false },
+          geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
+        })),
+      });
+      return;
+    }
+    const oblik = this.odabrano.oblik ?? null;
     const lista = oblik ? this.stajalista.get(oblik) : undefined;
 
     if (oblik && !lista && !this.trazenaStajalista.has(oblik)) {
