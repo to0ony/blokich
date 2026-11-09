@@ -606,13 +606,13 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     tekst('vozila-tekst-ostali', 13.5, ['!', ['any', ['get', 'podsused'], ['get', 'odabrano']]]);
     tekst('vozila-tekst', 12, ['any', ['get', 'podsused'], ['get', 'odabrano']]);
     mapa.addLayer({
-      id: 'vozila-oznaka-vr',
+      id: 'vozila-ime',
       type: 'symbol',
       source: 'vozila',
-      minzoom: 14,
-      filter: ['has', 'oznaka'],
+      minzoom: 14.5,
+      filter: ['has', 'ime'],
       layout: {
-        'text-field': ['get', 'oznaka'],
+        'text-field': ['get', 'ime'],
         'text-font': ['Noto Sans Bold'],
         'text-size': 11,
         'text-offset': [0, 1.7],
@@ -759,8 +759,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
         // Crta se odozdo: ostali, Podsused, odabrano.
         red: odabrano ? 2 : v.podsused ? 1 : 0,
       };
-      // Natpis ispod vozila: linija bloka | V.R. (kao u rasporedu vozača).
-      if (v.vr && (v.podsused || odabrano)) props['oznaka'] = `${v.linijaBloka ?? v.linija}|${v.vr}`;
+      if (v.vozac?.ime) props['ime'] = v.vozac.ime;
       features.push({
         type: 'Feature',
         properties: props,
