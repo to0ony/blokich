@@ -14,13 +14,14 @@ import { forkJoin } from 'rxjs';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import {
   KartaService,
+  LinijaKarta,
   ManevarKarta,
   StajalisteKarta,
 } from '../../services/karta.service';
+import { Pracenje, Status, smjerIzmedu, trasaOdgovara, udaljenost } from '../../components/karta/pracenje';
 import {
   Trasa,
   napraviTrasu,
-  projiciraj,
   stajalistaNaTrasi,
   tockaNa,
 } from '../../components/karta/kretanje';
@@ -35,8 +36,8 @@ import {
 type Nacin = 'gps' | 'proba';
 
 const POSTAVKE_KEY = 'navigacija-postavke';
-/** Dalje od trase od ovoga = vozač nije na ruti. */
-const IZVAN_RUTE_M = 60;
+/** Koliko često (ms) najviše tražiti drugi smjer linije kad trenutni ne odgovara. */
+const PROVJERA_DRUGIH_MS = 3000;
 /** Probna vožnja: osnovna brzina (m/s, ~35 km/h) i stajanje na stajalištu (s). */
 const PROBA_BRZINA = 9.7;
 const PROBA_STAJANJE_S = 4;
@@ -114,7 +115,23 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
 
   readonly oblik: string | null;
   readonly linija: string | null;
-  readonly cilj: string | null;
+  /** Trasa i smjer koji se sad prate – mijenjaju se na okretištu ili kod krivog smjera. */
+  oblikTrenutni: string | null;
+  cilj: string | null;
+  /** Oba smjera linije (za automatski prelazak); prazno ako linija nije poznata. */
+  private smjeroviLinije: LinijaKarta['smjerovi'] = [];
+  private traseSmjerova = new Map<string, Trasa>();
+  private zadnjaProvjeraDrugih = 0;
+  /** Praćenje GPS-a po trasi i njegov zadnji status. */
+  private pracenje: Pracenje | null = null;
+  status: Status = 'slab-signal';
+  netocnost = 0;
+  /** Kad vozač nije na ruti: udaljenost i kut strelice prema ruti (na ekranu). */
+  doRute: { m: number; kut: number } | null = null;
+  private doRuteTocka: { lat: number; lon: number } | null = null;
+  /** Kratka obavijest gore (npr. "Prebačeno na smjer …"). */
+  obavijest: string | null = null;
+  private obavijestDo = 0;
   nacin: Nacin;
   treceD: boolean;
   glas: Glas;
@@ -185,9 +202,11 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   constructor() {
     const q = inject(ActivatedRoute).snapshot.queryParamMap;
     this.oblik = q.get('oblik');
+    this.oblikTrenutni = this.oblik;
     this.linija = q.get('linija');
     this.cilj = q.get('cilj');
     this.nacin = q.get('proba') ? 'proba' : 'gps';
+    if (this.nacin === 'proba') this.status = 'na-ruti';
     const p = ucitajPostavke();
     this.treceD = p.treceD;
     this.glas = p.glas;
@@ -249,21 +268,42 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
           this.greska = 'Trasa nije pronađena.';
           return;
         }
-        this.trasa = napraviTrasu(tocke);
-        this.stajalista = stajalista.stajalista ?? [];
-        this.udaljenosti = stajalistaNaTrasi(this.trasa, this.stajalista);
+        this.postaviTrasuVoznje(oblik, napraviTrasu(tocke), stajalista.stajalista ?? []);
         this.ucitano = true;
-        this.smjer = tockaNa(this.trasa, 20).smjer;
-        this.postaviTrasu();
+        this.smjer = tockaNa(this.trasa!, 20).smjer;
         // GPS tek kad vozač potvrdi upozorenje.
         if (this.nacin === 'gps' && this.upozorenjePrihvaceno) this.pokreniGps();
         this.petlja();
       },
       error: () => (this.greska = 'Trasa se ne može učitati.'),
     });
+    // Oba smjera linije – za prelazak na okretištu ili kad vozač ide suprotno.
+    if (this.linija) {
+      this.servis.linija(this.linija).subscribe({
+        next: (l) => (this.smjeroviLinije = l?.smjerovi ?? []),
+        error: () => {},
+      });
+    }
+  }
+
+  /** Nova trasa za praćenje: stajališta, skretanja, praćenje GPS-a ispočetka. */
+  private postaviTrasuVoznje(oblik: string, trasa: Trasa, stajalista: StajalisteKarta[], d = 0): void {
+    this.oblikTrenutni = oblik;
+    this.trasa = trasa;
+    this.stajalista = stajalista;
+    this.udaljenosti = stajalistaNaTrasi(trasa, stajalista);
+    this.pracenje = new Pracenje(trasa);
+    this.d = this.dCilj = d;
+    this.kraj = false;
+    this.izgovoreno.clear();
+    this.manevri = [];
+    this.prikazaniPrvi = -1;
+    this.postaviTrasu();
+    this.crtajStrelice();
     // Skretanja stižu zasebno – bez njih navigacija radi sa stajalištima.
     this.servis.navigacija(oblik).subscribe({
       next: (n) => {
+        if (this.oblikTrenutni !== oblik) return;
         this.manevri = n.manevri ?? [];
         this.izvorSkretanja = n.izvor;
         this.prikazaniPrvi = -1;
@@ -271,6 +311,42 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       },
       error: () => {},
     });
+  }
+
+  /**
+   * Trenutna trasa ne odgovara (krivi smjer, okretište, nešto drugo): ima li
+   * drugi smjer linije koji ide ovdje i u smjeru vožnje? Ako ima, prijeđi na njega.
+   */
+  private probajDrugiSmjer(lat: number, lon: number): void {
+    const sad = performance.now();
+    if (sad - this.zadnjaProvjeraDrugih < PROVJERA_DRUGIH_MS) return;
+    this.zadnjaProvjeraDrugih = sad;
+    const kretanje = this.pracenje?.smjerKretanja ?? null;
+    for (const sm of this.smjeroviLinije) {
+      if (sm.oblik === this.oblikTrenutni || sm.tocke.length < 2) continue;
+      let t = this.traseSmjerova.get(sm.oblik);
+      if (!t) this.traseSmjerova.set(sm.oblik, (t = napraviTrasu(sm.tocke)));
+      const k = trasaOdgovara(t, lat, lon, kretanje);
+      if (!k) continue;
+      this.zone.run(() => {
+        this.cilj = sm.cilj;
+        this.postaviTrasuVoznje(sm.oblik, t!, sm.stajalista, k.d);
+        this.pracenje!.fiks(lat, lon, 10);
+        this.status = 'na-ruti';
+        this.sirovo = null;
+        this.izvanRute = false;
+        this.doRute = null;
+        const poruka = sm.cilj ? `Nastavljam u smjeru ${sm.cilj}.` : 'Nastavljam u drugom smjeru.';
+        this.pokaziObavijest(poruka);
+        this.reci(poruka);
+      });
+      return;
+    }
+  }
+
+  private pokaziObavijest(tekst: string): void {
+    this.obavijest = tekst;
+    this.obavijestDo = performance.now() + 5000;
   }
 
   // ---------- GPS ----------
@@ -301,30 +377,37 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   }
 
   private naLokaciju(p: GeolocationPosition): void {
-    if (!this.trasa) return;
+    if (!this.trasa || !this.pracenje) return;
     if (this.cekamGps || this.gpsGreska) {
       this.zone.run(() => {
         this.cekamGps = false;
         this.gpsGreska = null;
       });
     }
-    const { latitude: lat, longitude: lon, speed } = p.coords;
-    const prvi = this.zadnjiFix === 0;
-    const proj = projiciraj(this.trasa, lat, lon, prvi ? undefined : this.dCilj);
-    const izvan = proj.razmak > IZVAN_RUTE_M;
-    if (izvan !== this.izvanRute) this.zone.run(() => (this.izvanRute = izvan));
+    const { latitude: lat, longitude: lon, speed, heading, accuracy } = p.coords;
+    const bioNaRuti = this.status === 'na-ruti';
+    const s = this.pracenje.fiks(lat, lon, accuracy ?? 999, heading ?? null, speed ?? null);
+    this.netocnost = Math.round(s.netocnost);
+    this.status = s.status;
+    // Loš fiks ne pomiče prikaz.
+    if (!(s.netocnost <= 40)) return;
 
-    if (izvan) {
-      this.sirovo = { lat, lon };
-    } else {
+    if (s.status === 'na-ruti' && s.d !== null) {
       this.sirovo = null;
-      // GPS na mjestu šeta – ne vraćaj se unatrag za malo.
-      const d = proj.d < this.dCilj && this.dCilj - proj.d < 25 ? this.dCilj : proj.d;
-      if (prvi || Math.abs(d - this.d) > 400) this.d = d; // prvi fiks ili veliki skok
-      this.dCilj = d;
+      // Prvi položaj ili veliki skok: odmah tamo, inače glatko (vidi pomakni).
+      if (!bioNaRuti || Math.abs(s.d - this.d) > 400) this.d = s.d;
+      this.dCilj = s.d;
+    } else {
+      this.sirovo = { lat, lon };
     }
+    this.doRuteTocka = s.doRute ? { lat: s.doRute.lat, lon: s.doRute.lon } : null;
+    this.izvanRute = s.status === 'izvan-rute';
     this.brzina = typeof speed === 'number' && speed > 0.5 ? speed : 0;
     this.zadnjiFix = performance.now();
+
+    // Trasa ne odgovara ili je vožnja gotova → možda je drugi smjer linije.
+    const kraj = this.trasa && s.d !== null && s.d >= this.trasa.duljina - 30;
+    if (s.status === 'suprotan-smjer' || s.status === 'izvan-rute' || kraj) this.probajDrugiSmjer(lat, lon);
   }
 
   // ---------- Probna vožnja ----------
@@ -363,6 +446,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   }
 
   ispocetka(): void {
+    if (this.nacin === 'proba') this.status = 'na-ruti';
     this.d = this.dCilj = 0;
     this.kraj = false;
     this.pauza = false;
@@ -435,7 +519,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
 
   /** Jednom po događaju: manevar daleko/blizu, sljedeće stajalište, kraj. */
   private najave(): void {
-    if (this.izvanRute) return;
+    if (this.nacin === 'gps' && this.status !== 'na-ruti') return;
     const m = this.manevri.find((x) => x.d > this.d + 5);
     if (m) {
       const do_ = m.d - this.d;
@@ -461,6 +545,15 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
 
   private osvjeziPrikaz(): void {
     if (!this.trasa) return;
+    if (this.obavijest && performance.now() > this.obavijestDo) this.obavijest = null;
+    if (this.status === 'izvan-rute' && this.sirovo && this.doRuteTocka) {
+      const m = udaljenost(this.sirovo, this.doRuteTocka);
+      const smjer = smjerIzmedu(this.sirovo, this.doRuteTocka);
+      const karta = this.mapa?.getBearing() ?? 0;
+      this.doRute = { m, kut: smjer - karta };
+    } else {
+      this.doRute = null;
+    }
     const m = this.manevri.find((x) => x.d > this.d + 5) ?? null;
     this.sljedeciManevar = m;
     this.doManevra = m ? m.d - this.d : 0;
@@ -468,7 +561,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.sljedeceStajaliste = i >= 0 ? this.stajalista[i].naziv : null;
     this.doStajalista = i >= 0 ? this.udaljenosti[i] - this.d : 0;
     this.zatimStajaliste = i >= 0 ? (this.stajalista[i + 1]?.naziv ?? null) : null;
-    this.kraj = this.d >= this.trasa.duljina - 15;
+    this.kraj = (this.nacin === 'proba' || this.status === 'na-ruti') && this.d >= this.trasa.duljina - 15;
 
     // Skretanja i stajališta ispred, po udaljenosti – prva dva idu u kartice.
     const ispred: Dogadaj[] = [];
@@ -501,7 +594,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     const b = BOJE[this.tema];
     const prazno: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     if (!mapa.hasImage('vozilo')) mapa.addImage('vozilo', oznakaVozila(), { sdf: true, pixelRatio: 2 });
-    for (const izvor of ['ispred', 'iza', 'stajalista', 'ja']) {
+    for (const izvor of ['ispred', 'iza', 'stajalista', 'ja', 'do-rute']) {
       if (!mapa.getSource(izvor)) mapa.addSource(izvor, { type: 'geojson', data: prazno });
     }
 
@@ -523,6 +616,13 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       });
     }
 
+    mapa.addLayer({
+      id: 'do-rute',
+      type: 'line',
+      source: 'do-rute',
+      layout: { 'line-cap': 'round' },
+      paint: { 'line-color': b.trasa, 'line-width': 4, 'line-dasharray': [1, 1.5] },
+    });
     mapa.addLayer({
       id: 'iza',
       type: 'line',
@@ -737,6 +837,10 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     let lon: number;
     if (this.sirovo) {
       ({ lat, lon } = this.sirovo);
+      const k = this.pracenje?.smjerKretanja;
+      if (k !== null && k !== undefined) {
+        this.smjer = (this.smjer + razlikaKuta(this.smjer, k) * Math.min(1, dt * 2.5) + 360) % 360;
+      }
     } else {
       const p = tockaNa(t, this.d);
       lat = p.lat;
@@ -759,6 +863,27 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
           geometry: { type: 'Point', coordinates: [lon, lat] },
         },
       ],
+    });
+
+    const doRute = mapa.getSource('do-rute') as GeoJSONSource | undefined;
+    doRute?.setData({
+      type: 'FeatureCollection',
+      features:
+        this.sirovo && this.doRuteTocka && this.status === 'izvan-rute'
+          ? [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [
+                    [lon, lat],
+                    [this.doRuteTocka.lon, this.doRuteTocka.lat],
+                  ],
+                },
+              },
+            ]
+          : [],
     });
 
     // Trasa: prijeđeni dio blijedo, ostatak jako.

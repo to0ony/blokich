@@ -8,14 +8,56 @@
     </button>
 
     <div class="nv-kartice">
-      <div class="nv-upozorenje" *ngIf="izvanRute">
-        <i class="pi pi-exclamation-triangle"></i> Izvan rute – vrati se na trasu
-      </div>
-      <div class="nv-upozorenje is-kraj" *ngIf="kraj && !izvanRute">
-        <i class="pi pi-flag"></i> Kraj rute<ng-container *ngIf="cilj"> · {{ cilj }}</ng-container>
+      <div class="nv-obavijest" *ngIf="obavijest" role="status">
+        <i class="pi pi-sync"></i> {{ obavijest }}
       </div>
 
-      <ng-container *ngIf="ucitano && !izvanRute && !kraj">
+      <!-- GPS statusi (samo navigacija; probna vožnja je uvijek "na ruti") -->
+      <ng-container *ngIf="ucitano && nacin === 'gps' && upozorenjePrihvaceno && !cekamGps && !gpsGreska">
+        <div class="nv-kartica is-status" *ngIf="status === 'slab-signal'">
+          <span class="nv-ikona" aria-hidden="true"><i class="pi pi-wifi"></i></span>
+          <div class="nv-kartica-txt">
+            <strong>Tražim GPS</strong>
+            <span>Signal još nije precizan<ng-container *ngIf="netocnost && netocnost < 999"> (±{{ netocnost }} m)</ng-container></span>
+          </div>
+        </div>
+        <div class="nv-kartica is-status" *ngIf="status === 'odredujem-smjer'">
+          <span class="nv-ikona" aria-hidden="true"><i class="pi pi-compass"></i></span>
+          <div class="nv-kartica-txt">
+            <strong>Krenite</strong>
+            <span>Određujem smjer vožnje na ruti</span>
+          </div>
+        </div>
+        <div class="nv-kartica is-greska" *ngIf="status === 'izvan-rute'">
+          <span class="nv-ikona" aria-hidden="true">
+            <svg viewBox="0 0 48 48" [style.transform]="'rotate(' + (doRute?.kut ?? 0) + 'deg)'">
+              <path d="M24 44V14" />
+              <path d="M12 24L24 10l12 14" />
+            </svg>
+          </span>
+          <div class="nv-kartica-txt">
+            <strong>{{ doRute ? 'Do rute ' + opisUdaljenosti(doRute.m) : 'Izvan rute' }}</strong>
+            <span>Vozite prema isprekidanoj liniji</span>
+          </div>
+        </div>
+        <div class="nv-kartica is-greska" *ngIf="status === 'suprotan-smjer'">
+          <span class="nv-ikona" aria-hidden="true"><i class="pi pi-replay"></i></span>
+          <div class="nv-kartica-txt">
+            <strong>Suprotan smjer</strong>
+            <span>Vozite suprotno od odabrane vožnje</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="nv-upozorenje is-kraj" *ngIf="kraj">
+        <i class="pi pi-flag"></i>
+        <span>
+          Kraj vožnje<ng-container *ngIf="cilj"> · {{ cilj }}</ng-container>
+          <small *ngIf="nacin === 'gps' && linija">Kad krenete u drugom smjeru, navigacija nastavlja sama.</small>
+        </span>
+      </div>
+
+      <ng-container *ngIf="ucitano && status === 'na-ruti' && !kraj">
         <div
           *ngFor="let e of dogadaji; let i = index"
           class="nv-kartica"
