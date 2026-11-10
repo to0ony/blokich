@@ -72,12 +72,11 @@ interface Postavke {
 function ucitajPostavke(): Postavke {
   try {
     const p = JSON.parse(localStorage.getItem(POSTAVKE_KEY) ?? '{}');
-    // Starije postavke: glas je bio true/false.
-    const glas: Glas =
-      p.glas === 'sve' || p.glas === 'skretanja' || p.glas === 'ne' ? p.glas : p.glas === false ? 'ne' : 'sve';
+    // Glas je po defaultu isključen; uključuje ga vozač sam (izbor se pamti).
+    const glas: Glas = p.glas === 'sve' || p.glas === 'skretanja' ? p.glas : 'ne';
     return { treceD: p.treceD !== false, glas };
   } catch {
-    return { treceD: true, glas: 'sve' };
+    return { treceD: true, glas: 'ne' };
   }
 }
 
