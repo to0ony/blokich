@@ -1,4 +1,30 @@
 /** Zajedničko za punu kartu i karticu vozača: podloga, boje, oznaka vozila. */
+import type { Map as MapaLibre } from 'maplibre-gl';
+
+/**
+ * Smije li kamera sad pratiti vozilo? Ne dok vozač dira kartu (i malo
+ * nakon): svaka promjena kamere u MapLibreu prekida započetu gestu, pa se
+ * karta inače ne bi dala ni povući ni zumirati.
+ */
+export function slobodnaKamera(mapa: MapaLibre): () => boolean {
+  let dira = false;
+  let zadnje = 0;
+  const pocni = () => {
+    dira = true;
+    zadnje = performance.now();
+  };
+  const kraj = () => {
+    dira = false;
+    zadnje = performance.now();
+  };
+  mapa.on('touchstart', pocni);
+  mapa.on('mousedown', pocni);
+  mapa.on('touchend', kraj);
+  mapa.on('touchcancel', kraj);
+  mapa.on('mouseup', kraj);
+  mapa.on('wheel', () => (zadnje = performance.now()));
+  return () => !dira && performance.now() - zadnje > 350 && !mapa.isMoving();
+}
 
 export type Tema = 'svijetla' | 'tamna';
 

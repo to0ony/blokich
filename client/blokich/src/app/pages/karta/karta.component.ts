@@ -35,6 +35,7 @@ import {
   sustavTamna,
   ucitajCss,
   ucitajPostavke,
+  slobodnaKamera,
 } from '../../components/karta/karta-stil';
 
 /** Dohvat svakih 5 s – nova pozicija brže stigne, kretanje je mirnije. */
@@ -78,6 +79,8 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   private readonly servis = inject(KartaService);
   private readonly zone = inject(NgZone);
   private readonly router = inject(Router);
+  /** false dok vozač dira kartu – tada je kamera ne smije pomicati. */
+  private kameraSlobodna: () => boolean = () => false;
   /**
    * Otvaranje s kartice vozača: ?vozilo=374 odabere bus čim stigne u
    * podatke; ako ga nema, ?linija=137 pokaže rutu linije.
@@ -177,6 +180,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
       mapa.touchZoomRotate.disableRotation();
       // I kod promjene teme – novi stil briše naše slojeve.
       mapa.on('style.load', () => this.postaviSlojeve(mapa));
+      this.kameraSlobodna = slobodnaKamera(mapa);
       mapa.on('dragstart', () => {
         if (this.odabrano && this.prati) this.zone.run(() => (this.prati = false));
       });
@@ -863,7 +867,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     }
     izvor.setData({ type: 'FeatureCollection', features });
 
-    if (odabranaPozicija && this.prati && this.mapa && !this.mapa.isMoving()) {
+    if (odabranaPozicija && this.prati && this.mapa && this.kameraSlobodna()) {
       this.mapa.setCenter(odabranaPozicija);
     }
   }

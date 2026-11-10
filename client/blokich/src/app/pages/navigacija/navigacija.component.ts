@@ -25,7 +25,15 @@ import {
   stajalistaNaTrasi,
   tockaNa,
 } from '../../components/karta/kretanje';
-import { BOJE, STIL, Tema, oznakaVozila, temaKarte, ucitajCss } from '../../components/karta/karta-stil';
+import {
+  BOJE,
+  STIL,
+  Tema,
+  oznakaVozila,
+  slobodnaKamera,
+  temaKarte,
+  ucitajCss,
+} from '../../components/karta/karta-stil';
 import {
   govorManevra,
   kutStrelice,
@@ -114,6 +122,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   private readonly servis = inject(KartaService);
   private readonly zone = inject(NgZone);
   private readonly lokacija = inject(Location);
+  /** false dok vozač dira kartu – tada je kamera ne smije pomicati. */
+  private kameraSlobodna: () => boolean = () => false;
 
   readonly oblik: string | null;
   readonly linija: string | null;
@@ -238,6 +248,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       });
       mapa.on('style.load', () => this.postaviSlojeve(mapa));
       // Vozač pomakne kartu → prestani pratiti dok ne stisne "Centriraj".
+      this.kameraSlobodna = slobodnaKamera(mapa);
       mapa.on('dragstart', () => this.zone.run(() => (this.pratim = false)));
       // Zumiranje prstima: kao + i − – privremeno, pa natrag na optimalni zoom.
       mapa.on('zoomend', (e) => {
@@ -952,7 +963,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       geometry: { type: 'LineString', coordinates: ispred },
     });
 
-    if (this.pratim && !mapa.isMoving()) {
+    if (this.pratim && this.kameraSlobodna()) {
       // Brže = šira slika ispred.
       const kmh = (this.nacin === 'proba' ? PROBA_BRZINA * Math.min(this.ubrzanje, 2) : this.brzina) * 3.6;
       this.optimalniZoom = kmh > 45 ? 16 : kmh > 25 ? 16.6 : 17.2;
