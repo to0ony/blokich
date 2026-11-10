@@ -61,6 +61,13 @@
   width: 100%;
 }
 
+/* Karte linija ispod kartice Danas: dvije linije = jedna pored druge */
+.rs-karte.is-dvije {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 /* Danas */
 .rs-today {
   position: relative;

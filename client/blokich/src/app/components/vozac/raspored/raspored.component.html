@@ -61,7 +61,17 @@
 </section>
 
 <!-- Moja linija na karti: trasa, a dok vozim ili čekam i moj bus uživo -->
-<app-moja-karta *ngIf="!loading && danas?.sluzbe?.length" [dan]="danas" />
+<!-- Dvije linije u danu: dvije karte jedna pored druge -->
+<ng-container *ngIf="!loading && danas as d">
+  <div class="rs-karte" *ngIf="linijeKarte(d) as linije" [class.is-dvije]="linije.length > 1">
+    <app-moja-karta
+      *ngFor="let l of linije"
+      [dan]="d"
+      [linija]="linije.length > 1 ? l : null"
+      [kompaktno]="linije.length > 1"
+    />
+  </div>
+</ng-container>
 
 <!-- Tjedan: naslov, prekidač i dani u jednoj kartici -->
 <section class="rs-week">

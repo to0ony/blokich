@@ -2,15 +2,43 @@
   type="button"
   class="mk"
   *ngIf="dio && vrsta"
+  [class.is-kompaktno]="kompaktno"
+  [class.is-gotovo]="vrsta === 'gotovo'"
   (click)="otvori()"
   [attr.aria-label]="'Otvori kartu linije ' + dio.linija"
 >
   <div class="mk-okvir">
     <div #mapa class="mk-mapa"></div>
+    <span class="mk-linija" *ngIf="kompaktno">{{ dio.linija }}</span>
     <span class="mk-izvor">© OpenFreeMap · © OpenStreetMap</span>
   </div>
 
-  <div class="mk-info">
+  <!-- Uska kartica (dvije linije u danu): kratko, u dva retka -->
+  <div class="mk-info" *ngIf="kompaktno">
+    <span class="mk-txt">
+      <ng-container [ngSwitch]="vrsta">
+        <ng-container *ngSwitchCase="'vozim'">
+          <strong>{{ vozilo && sljedece ? sljedece : 'Voziš sad' }}</strong>
+          <small>{{ smjer ? 'Smjer ' + smjer : 'do ' + dio.do }}</small>
+        </ng-container>
+        <ng-container *ngSwitchCase="'cekam'">
+          <strong>{{ vozilo ? 'Bus ' + vozilo.id : 'Preuzimaš' }}</strong>
+          <small>u {{ dio.od }}<ng-container *ngIf="vozilo && sljedece"> · {{ sljedece }}</ng-container></small>
+        </ng-container>
+        <ng-container *ngSwitchCase="'kasnije'">
+          <strong>Od {{ dio.od }}</strong>
+          <small>{{ ruta?.opis || 'Linija ' + dio.linija }}</small>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+          <strong>Završeno</strong>
+          <small>u {{ dio.do }}</small>
+        </ng-container>
+      </ng-container>
+    </span>
+  </div>
+
+  <!-- Jedna linija u danu: kartica preko cijele širine -->
+  <div class="mk-info" *ngIf="!kompaktno">
     <span class="mk-ico" [class.is-live]="vozilo"><i class="pi pi-map"></i></span>
     <span class="mk-txt">
       <ng-container [ngSwitch]="vrsta">

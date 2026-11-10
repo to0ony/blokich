@@ -28,7 +28,8 @@ const CEKANJE_MIN = 60;
 const INTERVAL_MS = 5_000;
 const FRAME_MS = 33;
 
-type Vrsta = 'vozim' | 'cekam' | 'kasnije';
+/** 'gotovo' samo u kompaktnoj kartici (dvije linije): linija je za danas odvožena. */
+type Vrsta = 'vozim' | 'cekam' | 'kasnije' | 'gotovo';
 
 /**
  * Karta ispod kartice "Danas": trasa linije koju vozač danas vozi, a dok vozi
@@ -43,6 +44,10 @@ type Vrsta = 'vozim' | 'cekam' | 'kasnije';
 })
 export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() dan: DanRasporeda | undefined;
+  /** Samo ova linija (kad vozač danas vozi dvije, svaka ima svoju kartu). */
+  @Input() linija: string | null = null;
+  /** Uska kartica (dvije jedna pored druge). */
+  @Input() kompaktno = false;
   private mapaEl?: ElementRef<HTMLDivElement>;
 
   /** Element karte postoji samo dok ima što prikazati – karta se radi i miče s njim. */
@@ -110,7 +115,9 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /** Služba u tijeku → vozim; sljedeća unutar sat vremena → čekam bus; kasnije → samo ruta. */
   private odrediDio(): void {
-    const sluzbe = (this.dan?.sluzbe ?? []).filter((s) => blokZa(s) && s.linija);
+    const sluzbe = (this.dan?.sluzbe ?? []).filter(
+      (s) => blokZa(s) && s.linija && (!this.linija || s.linija === this.linija),
+    );
     const sad = sluzbe.find((s) => uSmjeniSad(s.od, s.do));
     const sljedeca = sad
       ? undefined
@@ -119,21 +126,25 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
           .filter((x) => x.za !== null)
           .sort((a, b) => a.za! - b.za!)[0];
 
-    const dio = sad ?? sljedeca?.s ?? null;
+    // U kompaktnoj kartici linija koja je gotova ostaje (s trasom), da se raspored ne pomiče.
+    const gotova = !sad && !sljedeca && this.kompaktno ? (sluzbe[sluzbe.length - 1] ?? null) : null;
+    const dio = sad ?? sljedeca?.s ?? gotova;
     const vrsta: Vrsta | null = sad
       ? 'vozim'
       : sljedeca
         ? sljedeca.za! <= CEKANJE_MIN
           ? 'cekam'
           : 'kasnije'
-        : null;
+        : gotova
+          ? 'gotovo'
+          : null;
 
     const promjena = dio !== this.dio || vrsta !== this.vrsta;
     this.dio = dio;
     this.vrsta = vrsta;
     if (!promjena) return;
 
-    if (vrsta === 'kasnije' || !dio) {
+    if (vrsta === 'kasnije' || vrsta === 'gotovo' || !dio) {
       this.vozilo = null;
       this.kretanje.azuriraj([], Date.now());
     }
@@ -343,7 +354,7 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
           [w, s],
           [e, n],
         ],
-        { padding: 22, maxZoom: 15, duration: 0 },
+        { padding: this.kompaktno ? 14 : 22, maxZoom: 15, duration: 0 },
       );
     }
     if (!this.vozilo) {

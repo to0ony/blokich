@@ -231,6 +231,15 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     return [...new Set(dan.sluzbe.map((s) => s.linija).filter((l): l is string => !!l))];
   }
 
+  /** Linije dana koje imaju blok (linija + V.R.) – za karte ispod kartice Danas. */
+  linijeKarte(dan: DanRasporeda): string[] {
+    return [
+      ...new Set(
+        dan.sluzbe.filter((s) => blokZa(s) && s.linija).map((s) => s.linija as string),
+      ),
+    ];
+  }
+
   otvoriSmjenu(dan: DanRasporeda): void {
     this.smjenaDan = dan;
     this.smjenaOtvorena = true;

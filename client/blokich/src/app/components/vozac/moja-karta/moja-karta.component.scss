@@ -84,6 +84,50 @@
   }
 }
 
+// ---------- Uska kartica (dvije linije u danu) ----------
+.mk-linija {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 9px;
+  border-radius: 9px;
+  background: #1b3654;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.mk.is-kompaktno {
+  border-radius: 18px;
+
+  .mk-mapa {
+    height: 125px;
+  }
+  .mk-izvor {
+    font-size: 8px;
+  }
+  .mk-info {
+    padding: 9px 11px 10px;
+  }
+  .mk-txt strong {
+    font-size: 14px;
+  }
+  .mk-txt small {
+    font-size: 12px;
+  }
+}
+
+// Odvožena linija: utišana, da se odmah vidi koja je aktualna.
+.mk.is-gotovo {
+  .mk-okvir {
+    opacity: 0.55;
+  }
+  .mk-txt strong {
+    color: var(--vz-muted, #64748b);
+  }
+}
+
 .mk-go {
   color: var(--vz-muted, #64748b);
   font-size: 13px;
