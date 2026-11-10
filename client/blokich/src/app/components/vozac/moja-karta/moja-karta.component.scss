@@ -84,7 +84,7 @@
   }
 }
 
-// ---------- Uska kartica (dvije linije u danu) ----------
+// ---------- Više linija u danu (klizač): broj linije na karti ----------
 .mk-linija {
   position: absolute;
   top: 8px;
@@ -96,26 +96,6 @@
   font-size: 15px;
   font-weight: 800;
   pointer-events: none;
-}
-
-.mk.is-kompaktno {
-  border-radius: 18px;
-
-  .mk-mapa {
-    height: 125px;
-  }
-  .mk-izvor {
-    font-size: 8px;
-  }
-  .mk-info {
-    padding: 9px 11px 10px;
-  }
-  .mk-txt strong {
-    font-size: 14px;
-  }
-  .mk-txt small {
-    font-size: 12px;
-  }
 }
 
 // Odvožena linija: utišana, da se odmah vidi koja je aktualna.

@@ -57,9 +57,8 @@
         <a
           *ngIf="d.linija; else bezLinije"
           class="sl-line"
-          [href]="rutaUrl(d.linija)"
-          target="_blank"
-          rel="noopener"
+          routerLink="/karta"
+          [queryParams]="{ linija: d.linija }"
         >
           <span class="vz-label">Linija</span>
           <strong>{{ d.linija }}</strong>

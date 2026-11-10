@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   Sluzba,
   pauzaMinuta,
-  rutaUrl,
   satiSluzbe,
   trajanjeTekst,
 } from '../vozac.model';
@@ -15,14 +15,13 @@ import {
 @Component({
   selector: 'app-sluzba-detalji',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './sluzba-detalji.component.html',
   styleUrl: './sluzba-detalji.component.scss',
 })
 export class SluzbaDetaljiComponent {
   @Input() sluzbe: Sluzba[] = [];
 
-  readonly rutaUrl = rutaUrl;
 
   get sati() {
     return satiSluzbe(this.sluzbe);

@@ -28,7 +28,7 @@ const CEKANJE_MIN = 60;
 const INTERVAL_MS = 5_000;
 const FRAME_MS = 33;
 
-/** 'gotovo' samo u kompaktnoj kartici (dvije linije): linija je za danas odvožena. */
+/** 'gotovo' samo kad vozač danas ima više linija (klizač): linija je za danas odvožena. */
 type Vrsta = 'vozim' | 'cekam' | 'kasnije' | 'gotovo';
 
 /**
@@ -46,8 +46,8 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() dan: DanRasporeda | undefined;
   /** Samo ova linija (kad vozač danas vozi dvije, svaka ima svoju kartu). */
   @Input() linija: string | null = null;
-  /** Uska kartica (dvije jedna pored druge). */
-  @Input() kompaktno = false;
+  /** Jedna od više linija dana (klizač): broj linije na karti, odvožena linija ostaje. */
+  @Input() viseLinija = false;
   private mapaEl?: ElementRef<HTMLDivElement>;
 
   /** Element karte postoji samo dok ima što prikazati – karta se radi i miče s njim. */
@@ -126,8 +126,8 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
           .filter((x) => x.za !== null)
           .sort((a, b) => a.za! - b.za!)[0];
 
-    // U kompaktnoj kartici linija koja je gotova ostaje (s trasom), da se raspored ne pomiče.
-    const gotova = !sad && !sljedeca && this.kompaktno ? (sluzbe[sluzbe.length - 1] ?? null) : null;
+    // Kad je linija jedna od više, odvožena ostaje (s trasom), da klizač ne mijenja broj kartica.
+    const gotova = !sad && !sljedeca && this.viseLinija ? (sluzbe[sluzbe.length - 1] ?? null) : null;
     const dio = sad ?? sljedeca?.s ?? gotova;
     const vrsta: Vrsta | null = sad
       ? 'vozim'
@@ -354,7 +354,7 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
           [w, s],
           [e, n],
         ],
-        { padding: this.kompaktno ? 14 : 22, maxZoom: 15, duration: 0 },
+        { padding: 22, maxZoom: 15, duration: 0 },
       );
     }
     if (!this.vozilo) {

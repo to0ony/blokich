@@ -8,9 +8,9 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import {
   KartaService,
@@ -69,7 +69,7 @@ function bezKvacica(s: string): string {
 @Component({
   selector: 'app-karta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './karta.component.html',
   styleUrl: './karta.component.scss',
 })
@@ -477,6 +477,14 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   pratiOpet(): void {
     this.prati = true;
+  }
+
+  private readonly lokacija = inject(Location);
+
+  /** Natrag odakle je vozač došao (raspored, služba, login); bez povijesti na login. */
+  natrag(): void {
+    if (window.history.length > 1) this.lokacija.back();
+    else this.router.navigate(['/login']);
   }
 
   /** Gumbi + i −; praćenje odabranog vozila mijenja samo središte, ne zoom. */
