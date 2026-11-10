@@ -212,7 +212,8 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
     return this.vozilo?.cilj ?? this.ruta?.smjerovi[0]?.cilj ?? null;
   }
 
-  get sljedece(): string | null {
+  /** Sljedeće stajalište busa (ili ono na kojem upravo stoji). */
+  get sljedece(): { naziv: string; naStajalistu: boolean } | null {
     const v = this.vozilo;
     if (!v?.oblik) return null;
     const lista = this.stajalista.get(v.oblik);
@@ -222,7 +223,19 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
     let u = this.udaljenosti.get(v.oblik);
     if (!u) this.udaljenosti.set(v.oblik, (u = stajalistaNaTrasi(t, lista)));
     const s = sljedeceStajaliste(u, d);
-    return s ? (s.naStajalistu ? `na stajalištu ${lista[s.indeks].naziv}` : lista[s.indeks].naziv) : null;
+    return s ? { naziv: lista[s.indeks].naziv, naStajalistu: s.naStajalistu } : null;
+  }
+
+  /** "Sljedeće: Dubje" ili "Na stajalištu Dubje". */
+  get naslovSljedeceg(): string | null {
+    const s = this.sljedece;
+    return s ? (s.naStajalistu ? `Na stajalištu ${s.naziv}` : `Sljedeće: ${s.naziv}`) : null;
+  }
+
+  /** Za bus koji preuzimam: "Dubje" ili "na stajalištu Dubje". */
+  get gdjeJeBus(): string | null {
+    const s = this.sljedece;
+    return s ? (s.naStajalistu ? `na stajalištu ${s.naziv}` : s.naziv) : null;
   }
 
   otvori(): void {

@@ -18,11 +18,11 @@
     <span class="mk-txt">
       <ng-container [ngSwitch]="vrsta">
         <ng-container *ngSwitchCase="'vozim'">
-          <strong>{{ vozilo ? (sljedece ? 'Sljedeće: ' + sljedece : 'Tvoj bus ' + vozilo.id) : 'Linija ' + dio.linija }}</strong>
+          <strong>{{ vozilo ? (naslovSljedeceg ?? 'Tvoj bus ' + vozilo.id) : 'Linija ' + dio.linija }}</strong>
           <small>{{ smjer ? 'Smjer ' + smjer : 'Tvoja linija danas' }}</small>
         </ng-container>
         <ng-container *ngSwitchCase="'cekam'">
-          <strong>{{ vozilo ? 'Tvoj bus ' + vozilo.id + (sljedece ? ' · ' + sljedece : '') : 'Linija ' + dio.linija }}</strong>
+          <strong>{{ vozilo ? 'Tvoj bus ' + vozilo.id + (gdjeJeBus ? ' · ' + gdjeJeBus : '') : 'Linija ' + dio.linija }}</strong>
           <small>{{ vozilo ? 'Preuzimaš ga u ' + dio.od : 'Preuzimaš u ' + dio.od + ' · bus još nije na karti' }}</small>
         </ng-container>
         <ng-container *ngSwitchCase="'gotovo'">
