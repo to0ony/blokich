@@ -103,6 +103,10 @@
 
   <!-- Desno: 2D/3D, glas, centriranje -->
   <div class="nv-tools">
+    <div class="nv-zoom" role="group" aria-label="Zoom (privremeno)">
+      <button type="button" aria-label="Približi" (click)="zumiraj(1)"><i class="pi pi-plus"></i></button>
+      <button type="button" aria-label="Udalji" (click)="zumiraj(-1)"><i class="pi pi-minus"></i></button>
+    </div>
     <button type="button" class="nv-btn" [attr.aria-pressed]="treceD" (click)="prebaciTreceD()">
       <b>{{ treceD ? '3D' : '2D' }}</b>
     </button>
@@ -191,7 +195,7 @@
 
     <small class="nv-izvor">
       <ng-container *ngIf="nacin === 'proba'">Probna vožnja · </ng-container>
-      <ng-container *ngIf="izvorSkretanja === 'geometrija'">Skretanja procijenjena iz trase · </ng-container>
+      <ng-container *ngIf="izvorSkretanja === 'geometrija'">Skretanja iz trase · </ng-container>
       © OpenFreeMap · © OpenStreetMap
     </small>
   </section>

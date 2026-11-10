@@ -36,6 +36,8 @@ import {
 type Nacin = 'gps' | 'proba';
 
 const POSTAVKE_KEY = 'navigacija-postavke';
+/** Ručni zoom vrijedi ovoliko, pa se vraća na optimalni. */
+const ZOOM_POVRATAK_MS = 6000;
 /** Koliko često (ms) najviše tražiti drugi smjer linije kad trenutni ne odgovara. */
 const PROVJERA_DRUGIH_MS = 3000;
 /** Probna vožnja: osnovna brzina (m/s, ~35 km/h) i stajanje na stajalištu (s). */
@@ -237,6 +239,12 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       mapa.on('style.load', () => this.postaviSlojeve(mapa));
       // Vozač pomakne kartu → prestani pratiti dok ne stisne "Centriraj".
       mapa.on('dragstart', () => this.zone.run(() => (this.pratim = false)));
+      // Zumiranje prstima: kao + i − – privremeno, pa natrag na optimalni zoom.
+      mapa.on('zoomend', (e) => {
+        if (!(e as { originalEvent?: unknown }).originalEvent) return;
+        this.zoomPomak = Math.max(-4, Math.min(2, mapa.getZoom() - this.optimalniZoom));
+        this.zoomPomakDo = performance.now() + ZOOM_POVRATAK_MS;
+      });
       this.mapa = mapa;
     });
 
@@ -488,6 +496,19 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     } catch {}
     if (g === 'sve') this.reci('Najavljujem skretanja i stajališta.');
     if (g === 'skretanja') this.reci('Najavljujem samo skretanja.');
+  }
+
+  /**
+   * Gumbi + i − (i zumiranje prstima): privremeni pomak od optimalnog zooma.
+   * Nakon nekoliko sekundi bez dodira zoom se glatko vrati na optimalni.
+   */
+  private zoomPomak = 0;
+  private zoomPomakDo = 0;
+  private optimalniZoom = 17.2;
+
+  zumiraj(smjer: 1 | -1): void {
+    this.zoomPomak = Math.max(-4, Math.min(2, this.zoomPomak + smjer));
+    this.zoomPomakDo = performance.now() + ZOOM_POVRATAK_MS;
   }
 
   centriraj(): void {
@@ -934,13 +955,18 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     if (this.pratim && !mapa.isMoving()) {
       // Brže = šira slika ispred.
       const kmh = (this.nacin === 'proba' ? PROBA_BRZINA * Math.min(this.ubrzanje, 2) : this.brzina) * 3.6;
-      const zoom = kmh > 45 ? 16 : kmh > 25 ? 16.6 : 17.2;
+      this.optimalniZoom = kmh > 45 ? 16 : kmh > 25 ? 16.6 : 17.2;
+      const rucno = performance.now() < this.zoomPomakDo;
+      if (!rucno) this.zoomPomak = 0;
+      const zoom = this.optimalniZoom + this.zoomPomak;
+      // Ručna promjena brzo, povratak na optimalni polako i glatko.
+      const brzinaZooma = rucno ? 4 : 1;
       const h = this.mapaEl.nativeElement.clientHeight;
       mapa.jumpTo({
         center: [lon, lat],
         bearing: this.smjer,
         pitch: this.treceD ? 55 : 0,
-        zoom: mapa.getZoom() + (zoom - mapa.getZoom()) * Math.min(1, dt),
+        zoom: mapa.getZoom() + (zoom - mapa.getZoom()) * Math.min(1, dt * brzinaZooma),
         // Vozilo u donjem dijelu ekrana – više se vidi ispred.
         padding: { top: h * 0.42, bottom: 90, left: 0, right: 0 },
       });

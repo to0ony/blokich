@@ -232,7 +232,8 @@
 .nv-tools {
   position: absolute;
   right: 12px;
-  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 96px);
+  // Iznad donje trake (u probnoj vožnji je viša zbog kontrola).
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 112px);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -241,6 +242,33 @@
 
 .nv-glas {
   position: relative;
+}
+
+.nv-zoom {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--nv-border);
+  border-radius: 14px;
+  background: var(--nv-panel);
+  box-shadow: 0 4px 14px var(--nv-shadow);
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 46px;
+    border: 0;
+    background: none;
+    color: var(--nv-text);
+    font-size: 17px;
+    cursor: pointer;
+
+    & + button {
+      border-top: 1px solid var(--nv-border);
+    }
+  }
 }
 
 // Izbornik glasa otvara se lijevo i prema gore od gumba.

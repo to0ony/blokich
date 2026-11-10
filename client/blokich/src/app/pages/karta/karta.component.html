@@ -73,6 +73,12 @@
     </div>
   </div>
 
+  <!-- Zoom: ostaje kako ga vozač postavi -->
+  <div class="km-zoom" role="group" aria-label="Zoom karte">
+    <button type="button" aria-label="Približi" (click)="zumiraj(1)"><i class="pi pi-plus"></i></button>
+    <button type="button" aria-label="Udalji" (click)="zumiraj(-1)"><i class="pi pi-minus"></i></button>
+  </div>
+
   <!-- Ruta linije iz pretrage (dok nije odabrano vozilo) -->
   <section
     #karticaRute

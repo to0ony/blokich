@@ -475,6 +475,13 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     this.prati = true;
   }
 
+  /** Gumbi + i −; praćenje odabranog vozila mijenja samo središte, ne zoom. */
+  zumiraj(smjer: 1 | -1): void {
+    if (!this.mapa) return;
+    if (smjer > 0) this.mapa.zoomIn({ duration: 250 });
+    else this.mapa.zoomOut({ duration: 250 });
+  }
+
   // ---------- Kartica na povlačenje ----------
 
   /** Kartica spuštena: vidi se samo zaglavlje, ostatak ekrana je karta. */
