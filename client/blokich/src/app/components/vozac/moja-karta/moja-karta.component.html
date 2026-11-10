@@ -1,0 +1,40 @@
+<button
+  type="button"
+  class="mk"
+  *ngIf="dio && vrsta"
+  [class.is-gotovo]="vrsta === 'gotovo'"
+  (click)="otvori()"
+  [attr.aria-label]="'Otvori kartu linije ' + dio.linija"
+>
+  <div class="mk-okvir">
+    <div #mapa class="mk-mapa"></div>
+    <!-- Više linija u danu (klizač): koja je ovo linija -->
+    <span class="mk-linija" *ngIf="viseLinija">{{ dio.linija }}</span>
+    <span class="mk-izvor">© OpenFreeMap · © OpenStreetMap</span>
+  </div>
+
+  <div class="mk-info">
+    <span class="mk-ico" [class.is-live]="vozilo"><i class="pi pi-map"></i></span>
+    <span class="mk-txt">
+      <ng-container [ngSwitch]="vrsta">
+        <ng-container *ngSwitchCase="'vozim'">
+          <strong>{{ vozilo ? (sljedece ? 'Sljedeće: ' + sljedece : 'Tvoj bus ' + vozilo.id) : 'Linija ' + dio.linija }}</strong>
+          <small>{{ smjer ? 'Smjer ' + smjer : 'Tvoja linija danas' }}</small>
+        </ng-container>
+        <ng-container *ngSwitchCase="'cekam'">
+          <strong>{{ vozilo ? 'Tvoj bus ' + vozilo.id + (sljedece ? ' · ' + sljedece : '') : 'Linija ' + dio.linija }}</strong>
+          <small>{{ vozilo ? 'Preuzimaš ga u ' + dio.od : 'Preuzimaš u ' + dio.od + ' · bus još nije na karti' }}</small>
+        </ng-container>
+        <ng-container *ngSwitchCase="'gotovo'">
+          <strong>Linija {{ dio.linija }} · odvoženo</strong>
+          <small>Završilo u {{ dio.do }}</small>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+          <strong>Linija {{ dio.linija }}<ng-container *ngIf="ruta?.opis"> · {{ ruta?.opis }}</ng-container></strong>
+          <small>Kreće u {{ dio.od }}</small>
+        </ng-container>
+      </ng-container>
+    </span>
+    <i class="pi pi-chevron-right mk-go"></i>
+  </div>
+</button>

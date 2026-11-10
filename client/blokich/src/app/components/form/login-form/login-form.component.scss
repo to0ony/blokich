@@ -130,6 +130,45 @@
 }
 
 /* Dodatne opcije */
+.lg-map {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #fff;
+  text-decoration: none;
+
+  .pi {
+    font-size: 18px;
+    opacity: 0.8;
+  }
+}
+
+.lg-map-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+}
+
+.lg-map-txt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  strong {
+    font-size: 15px;
+  }
+  small {
+    color: #cbd5e1;
+    font-size: 12.5px;
+  }
+}
+
 .lg-links {
   display: grid;
   grid-template-columns: 1fr 1fr;

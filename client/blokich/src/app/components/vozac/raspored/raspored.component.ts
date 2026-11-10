@@ -1,13 +1,16 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
   Output,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
@@ -20,6 +23,7 @@ import { LineScheduleService } from '../../../services/line-schedule.service';
 import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
+import { MojaKartaComponent } from '../moja-karta/moja-karta.component';
 import {
   DanRasporeda,
   Kolega,
@@ -32,7 +36,6 @@ import {
   opisKasnjenja,
   opisOdsustva,
   procjenaDolaska,
-  rutaUrl,
   slozTjedan,
   uSmjeniSad,
 } from '../vozac.model';
@@ -70,6 +73,8 @@ const MJESECI_GEN = [
     LucideAngularModule,
     KolegeListaComponent,
     SluzbaDetaljiComponent,
+    MojaKartaComponent,
+    RouterLink,
   ],
   templateUrl: './raspored.component.html',
   styleUrl: './raspored.component.scss',
@@ -88,7 +93,6 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   /** Ikona odmora kao na tahografu (krevet). */
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
-  readonly rutaUrl = rutaUrl;
   readonly jePricuva = jePricuva;
 
   tjedanOpcije = [
@@ -227,6 +231,63 @@ export class RasporedComponent implements OnChanges, OnDestroy {
 
   linije(dan: DanRasporeda): string[] {
     return [...new Set(dan.sluzbe.map((s) => s.linija).filter((l): l is string => !!l))];
+  }
+
+  // ---------- Klizač karata (više linija u danu) ----------
+
+  /** Koja je kartica klizača prikazana (za točkice). */
+  slajd = 0;
+  private klizacPostavljen = false;
+
+  /** Kad se klizač pojavi: odmah prikaži liniju koju vozač vozi sad (ili sljedeću). */
+  @ViewChild('klizac') set klizacRef(el: ElementRef<HTMLDivElement> | undefined) {
+    if (!el) {
+      this.klizacPostavljen = false;
+      return;
+    }
+    if (this.klizacPostavljen || !this.danas) return;
+    this.klizacPostavljen = true;
+    const i = this.aktualnaLinija(this.danas);
+    setTimeout(() => {
+      this.slajd = i;
+      el.nativeElement.scrollLeft = i * this.sirinaSlajda(el.nativeElement);
+    });
+  }
+
+  private sirinaSlajda(klizac: HTMLElement): number {
+    const prvi = klizac.firstElementChild as HTMLElement | null;
+    const razmak = parseFloat(getComputedStyle(klizac).columnGap) || 0;
+    return (prvi?.offsetWidth ?? klizac.clientWidth) + razmak;
+  }
+
+  naKlizanju(klizac: HTMLElement): void {
+    this.slajd = Math.round(klizac.scrollLeft / this.sirinaSlajda(klizac));
+  }
+
+  naSlajd(klizac: HTMLElement, i: number): void {
+    klizac.scrollTo({ left: i * this.sirinaSlajda(klizac), behavior: 'smooth' });
+  }
+
+  /** Indeks linije koja je sad u tijeku, inače sljedeće danas, inače prve. */
+  private aktualnaLinija(dan: DanRasporeda): number {
+    const linije = this.linijeKarte(dan);
+    const sluzbe = dan.sluzbe.filter((s) => blokZa(s) && s.linija);
+    const sad = sluzbe.find((s) => uSmjeniSad(s.od, s.do));
+    const sljedeca = sluzbe
+      .map((s) => ({ s, za: minutaDo(s.od) }))
+      .filter((x) => x.za !== null)
+      .sort((a, b) => a.za! - b.za!)[0]?.s;
+    const i = linije.indexOf((sad ?? sljedeca)?.linija ?? '');
+    return i >= 0 ? i : 0;
+  }
+
+  /** Linije dana koje imaju blok (linija + V.R.) – za karte ispod kartice Danas. */
+  linijeKarte(dan: DanRasporeda): string[] {
+    return [
+      ...new Set(
+        dan.sluzbe.filter((s) => blokZa(s) && s.linija).map((s) => s.linija as string),
+      ),
+    ];
   }
 
   otvoriSmjenu(dan: DanRasporeda): void {

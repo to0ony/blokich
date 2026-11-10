@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import dayjs from 'dayjs';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +15,6 @@ import {
   Kolega,
   TjedanTip,
   pauzaMinuta,
-  rutaUrl,
   satiSluzbe,
   trajanjeTekst,
 } from '../vozac.model';
@@ -68,6 +68,7 @@ interface SluzbaOdgovor {
     SkeletonModule,
     MessageModule,
     KolegaRowComponent,
+    RouterLink,
   ],
   templateUrl: './sluzbe.component.html',
   styleUrl: './sluzbe.component.scss',
@@ -86,7 +87,6 @@ export class SluzbeComponent {
   rezultat: SluzbaOdgovor | null = null;
   loading = false;
   greska = '';
-  readonly rutaUrl = rutaUrl;
 
   /** Dijelovi službe; bez polja `dijelovi` (stariji backend) samo prvi dio. */
   get dijelovi(): DioSluzbe[] {

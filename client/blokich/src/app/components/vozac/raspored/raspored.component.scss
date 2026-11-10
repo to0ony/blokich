@@ -61,6 +61,48 @@
   width: 100%;
 }
 
+/* Više linija u danu: klizač s karticom po liniji; sljedeća malo viri. */
+.rs-klizac {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > app-moja-karta {
+    flex: 0 0 88%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+}
+
+.rs-tockice {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+
+  button {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: width 0.2s;
+
+    &.is-on {
+      width: 18px;
+      background: #1b3654;
+    }
+  }
+}
+
 /* Danas */
 .rs-today {
   position: relative;

@@ -35,7 +35,7 @@
     </div>
 
     <div class="sd-links" *ngIf="s.linija">
-      <a [href]="rutaUrl(s.linija)" target="_blank" rel="noopener">
+      <a routerLink="/karta" [queryParams]="{ linija: s.linija }">
         <i class="pi pi-map"></i> Karta uživo
       </a>
     </div>

@@ -60,6 +60,31 @@
   </ng-template>
 </section>
 
+<!-- Moja linija na karti: trasa, a dok vozim ili čekam i moj bus uživo -->
+<!-- Karta linije ispod kartice Danas; više linija u danu = klizač -->
+<ng-container *ngIf="!loading && danas as d">
+  <ng-container *ngIf="linijeKarte(d) as linije">
+    <app-moja-karta *ngIf="linije.length === 1" [dan]="d" />
+
+    <ng-container *ngIf="linije.length > 1">
+      <div class="rs-klizac" #klizac (scroll)="naKlizanju(klizac)">
+        <app-moja-karta *ngFor="let l of linije" [dan]="d" [linija]="l" [viseLinija]="true" />
+      </div>
+      <div class="rs-tockice" role="tablist" aria-label="Linije danas">
+        <button
+          *ngFor="let l of linije; let i = index"
+          type="button"
+          role="tab"
+          [class.is-on]="i === slajd"
+          [attr.aria-selected]="i === slajd"
+          [attr.aria-label]="'Linija ' + l"
+          (click)="naSlajd(klizac, i)"
+        ></button>
+      </div>
+    </ng-container>
+  </ng-container>
+</ng-container>
+
 <!-- Tjedan: naslov, prekidač i dani u jednoj kartici -->
 <section class="rs-week">
   <div class="rs-week-head">
@@ -178,9 +203,8 @@
               <a
                 *ngIf="s.linija; else pricuva"
                 class="rs-mid"
-                [href]="rutaUrl(s.linija)"
-                target="_blank"
-                rel="noopener"
+                routerLink="/karta"
+                [queryParams]="{ linija: s.linija }"
                 (click)="$event.stopPropagation()"
                 [attr.aria-label]="'Karta linije ' + s.linija"
               >

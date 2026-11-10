@@ -59,6 +59,20 @@ export const routes: Routes = [
         (m) => m.VozniParkComponent,
       ),
   },
+  // Karta uživo s login ekrana (otključan uređaj)
+  {
+    canActivate: [PristupGuard],
+    path: 'karta',
+    loadComponent: () =>
+      import('./pages/karta/karta.component').then((m) => m.KartaComponent),
+  },
+  // Navigacija po trasi linije (GPS ili probna vožnja)
+  {
+    canActivate: [PristupGuard],
+    path: 'navigacija',
+    loadComponent: () =>
+      import('./pages/navigacija/navigacija.component').then((m) => m.NavigacijaComponent),
+  },
   // Driver Dashboard page route (lazy – PrimeNG se učitava tek ovdje)
   {
     canActivate: [DriverGuard],
