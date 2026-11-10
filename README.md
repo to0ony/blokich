@@ -22,37 +22,36 @@
 </p>
 
 <p align="center">
-  <img src="docs/mockups/raspored-left.png" alt="Blokich – tjedni raspored s kartom linije" width="420" />
-  <img src="docs/mockups/karta-right.png" alt="Blokich – karta uživo" width="420" />
+  <img src="docs/mockups/mix.png" alt="Blokich – raspored, smjena, karta uživo i navigacija" width="860" />
 </p>
 
 ## Značajke
 
 **Raspored i smjena**
-- 📅 Tjedni raspored (aktualni i sljedeći tjedan) s karticom **Danas** na vrhu
-- 🟢 **Uživo** iz ZET-ovog GTFS-RT feeda – tko od kolega sad vozi, kašnjenje, broj busa i procjena dolaska na predaju; „tvoj bus stiže ~13:05“ sat prije nastupa
-- 🗺️ Ispod kartice Danas karta tvoje linije s busom uživo i sljedećim stajalištem; kad su u danu dvije linije, kartice se listaju
-- 👥 Današnja smjena i vozači po liniji – s pozivom jednim dodirom i grupiranjem po V.R.
-- 🔎 Pregled službe, uključujući dvokratne službe na više linija
-- 📊 Statistika rada po tjednu i mjesecu
+- Tjedni raspored (aktualni i sljedeći tjedan) s karticom **Danas** na vrhu
+- **Uživo** iz ZET-ovog GTFS-RT feeda – tko od kolega sad vozi, kašnjenje, broj busa i procjena dolaska na predaju; „tvoj bus stiže ~13:05“ sat prije nastupa
+- Ispod kartice Danas karta tvoje linije s busom uživo i sljedećim stajalištem; kad su u danu dvije linije, kartice se listaju
+- Današnja smjena i vozači po liniji – s pozivom jednim dodirom i grupiranjem po V.R.
+- Pregled službe, uključujući dvokratne službe na više linija
+- Statistika rada po tjednu i mjesecu
 
 **Karta uživo**
-- 🚌 Sva vozila ZET-a na karti, s glatkim kretanjem po trasi linije; busevi AP Podsused istaknuti
-- 👆 Dodir na bus: smjer, sljedeće stajalište, kašnjenje, vozač s pozivom, model i tablica busa
-- 🔍 Pretraga po liniji, vozaču ili garažnom broju; ruta linije s oba smjera i stajalištima
-- 🎛️ Filteri (samo Podsused, tramvaji), tamna karta, zoom
+- Sva vozila ZET-a na karti, s glatkim kretanjem po trasi linije; busevi AP Podsused istaknuti
+- Dodir na bus: smjer, sljedeće stajalište, kašnjenje, vozač s pozivom, model i tablica busa
+- Pretraga po liniji, vozaču ili garažnom broju; ruta linije s oba smjera i stajalištima
+- Filteri (samo Podsused, tramvaji), tamna karta, zoom
 
 **Navigacija (beta)**
-- 🧭 Navigacija po trasi linije prema GPS-u telefona – 2D ili 3D, karta okrenuta u smjeru vožnje
-- ↪️ Sljedeće skretanje i stajalište u karticama gore, strelice skretanja na karti, glasovne najave (po defaultu isključene)
-- 🔁 Snalazi se kad se krene usred linije, vozi u suprotnom smjeru ili okreće na okretištu
-- ▶️ **Probna vožnja** – cijela trasa ubrzano, za učenje nove linije
+- Navigacija po trasi linije prema GPS-u telefona – 2D ili 3D, karta okrenuta u smjeru vožnje
+- Sljedeće skretanje i stajalište u karticama gore, strelice skretanja na karti, glasovne najave (po defaultu isključene)
+- Snalazi se kad se krene usred linije, vozi u suprotnom smjeru ili okreće na okretištu
+- **Probna vožnja** – cijela trasa ubrzano, za učenje nove linije
 
 **Za administratora**
-- ☁️ Jedan klik povlači službe i disponent s ZET intraneta i obrađuje ih
-- 📄 Ručni uvoz PDF-ova (drag & drop), duplikati se prepoznaju po hashu
+- Jedan klik povlači službe i disponent s ZET intraneta i obrađuje ih
+- Ručni uvoz PDF-ova (drag & drop), duplikati se prepoznaju po hashu
 
-📱 Sve je mobile-first.
+Sve je mobile-first.
 
 ## Screenshots
 
@@ -76,10 +75,10 @@ service/blokich/osrm    OSRM (opcionalno) – skretanja s imenima ulica
 ```
 
 Vanjski izvori:
-- **ZET intranet** – PDF službi i disponenta
-- **ZET GTFS-Realtime** – vozila uživo i kašnjenja (backend ga čita najviše jednom u 5 s)
-- **ZET GTFS (vozni red)** – linije, trase i stajališta; backend ga sam osvježava svakih 6 h
-- **OpenFreeMap / OpenStreetMap** – podloga karte
+- intranet** – PDF službi i disponenta
+- GTFS-Realtime** – vozila uživo i kašnjenja (backend ga čita najviše jednom u 5 s)
+- GTFS (vozni red)** – linije, trase i stajališta; backend ga sam osvježava svakih 6 h
+- / OpenStreetMap** – podloga karte
 
 Spajanje s feedom: blok = linija + V.R. s dvije znamenke (`109` + `2` → `10902`). Vozač na busu dolazi iz disponenta i službi za taj blok.
 
