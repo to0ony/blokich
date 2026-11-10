@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -7,6 +8,8 @@ async function bootstrap() {
 
   // Iza nginxa: prava IP adresa klijenta iz X-Forwarded-For (rate limit lozinke).
   app.set('trust proxy', 1);
+  // Sažimanje odgovora (gzip): karta svakih 5 s dohvaća ~90 KB JSON-a, sažeto ~10 KB.
+  app.use(compression());
 
   app.enableCors({
     origin: [
