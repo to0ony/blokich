@@ -111,24 +111,79 @@ export class KartaService {
 
   /**
    * Ruta linije po broju (kao na busu): za svaki smjer glavna trasa i
-   * njena stajališta. null = linija ne postoji (ili GTFS još nije učitan).
+   * njena stajališta, plus sve varijante tog smjera (prva je glavna).
+   * null = linija ne postoji (ili GTFS još nije učitan).
    */
   linija(broj: string): LinijaKarta | null {
     const g = this.gtfs.get();
     if (!g) return null;
     const ruta = [...g.rute.values()].find((r) => r.naziv === broj) ?? g.rute.get(broj);
     if (!ruta) return null;
+    const trasa = (oblik: string) => ({
+      oblik,
+      tocke: g.oblici.get(oblik) ?? [],
+      stajalista: this.stajalista(oblik),
+    });
     const smjerovi = (g.glavneTrase.get(ruta.id) ?? [])
-      .map((t) => ({
-        smjer: t.smjer,
-        cilj: t.cilj,
-        oblik: t.oblik,
-        tocke: g.oblici.get(t.oblik) ?? [],
-        stajalista: this.stajalista(t.oblik),
-      }))
+      .map((t) => {
+        const glavna = trasa(t.oblik);
+        const varijante: VarijantaKarta[] = [
+          { ...glavna, cilj: t.cilj, voznji: t.voznji, glavna: true, opis: 'Glavna trasa' },
+          ...t.ostale.map((o) => {
+            const v = trasa(o.oblik);
+            return {
+              ...v,
+              cilj: o.cilj,
+              voznji: o.voznji,
+              glavna: false,
+              opis:
+                opisVarijante(glavna.stajalista, v.stajalista) ??
+                (v.stajalista.length ? 'ista stajališta, drugi put' : (o.cilj ?? o.oblik)),
+            };
+          }),
+        ].filter((v) => v.tocke.length > 1);
+        return { smjer: t.smjer, cilj: t.cilj, ...glavna, varijante };
+      })
       .filter((s) => s.tocke.length > 1);
     return { broj: ruta.naziv, opis: ruta.opis, tip: ruta.tip === 0 ? 'tramvaj' : 'autobus', smjerovi };
   }
+}
+
+/**
+ * Kratak opis po čemu se varijanta razlikuje od glavne trase, npr.
+ * "preko Jadranska av.-Arena", "do Petlja - izlaz" ili "bez Klanjec".
+ * null = nema razlike u stajalištima (ili nema stajališta za usporedbu).
+ */
+export function opisVarijante(glavna: StajalisteGtfs[], varijanta: StajalisteGtfs[]): string | null {
+  if (!glavna.length || !varijanta.length) return null;
+  const uGlavnoj = new Set(glavna.map((s) => s.naziv));
+  const uVarijanti = new Set(varijanta.map((s) => s.naziv));
+  const prva = varijanta[0].naziv;
+  const zadnja = varijanta[varijanta.length - 1].naziv;
+  const dijelovi: string[] = [];
+  if (prva !== glavna[0].naziv) dijelovi.push(`od ${prva}`);
+  if (zadnja !== glavna[glavna.length - 1].naziv) dijelovi.push(`do ${zadnja}`);
+  // Krajnja stajališta su već opisana s "od"/"do".
+  const dodatna = varijanta.slice(1, -1).find((s) => !uGlavnoj.has(s.naziv));
+  if (dodatna) dijelovi.push(`preko ${dodatna.naziv}`);
+  else if (!dijelovi.length) {
+    const preskace = glavna.find((s) => !uVarijanti.has(s.naziv));
+    if (preskace) dijelovi.push(`bez ${preskace.naziv}`);
+  }
+  return dijelovi.length ? dijelovi.join(', ') : null;
+}
+
+/** Jedna trasa smjera: glavna ili rjeđa varijanta. */
+export interface VarijantaKarta {
+  oblik: string;
+  cilj: string | null;
+  tocke: Oblik;
+  stajalista: StajalisteGtfs[];
+  /** Najviše vožnji tom trasom u jednom danu. */
+  voznji: number;
+  glavna: boolean;
+  /** Npr. "Glavna trasa", "preko Jadranska av.-Arena", "do Petlja - izlaz". */
+  opis: string;
 }
 
 /** Ruta linije za kartu. */
@@ -136,12 +191,14 @@ export interface LinijaKarta {
   broj: string;
   opis: string;
   tip: 'tramvaj' | 'autobus';
+  /** Polja smjera su njegova glavna trasa; `varijante` su sve trase smjera. */
   smjerovi: {
     smjer: number | null;
     cilj: string | null;
     oblik: string;
     tocke: Oblik;
     stajalista: StajalisteGtfs[];
+    varijante: VarijantaKarta[];
   }[];
 }
 

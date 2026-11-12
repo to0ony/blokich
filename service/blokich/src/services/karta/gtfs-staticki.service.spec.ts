@@ -45,6 +45,7 @@ describe('obradiGtfs', () => {
       oblik: '109_1',
       smjer: 0,
       cilj: 'Dubrava',
+      servis: '0_11',
     });
   });
 
