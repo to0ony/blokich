@@ -50,7 +50,20 @@ export interface RutaKarta {
   tip: number;
 }
 
-/** Ruta linije: za svaki smjer glavna trasa i stajališta. */
+/** Jedna trasa smjera linije: glavna ili rjeđa varijanta. */
+export interface VarijantaKarta {
+  oblik: string;
+  cilj: string | null;
+  tocke: [number, number][];
+  stajalista: StajalisteKarta[];
+  /** Najviše vožnji tom trasom u jednom danu. */
+  voznji: number;
+  glavna: boolean;
+  /** Npr. "Glavna trasa", "preko Jadranska av.-Arena", "do Petlja - izlaz". */
+  opis: string;
+}
+
+/** Ruta linije: za svaki smjer glavna trasa i stajališta, plus sve varijante. */
 export interface LinijaKarta {
   broj: string;
   opis: string;
@@ -61,6 +74,8 @@ export interface LinijaKarta {
     oblik: string;
     tocke: [number, number][];
     stajalista: StajalisteKarta[];
+    /** Prva je glavna. Stariji API ih ne šalje. */
+    varijante?: VarijantaKarta[];
   }[];
 }
 

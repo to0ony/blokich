@@ -426,6 +426,61 @@
   }
 }
 
+.km-vars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 168px;
+  margin-top: 10px;
+  overflow-y: auto;
+}
+
+.km-var {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--vz-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--vz-text);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+
+  .pi {
+    flex: none;
+    color: var(--vz-muted);
+    font-size: 12px;
+  }
+
+  .km-var-opis {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .km-var-broj {
+    flex: none;
+    color: var(--vz-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.is-on {
+    border-color: var(--km-accent);
+    background: var(--km-accent-soft);
+
+    .pi {
+      color: var(--km-accent);
+    }
+  }
+}
+
 .km-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;

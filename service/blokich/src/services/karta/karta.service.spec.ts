@@ -1,4 +1,4 @@
-import { KartaService, spojiVozilo } from './karta.service';
+import { KartaService, opisVarijante, spojiVozilo } from './karta.service';
 import { GtfsPodaci, glavneTraseLinija } from './gtfs-staticki.service';
 import { VOZNI_PARK } from '../zet-uzivo/zet-uzivo.service';
 
@@ -75,8 +75,15 @@ describe('spojiVozilo', () => {
 });
 
 describe('glavneTraseLinija', () => {
-  it('po smjeru trasa s najviše vožnji', () => {
-    const v = (oblik: string, smjer: number, cilj: string) => ({ ruta: '109', oblik, smjer, cilj });
+  const v = (oblik: string, smjer: number, cilj: string, servis = 'r') => ({
+    ruta: '109',
+    oblik,
+    smjer,
+    cilj,
+    servis,
+  });
+
+  it('po smjeru trasa s najviše vožnji, ostale kao varijante', () => {
     const g = glavneTraseLinija(
       new Map([
         ['a', v('109_1', 0, 'Dugave')],
@@ -86,9 +93,49 @@ describe('glavneTraseLinija', () => {
       ]),
     );
     expect(g.get('109')).toEqual([
-      { smjer: 0, oblik: '109_1', cilj: 'Dugave' },
-      { smjer: 1, oblik: '109_2', cilj: 'Črnomerec' },
+      { smjer: 0, oblik: '109_1', cilj: 'Dugave', voznji: 2, ostale: [{ oblik: '109_9', cilj: 'Garaža', voznji: 1 }] },
+      { smjer: 1, oblik: '109_2', cilj: 'Črnomerec', voznji: 1, ostale: [] },
     ]);
+  });
+
+  it('broj vožnji je najveći u jednom servisu (danu)', () => {
+    const g = glavneTraseLinija(
+      new Map([
+        ['a', v('109_1', 0, 'Dugave', 'radni')],
+        ['b', v('109_1', 0, 'Dugave', 'subota')],
+        ['c', v('109_1', 0, 'Dugave', 'nedjelja')],
+        ['d', v('109_3', 0, 'Dugave', 'radni')],
+        ['e', v('109_3', 0, 'Dugave', 'radni')],
+      ]),
+    );
+    expect(g.get('109')![0]).toMatchObject({
+      oblik: '109_1',
+      voznji: 1,
+      ostale: [{ oblik: '109_3', voznji: 2 }],
+    });
+  });
+});
+
+describe('opisVarijante', () => {
+  const st = (...nazivi: string[]) => nazivi.map((naziv, i) => ({ id: String(i), naziv, lat: 0, lon: 0 }));
+  const glavna = st('Savski most', 'Remetinec', 'Karlovačka', 'Petlja', 'Brezovica');
+
+  it('drugi put: prvo stajalište kojeg glavna nema', () => {
+    expect(opisVarijante(glavna, st('Savski most', 'Arena', 'Petlja', 'Brezovica'))).toBe('preko Arena');
+  });
+
+  it('skraćena vožnja: novi kraj', () => {
+    expect(opisVarijante(glavna, st('Savski most', 'Remetinec', 'Karlovačka', 'Petlja'))).toBe('do Petlja');
+    expect(opisVarijante(glavna, st('Karlovačka', 'Petlja', 'Brezovica'))).toBe('od Karlovačka');
+  });
+
+  it('isti krajevi, preskače stajalište', () => {
+    expect(opisVarijante(glavna, st('Savski most', 'Remetinec', 'Petlja', 'Brezovica'))).toBe('bez Karlovačka');
+  });
+
+  it('bez razlike ili bez stajališta = null', () => {
+    expect(opisVarijante(glavna, glavna)).toBeNull();
+    expect(opisVarijante([], glavna)).toBeNull();
   });
 });
 
@@ -102,7 +149,7 @@ describe('KartaService.linija', () => {
     oblici: new Map([['109_1', tocke]]),
     stajalista: new Map([['s1', { id: 's1', naziv: 'Črnomerec', lat: 45.8, lon: 15.9 }]]),
     stajalistaOblika: new Map([['109_1', ['s1']]]),
-    glavneTrase: new Map([['109', [{ smjer: 0, oblik: '109_1', cilj: 'Dubrava' }]]]),
+    glavneTrase: new Map([['109', [{ smjer: 0, oblik: '109_1', cilj: 'Dubrava', voznji: 30, ostale: [] }]]]),
   };
   const s = new KartaService({} as any, { get: () => podaci } as any, {} as any);
 
@@ -118,9 +165,65 @@ describe('KartaService.linija', () => {
           oblik: '109_1',
           tocke,
           stajalista: [{ id: 's1', naziv: 'Črnomerec', lat: 45.8, lon: 15.9 }],
+          varijante: [
+            {
+              oblik: '109_1',
+              cilj: 'Dubrava',
+              tocke,
+              stajalista: [{ id: 's1', naziv: 'Črnomerec', lat: 45.8, lon: 15.9 }],
+              voznji: 30,
+              glavna: true,
+              opis: 'Glavna trasa',
+            },
+          ],
         },
       ],
     });
+  });
+
+  it('varijante smjera s opisom razlike', () => {
+    const st = (id: string, naziv: string) => ({ id, naziv, lat: 45.8, lon: 15.9 });
+    const s2 = new KartaService(
+      {} as any,
+      {
+        get: () => ({
+          ...podaci,
+          oblici: new Map([
+            ['132_5', tocke],
+            ['132_8', tocke],
+          ]),
+          stajalista: new Map(
+            [st('a', 'Savski most'), st('b', 'Remetinec'), st('c', 'Arena'), st('d', 'Brezovica')].map((x) => [x.id, x]),
+          ),
+          stajalistaOblika: new Map([
+            ['132_5', ['a', 'b', 'd']],
+            ['132_8', ['a', 'c', 'd']],
+          ]),
+          rute: new Map([['132', { id: '132', naziv: '132', opis: 'S. most - Brezovica', tip: 3 }]]),
+          glavneTrase: new Map([
+            [
+              '132',
+              [
+                {
+                  smjer: 0,
+                  oblik: '132_5',
+                  cilj: 'Brezovica',
+                  voznji: 30,
+                  ostale: [{ oblik: '132_8', cilj: 'Brezovica', voznji: 9 }],
+                },
+              ],
+            ],
+          ]),
+        }),
+      } as any,
+      {} as any,
+    );
+    const sm = s2.linija('132')!.smjerovi[0];
+    expect(sm.oblik).toBe('132_5');
+    expect(sm.varijante.map((v) => [v.oblik, v.glavna, v.voznji, v.opis])).toEqual([
+      ['132_5', true, 30, 'Glavna trasa'],
+      ['132_8', false, 9, 'preko Arena'],
+    ]);
   });
 
   it('nepoznata linija = null', () => {

@@ -21,6 +21,8 @@ export interface VoznjaGtfs {
   oblik: string | null;
   smjer: number | null;
   cilj: string | null;
+  /** service_id – vožnje istog servisa voze isti dan. */
+  servis?: string;
 }
 
 /** Trasa kao niz [lat, lon]. */
@@ -46,11 +48,21 @@ export interface GtfsPodaci {
   glavneTrase: Map<string, GlavnaTrasa[]>;
 }
 
-/** Najčešća trasa linije u jednom smjeru. */
+/** Najčešća trasa linije u jednom smjeru, s ostalim varijantama tog smjera. */
 export interface GlavnaTrasa {
   smjer: number | null;
   oblik: string;
   cilj: string | null;
+  /** Najviše vožnji tom trasom u jednom danu (servisu). */
+  voznji: number;
+  /** Ostale trase istog smjera, od najčešće prema rjeđima. */
+  ostale: VarijantaTrase[];
+}
+
+export interface VarijantaTrase {
+  oblik: string;
+  cilj: string | null;
+  voznji: number;
 }
 
 const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt', 'stops.txt'];
@@ -161,6 +173,7 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
       oblik: t.shape_id || null,
       smjer: Number.isFinite(smjer) ? smjer : null,
       cilj: t.trip_headsign || null,
+      servis: t.service_id || undefined,
     });
   }
 
@@ -212,26 +225,37 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
 
 /**
  * Za svaku liniju i smjer trasa kojom ide najviše vožnji – to je "ruta
- * linije" kakvu vozač očekuje, bez rijetkih varijanti (garaža, skraćene).
+ * linije" kakvu vozač očekuje. Rijetke varijante (garaža, skraćene, drugi
+ * put) idu u `ostale`. Broj vožnji je najveći broj u jednom servisu (danu),
+ * da varijanta koja vozi samo radnim danom ne izgleda rjeđe nego jest.
  */
 export function glavneTraseLinija(voznje: Map<string, VoznjaGtfs>): Map<string, GlavnaTrasa[]> {
-  const brojac = new Map<string, Map<string, { n: number; cilj: string | null }>>();
+  const brojac = new Map<string, Map<string, { poServisu: Map<string, number>; cilj: string | null }>>();
   for (const v of voznje.values()) {
     if (!v.oblik) continue;
     const kljuc = `${v.ruta}|${v.smjer ?? ''}`;
     let poObliku = brojac.get(kljuc);
     if (!poObliku) brojac.set(kljuc, (poObliku = new Map()));
-    const b = poObliku.get(v.oblik) ?? { n: 0, cilj: v.cilj };
-    b.n++;
-    poObliku.set(v.oblik, b);
+    let b = poObliku.get(v.oblik);
+    if (!b) poObliku.set(v.oblik, (b = { poServisu: new Map(), cilj: v.cilj }));
+    const servis = v.servis ?? '';
+    b.poServisu.set(servis, (b.poServisu.get(servis) ?? 0) + 1);
   }
 
   const rez = new Map<string, GlavnaTrasa[]>();
   for (const [kljuc, poObliku] of brojac) {
     const [ruta, smjerTekst] = kljuc.split('|');
-    const [oblik, b] = [...poObliku].sort((x, y) => y[1].n - x[1].n)[0];
+    const trase = [...poObliku]
+      .map(([oblik, b]) => ({
+        oblik,
+        cilj: b.cilj,
+        voznji: Math.max(...b.poServisu.values()),
+        ukupno: [...b.poServisu.values()].reduce((a, n) => a + n, 0),
+      }))
+      .sort((x, y) => y.ukupno - x.ukupno || y.voznji - x.voznji || x.oblik.localeCompare(y.oblik));
+    const [glavna, ...ostale] = trase.map(({ oblik, cilj, voznji }) => ({ oblik, cilj, voznji }));
     const lista = rez.get(ruta) ?? [];
-    lista.push({ smjer: smjerTekst === '' ? null : Number(smjerTekst), oblik, cilj: b.cilj });
+    lista.push({ smjer: smjerTekst === '' ? null : Number(smjerTekst), ...glavna, ostale });
     rez.set(ruta, lista);
   }
   for (const lista of rez.values()) lista.sort((a, b) => (a.smjer ?? 0) - (b.smjer ?? 0));

@@ -15,6 +15,7 @@ import type { GeoJSONSource, Map as MapaLibre } from 'maplibre-gl';
 import {
   KartaService,
   LinijaKarta,
+  VarijantaKarta,
   RutaKarta,
   StajalisteKarta,
   VoziloKarta,
@@ -102,6 +103,8 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   /** Ruta linije odabrane u pretrazi i koji je smjer prikazan. */
   ruta: LinijaKarta | null = null;
   smjerRute = 0;
+  /** Indeks u varijantama prikazanog smjera (0 = glavna trasa). */
+  varijantaRute = 0;
   ucitavaRutu = false;
   private sveRute: RutaKarta[] = [];
   prati = true;
@@ -401,6 +404,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     this.filterLinija = l;
     this.ruta = null;
     this.smjerRute = 0;
+    this.varijantaRute = 0;
     this.spusteno = false;
     this.zatvori();
     if (!l) return;
@@ -424,18 +428,33 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   odaberiSmjer(i: number): void {
     this.smjerRute = i;
+    this.varijantaRute = 0;
     this.prikaziTrasu();
   }
 
-  /** Smjer rute koji se prikazuje (dok vozilo nije odabrano). */
-  private get prikazaniSmjer(): LinijaKarta['smjerovi'][number] | null {
-    return this.ruta?.smjerovi[this.smjerRute] ?? this.ruta?.smjerovi[0] ?? null;
+  odaberiVarijantu(i: number): void {
+    this.varijantaRute = i;
+    this.prikaziTrasu();
+  }
+
+  /** Varijante prikazanog smjera; prazno ako ih ima samo jedna. */
+  get varijanteSmjera(): VarijantaKarta[] {
+    const sm = this.ruta?.smjerovi[this.smjerRute] ?? this.ruta?.smjerovi[0];
+    const v = sm?.varijante ?? [];
+    return v.length > 1 ? v : [];
+  }
+
+  /** Trasa rute koja se prikazuje (dok vozilo nije odabrano): smjer pa varijanta. */
+  get prikazaniSmjer(): Pick<VarijantaKarta, 'oblik' | 'cilj' | 'tocke' | 'stajalista'> | null {
+    const sm = this.ruta?.smjerovi[this.smjerRute] ?? this.ruta?.smjerovi[0] ?? null;
+    return sm?.varijante?.[this.varijantaRute] ?? sm;
   }
 
   private pogledNaRutu(): void {
     if (!this.mapa || !this.ruta) return;
     let [w, s, e, n] = [180, 90, -180, -90];
-    for (const sm of this.ruta.smjerovi) {
+    const trase = this.ruta.smjerovi.flatMap((sm): { tocke: [number, number][] }[] => sm.varijante ?? [sm]);
+    for (const sm of trase) {
       for (const [lat, lon] of sm.tocke) {
         w = Math.min(w, lon);
         e = Math.max(e, lon);

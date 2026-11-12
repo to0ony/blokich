@@ -102,8 +102,8 @@
           <ng-container *ngIf="ucitavaRutu">Učitavam rutu…</ng-container>
           <ng-container *ngIf="!ucitavaRutu">
             {{ prikazana.length ? prikazana.length + ' na karti' : 'Nitko sad ne vozi' }}
-            <ng-container *ngIf="ruta && ruta.smjerovi[smjerRute]?.stajalista?.length">
-              · {{ ruta.smjerovi[smjerRute].stajalista.length }} stajališta
+            <ng-container *ngIf="ruta && prikazaniSmjer?.stajalista?.length">
+              · {{ prikazaniSmjer!.stajalista.length }} stajališta
             </ng-container>
           </ng-container>
         </span>
@@ -127,7 +127,22 @@
       </button>
     </div>
 
-    <div class="km-nav" *ngIf="ruta?.smjerovi?.[smjerRute] as s">
+    <div class="km-vars" *ngIf="varijanteSmjera.length" role="group" aria-label="Varijanta trase">
+      <button
+        *ngFor="let v of varijanteSmjera; let i = index"
+        type="button"
+        class="km-var"
+        [class.is-on]="i === varijantaRute"
+        [attr.aria-pressed]="i === varijantaRute"
+        (click)="odaberiVarijantu(i)"
+      >
+        <i class="pi" [class.pi-star]="v.glavna" [class.pi-directions]="!v.glavna"></i>
+        <span class="km-var-opis">{{ v.opis }}</span>
+        <span class="km-var-broj">{{ v.voznji }}×/dan</span>
+      </button>
+    </div>
+
+    <div class="km-nav" *ngIf="ruta && prikazaniSmjer as s">
       <button type="button" class="km-nav-btn is-main" (click)="navigiraj(s.oblik, ruta!.broj, s.cilj, false)">
         <i class="pi pi-send"></i> Navigacija
       </button>
