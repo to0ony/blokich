@@ -23,6 +23,8 @@ export interface VoznjaGtfs {
   cilj: string | null;
   /** service_id – vožnje istog servisa voze isti dan. */
   servis?: string;
+  /** Polazak s prvog stajališta, minute od ponoći (može biti > 1440). */
+  polazak?: number;
 }
 
 /** Trasa kao niz [lat, lon]. */
@@ -46,6 +48,18 @@ export interface GtfsPodaci {
   stajalistaOblika: Map<string, string[]>;
   /** route_id -> glavna trasa za svaki smjer (ona kojom ide najviše vožnji). */
   glavneTrase: Map<string, GlavnaTrasa[]>;
+  /** shape_id -> minute od polaska do svakog stajališta (iz jedne vožnje). */
+  vremenaOblika?: Map<string, number[]>;
+  /** calendar.txt + calendar_dates.txt – koji servis vozi koji dan. */
+  kalendar?: KalendarGtfs;
+}
+
+export interface KalendarGtfs {
+  /** Redovni servisi po danima u tjednu (pon = 0) i rasponu datuma YYYYMMDD. */
+  tjedni: { servis: string; dani: boolean[]; od: string; do: string }[];
+  /** Iznimke po datumu YYYYMMDD: dodani i uklonjeni servisi. */
+  dodani: Map<string, Set<string>>;
+  uklonjeni: Map<string, Set<string>>;
 }
 
 /** Najčešća trasa linije u jednom smjeru, s ostalim varijantama tog smjera. */
@@ -65,7 +79,15 @@ export interface VarijantaTrase {
   voznji: number;
 }
 
-const DATOTEKE = ['feed_info.txt', 'routes.txt', 'trips.txt', 'shapes.txt', 'stops.txt'];
+const DATOTEKE = [
+  'feed_info.txt',
+  'routes.txt',
+  'trips.txt',
+  'shapes.txt',
+  'stops.txt',
+  'calendar.txt',
+  'calendar_dates.txt',
+];
 /** ZET objavljuje novi GTFS otprilike jednom dnevno. */
 const OSVJEZI_MS = 6 * 60 * 60 * 1000;
 /** Točke trase bliže od ovoga pravcu između susjeda se izbacuju. */
@@ -74,7 +96,8 @@ const TOLERANCIJA_M = 1.5;
 /**
  * Statični GTFS ZET-a (vozni red): linije, vožnje i trase za kartu.
  * Drži se u memoriji. stop_times.txt (~80 MB) se čita u komadima i iz njega
- * se uzima samo po jedna vožnja za svaku trasu – za popis stajališta.
+ * se uzima polazak svake vožnje i po jedna vožnja za svaku trasu – za popis
+ * stajališta i vremena između njih.
  */
 @Injectable()
 export class GtfsStatickiService implements OnModuleInit, OnModuleDestroy {
@@ -205,11 +228,21 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
     });
   }
 
-  const poVoznji = stajalistaVoznji(zip, new Set(predstavnici.values()));
+  const { poVoznji, polasci } = stajalistaVoznji(zip, new Set(predstavnici.values()));
   const stajalistaOblika = new Map<string, string[]>();
+  const vremenaOblika = new Map<string, number[]>();
   for (const [oblik, trip] of predstavnici) {
     const lista = poVoznji.get(trip);
-    if (lista?.length) stajalistaOblika.set(oblik, lista);
+    if (!lista?.length) continue;
+    stajalistaOblika.set(oblik, lista.map((x) => x.stop));
+    const prvo = lista[0].min;
+    if (prvo != null && lista.every((x) => x.min != null)) {
+      vremenaOblika.set(oblik, lista.map((x) => x.min! - prvo));
+    }
+  }
+  for (const [trip, min] of polasci) {
+    const v = voznje.get(trip);
+    if (v) v.polazak = min;
   }
 
   return {
@@ -220,7 +253,56 @@ export function obradiGtfs(zip: Uint8Array): GtfsPodaci {
     stajalista,
     stajalistaOblika,
     glavneTrase: glavneTraseLinija(voznje),
+    vremenaOblika,
+    kalendar: kalendarGtfs(redovi(tekst('calendar.txt')), redovi(tekst('calendar_dates.txt'))),
   };
+}
+
+export function kalendarGtfs(
+  calendar: Record<string, string>[],
+  iznimke: Record<string, string>[],
+): KalendarGtfs {
+  const DANI = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const tjedni = calendar
+    .filter((c) => c.service_id)
+    .map((c) => ({
+      servis: c.service_id,
+      dani: DANI.map((d) => c[d] === '1'),
+      od: c.start_date || '00000000',
+      do: c.end_date || '99999999',
+    }));
+  const dodani = new Map<string, Set<string>>();
+  const uklonjeni = new Map<string, Set<string>>();
+  for (const i of iznimke) {
+    if (!i.service_id || !i.date) continue;
+    const m = i.exception_type === '1' ? dodani : i.exception_type === '2' ? uklonjeni : null;
+    if (!m) continue;
+    let set = m.get(i.date);
+    if (!set) m.set(i.date, (set = new Set()));
+    set.add(i.service_id);
+  }
+  return { tjedni, dodani, uklonjeni };
+}
+
+/** Servisi koji voze na datum YYYYMMDD. */
+export function servisiNaDan(k: KalendarGtfs, datum: string): Set<string> {
+  const y = Number(datum.slice(0, 4));
+  const m = Number(datum.slice(4, 6));
+  const d = Number(datum.slice(6, 8));
+  const danUTjednu = (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
+  const rez = new Set<string>();
+  for (const t of k.tjedni) {
+    if (t.dani[danUTjednu] && t.od <= datum && datum <= t.do) rez.add(t.servis);
+  }
+  for (const s of k.dodani.get(datum) ?? []) rez.add(s);
+  for (const s of k.uklonjeni.get(datum) ?? []) rez.delete(s);
+  return rez;
+}
+
+/** "HH:MM:SS" -> minute od ponoći; null ako nije vrijeme. */
+function minuteIz(v: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})/.exec(v);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
 }
 
 /**
@@ -263,31 +345,51 @@ export function glavneTraseLinija(voznje: Map<string, VoznjaGtfs>): Map<string, 
 }
 
 /**
- * Stajališta odabranih vožnji iz stop_times.txt, redom. Datoteka se
- * raspakirava i čita u komadima – cijela bi zauzela ~80 MB memorije.
+ * Iz stop_times.txt: stajališta (s vremenima) odabranih vožnji, redom, i
+ * polazak svake vožnje s prvog stajališta. Datoteka se raspakirava i čita u
+ * komadima – cijela bi zauzela ~80 MB memorije.
  */
-function stajalistaVoznji(zip: Uint8Array, voznje: Set<string>): Map<string, string[]> {
-  const sirovo = new Map<string, { seq: number; stop: string }[]>();
+function stajalistaVoznji(
+  zip: Uint8Array,
+  voznje: Set<string>,
+): {
+  poVoznji: Map<string, { stop: string; min: number | null }[]>;
+  polasci: Map<string, number>;
+} {
+  const sirovo = new Map<string, { seq: number; stop: string; min: number | null }[]>();
+  const prvi = new Map<string, { seq: number; min: number }>();
   const bez = (v: string | undefined) => (v ?? '').trim().replace(/^"|"$/g, '');
-  let stupci: { trip: number; stop: number; seq: number } | null = null;
+  let stupci: { trip: number; stop: number; seq: number; pol: number } | null = null;
   let ostatak = '';
   const dekoder = new TextDecoder();
 
   const redak = (l: string) => {
     if (!l) return;
     if (!stupci) {
-      const h = l.replace(/^\uFEFF/, '').split(',').map((x) => bez(x));
-      stupci = { trip: h.indexOf('trip_id'), stop: h.indexOf('stop_id'), seq: h.indexOf('stop_sequence') };
+      const h = l
+        .replace(/^﻿/, '')
+        .split(',')
+        .map((x) => bez(x));
+      stupci = {
+        trip: h.indexOf('trip_id'),
+        stop: h.indexOf('stop_id'),
+        seq: h.indexOf('stop_sequence'),
+        pol: h.indexOf('departure_time'),
+      };
       return;
     }
-    // Brza provjera prije dijeljenja retka – zanima nas samo mali dio redaka.
-    if (stupci.trip === 0 && !voznje.has(bez(l.slice(0, l.indexOf(','))))) return;
     const d = l.split(',');
     const trip = bez(d[stupci.trip]);
+    const seq = Number(bez(d[stupci.seq]));
+    const min = minuteIz(bez(d[stupci.pol]));
+    if (min != null) {
+      const p = prvi.get(trip);
+      if (!p || seq < p.seq) prvi.set(trip, { seq, min });
+    }
     if (!voznje.has(trip)) return;
     let lista = sirovo.get(trip);
     if (!lista) sirovo.set(trip, (lista = []));
-    lista.push({ seq: Number(bez(d[stupci.seq])), stop: bez(d[stupci.stop]) });
+    lista.push({ seq, stop: bez(d[stupci.stop]), min });
   };
 
   const uz = new Unzip((f) => {
@@ -308,12 +410,17 @@ function stajalistaVoznji(zip: Uint8Array, voznje: Set<string>): Map<string, str
     uz.push(zip.subarray(i, i + KOMAD), i + KOMAD >= zip.length);
   }
 
-  const rez = new Map<string, string[]>();
+  const poVoznji = new Map<string, { stop: string; min: number | null }[]>();
   for (const [trip, lista] of sirovo) {
     lista.sort((a, b) => a.seq - b.seq);
-    rez.set(trip, lista.map((x) => x.stop));
+    poVoznji.set(
+      trip,
+      lista.map(({ stop, min }) => ({ stop, min })),
+    );
   }
-  return rez;
+  const polasci = new Map<string, number>();
+  for (const [trip, p] of prvi) polasci.set(trip, p.min);
+  return { poVoznji, polasci };
 }
 
 /** CSV s navodnicima (GTFS) -> objekti po zaglavlju. */

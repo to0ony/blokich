@@ -10,6 +10,7 @@ import {
   Oblik,
   RutaGtfs,
   StajalisteGtfs,
+  servisiNaDan,
 } from './gtfs-staticki.service';
 import { VozacNaBloku, VozaciNaBlokuService } from './vozaci-na-bloku.service';
 
@@ -147,6 +148,51 @@ export class KartaService {
       .filter((s) => s.tocke.length > 1);
     return { broj: ruta.naziv, opis: ruta.opis, tip: ruta.tip === 0 ? 'tramvaj' : 'autobus', smjerovi };
   }
+
+  /** Vozni red linije po broju na datum (YYYYMMDD, zadano danas). null = nema linije. */
+  vozniRed(broj: string, datum = danasZagreb()): VozniRedLinije | null {
+    const g = this.gtfs.get();
+    if (!g) return null;
+    const ruta = [...g.rute.values()].find((r) => r.naziv === broj) ?? g.rute.get(broj);
+    return ruta ? vozniRed(g, ruta, datum) : null;
+  }
+}
+
+/** Polasci i vremena vožnje po trasi linije za jedan dan. */
+export interface VozniRedLinije {
+  broj: string;
+  /** YYYYMMDD */
+  datum: string;
+  /** shape_id -> polasci (HH:MM, redom) i minute od polaska do svakog stajališta. */
+  oblici: Record<string, { polasci: string[]; vremena: number[] | null }>;
+}
+
+/** Današnji datum u Zagrebu kao YYYYMMDD. */
+export function danasZagreb(sad = new Date()): string {
+  return sad.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zagreb' }).replace(/-/g, '');
+}
+
+/** Vozni red linije na dan: polasci svake trase iz servisa koji tad voze. */
+export function vozniRed(g: GtfsPodaci, ruta: RutaGtfs, datum: string): VozniRedLinije {
+  const servisi = g.kalendar ? servisiNaDan(g.kalendar, datum) : new Set<string>();
+  const poObliku = new Map<string, number[]>();
+  for (const v of g.voznje.values()) {
+    if (v.ruta !== ruta.id || !v.oblik || v.polazak == null) continue;
+    if (!v.servis || !servisi.has(v.servis)) continue;
+    let lista = poObliku.get(v.oblik);
+    if (!lista) poObliku.set(v.oblik, (lista = []));
+    lista.push(v.polazak);
+  }
+  const hhmm = (min: number) =>
+    `${String(Math.floor(min / 60) % 24).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+  const oblici: VozniRedLinije['oblici'] = {};
+  for (const [oblik, polasci] of poObliku) {
+    oblici[oblik] = {
+      polasci: [...new Set(polasci)].sort((a, b) => a - b).map(hhmm),
+      vremena: g.vremenaOblika?.get(oblik) ?? null,
+    };
+  }
+  return { broj: ruta.naziv, datum, oblici };
 }
 
 /**
