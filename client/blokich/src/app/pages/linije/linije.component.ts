@@ -60,7 +60,7 @@ export class LinijePreglednikComponent implements OnInit {
   ucitavaPopis = true;
   greskaPopisa = false;
   upit = '';
-  tip: Tip = 'sve';
+  tip: Tip = 'autobus';
 
   // ---------- Odabrana linija ----------
   broj: string | null = null;
