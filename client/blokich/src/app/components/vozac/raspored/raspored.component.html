@@ -28,7 +28,6 @@
       <span class="t">{{ s.do }}</span>
       <!-- Dio koji se po redu dijelova vozi tek sutradan (nakon ponoći) -->
       <span class="rs-today-sutra" *ngIf="stanje(d, s).sutradan">{{ sutraKratko(d.datum) }}</span>
-      <i class="pi pi-check rs-today-done" *ngIf="stanje(d, s).gotovo" aria-label="Odvoženo"></i>
       <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
       <span class="rs-today-line" *ngIf="s.linija"
         >{{ s.linija
