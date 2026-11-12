@@ -39,7 +39,9 @@ import {
   procjenaDolaska,
   slozTjedan,
   stanjeSluzbe,
+  sutraKratko,
 } from '../vozac.model';
+import dayjs from 'dayjs';
 
 /** Bus koji preuzimam prikazuje se tek 60 min prije mog nastupa. */
 const CEKANJE_MIN = 60;
@@ -97,6 +99,8 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
   readonly jePricuva = jePricuva;
+  readonly stanje = stanjeSluzbe;
+  readonly sutraKratko = sutraKratko;
 
   tjedanOpcije = [
     { label: 'Ovaj tjedan', value: 'trenutni' as TjedanTip, disabled: false },
@@ -143,6 +147,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
    * preuzimam: "tvoj bus N stiže ~HH:MM".
    */
   osvjeziMojBus(): void {
+    this.pratiKlizac();
     if (typeof document !== 'undefined' && document.hidden) return;
     const dan = this.danas;
     const sluzbe = (dan?.sluzbe ?? []).filter((s) => blokZa(s));
@@ -208,6 +213,22 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     return jeJucer(dan.datum);
   }
 
+  /** Istaknuti dan u tjednu: aktivni dan (i noćna od jučer), inače kalendarski danas. */
+  istaknut(dan: DanRasporeda): boolean {
+    const a = this.danas;
+    return a && this.dani.includes(a) ? dan === a : dan.danas;
+  }
+
+  /** Dok se prikazuje noćna od jučer: prva današnja služba, npr. "14:00 · 109". */
+  danasKasnije(dan: DanRasporeda): string | null {
+    if (!jeJucer(dan.datum)) return null;
+    const danas = this.dani.find((d) => d.datum.isSame(dayjs(), 'day'));
+    const s = danas?.sluzbe[0];
+    if (!s) return null;
+    const linije = [...new Set(danas!.sluzbe.map((x) => x.linija).filter(Boolean))];
+    return [s.od, ...linije].join(' · ');
+  }
+
   /** Dan je iz prošlog tjedna – za njega nema popisa kolega. */
   izProslogTjedna(dan: DanRasporeda): boolean {
     return dan === this.prethodniDan;
@@ -256,19 +277,41 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   slajd = 0;
   private klizacPostavljen = false;
 
+  private klizacEl: HTMLDivElement | null = null;
+  /** Linija na koju je klizač zadnji put sam prešao (ne dira ručno listanje između). */
+  private pracenaLinija: string | null = null;
+
   /** Kad se klizač pojavi: odmah prikaži liniju koju vozač vozi sad (ili sljedeću). */
   @ViewChild('klizac') set klizacRef(el: ElementRef<HTMLDivElement> | undefined) {
     if (!el) {
       this.klizacPostavljen = false;
+      this.klizacEl = null;
       return;
     }
+    this.klizacEl = el.nativeElement;
     if (this.klizacPostavljen || !this.danas) return;
     this.klizacPostavljen = true;
     const i = this.aktualnaLinija(this.danas);
+    this.pracenaLinija = this.linijeKarte(this.danas)[i] ?? null;
     setTimeout(() => {
       this.slajd = i;
       el.nativeElement.scrollLeft = i * this.sirinaSlajda(el.nativeElement);
     });
+  }
+
+  /**
+   * Kad vozač prijeđe na sljedeću liniju (npr. u 01:45 sa 132 na 118),
+   * klizač sam pređe na nju.
+   */
+  private pratiKlizac(): void {
+    const el = this.klizacEl;
+    const dan = this.danas;
+    if (!el || !dan) return;
+    const linije = this.linijeKarte(dan);
+    const i = this.aktualnaLinija(dan);
+    if (linije[i] === this.pracenaLinija) return;
+    this.pracenaLinija = linije[i] ?? null;
+    this.naSlajd(el, i);
   }
 
   private sirinaSlajda(klizac: HTMLElement): number {

@@ -17,10 +17,18 @@
   </div>
 
   <ng-container *ngIf="d.sluzbe.length; else danasSlobodno">
-    <div class="rs-today-time" *ngFor="let s of d.sluzbe; let i = index">
+    <div
+      class="rs-today-time"
+      *ngFor="let s of d.sluzbe; let i = index"
+      [class.is-gotovo]="stanje(d, s).gotovo"
+      [class.is-sad]="stanje(d, s).uTijeku"
+    >
       <span class="t">{{ s.od }}</span>
       <i class="pi pi-arrow-right"></i>
       <span class="t">{{ s.do }}</span>
+      <!-- Dio koji se po redu dijelova vozi tek sutradan (nakon ponoći) -->
+      <span class="rs-today-sutra" *ngIf="stanje(d, s).sutradan">{{ sutraKratko(d.datum) }}</span>
+      <i class="pi pi-check rs-today-done" *ngIf="stanje(d, s).gotovo" aria-label="Odvoženo"></i>
       <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
       <span class="rs-today-line" *ngIf="s.linija"
         >{{ s.linija
@@ -29,6 +37,10 @@
     </div>
     <div class="rs-today-place">
       {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
+    </div>
+    <!-- Noćna od jučer: današnja služba da se vidi bez čekanja kraja noći -->
+    <div class="rs-today-kasnije" *ngIf="danasKasnije(d) as t">
+      <i class="pi pi-calendar"></i> Danas kasnije: {{ t }}
     </div>
     <!-- Moj bus uživo (ZET) – samo kad postoje podaci -->
     <div class="rs-today-live" *ngIf="mojBus as b" [class.is-late]="kasniZnatno(b.kasnjenje)">
@@ -141,7 +153,7 @@
       type="button"
       class="rs-chip"
       [class.is-work]="d.sluzbe.length"
-      [class.is-today]="d.danas"
+      [class.is-today]="istaknut(d)"
       [class.is-past]="d.prosao"
       (click)="skrolajNa(d)"
     >
@@ -172,7 +184,7 @@
       *ngFor="let d of dani"
       class="rs-day"
       [id]="'dan-' + d.key"
-      [class.is-today]="d.danas"
+      [class.is-today]="istaknut(d)"
       [class.is-past]="d.prosao"
       [class.is-off]="!d.sluzbe.length"
       [class.is-sat]="d.key === 'sub'"

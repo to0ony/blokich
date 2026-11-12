@@ -222,23 +222,51 @@ function minute(hhmm: string | undefined): number | null {
 }
 
 /**
- * Je li služba sad u tijeku: od `od` do neposredno prije `do`. U minuti
- * predaje vozi onaj koji preuzima. Služba preko ponoći (20:00–01:30) svog
- * dana traje od `od` do ponoći, a sutradan (`jucer` = služba je od jučer)
- * od ponoći do `do` – isto pravilo kao na backendu (aktivniNaBlokovima).
+ * Je li dio službe sad u tijeku, gledan sam za sebe: od `od` do neposredno
+ * prije `do`, danas. Za cijelu službu (i dijelove nakon ponoći) koristi
+ * stanjeSluzbe / aktivniDan, koji idu po lancu dijelova.
  */
 export function uSmjeniSad(
   od?: string,
   doo?: string,
   sad = new Date(),
-  jucer = false,
 ): boolean {
-  const a = minute(od);
-  const b = minute(doo);
-  if (a === null || b === null) return false;
+  const i = lanacSluzbi([{ od, do: doo }])[0];
+  if (!i) return false;
   const n = sad.getHours() * 60 + sad.getMinutes();
-  if (jucer) return a > b && n < b;
-  return a <= b ? n >= a && n < b : n >= a;
+  return i.pocetak <= n && n < i.kraj;
+}
+
+/**
+ * Dijelovi jedne službe redom (kako su u PDF-u) kao stvarni intervali u
+ * minutama od ponoći dana službe. Kad vrijeme "skoči unatrag" (01:45 nakon
+ * 21:50–01:40), dio je sutradan: 21:50–01:40 = 1310–1540, 01:45–04:20 =
+ * 1545–1700. Prvi dio vrijedi za dan pod kojim piše. Isto kao na backendu.
+ */
+export function lanacSluzbi(
+  dijelovi: { od?: string; do?: string }[],
+): ({ pocetak: number; kraj: number } | null)[] {
+  let prije: number | null = null;
+  return dijelovi.map((d) => {
+    let a = minute(d.od);
+    let b = minute(d.do);
+    if (a === null || b === null) return null;
+    // Malo preklapanje kod predaje nije novi dan – samo veliki skok unatrag.
+    if (prije !== null) while (a < prije - 12 * 60) a += 24 * 60;
+    while (b < a) b += 24 * 60;
+    prije = b;
+    return { pocetak: a, kraj: b };
+  });
+}
+
+/** Minute od ponoći zadanog dana do `sad` (jučer u 00:30 = 1470). */
+export function minuteOdDana(datum: Dayjs, sad = new Date()): number {
+  return dayjs(sad).diff(datum.startOf('day'), 'minute');
+}
+
+/** Kratki naziv sljedećeg dana, malim slovima ("pet" za četvrtak). */
+export function sutraKratko(datum: Dayjs): string {
+  return DANI[datum.add(1, 'day').isoWeekday() - 1].kratko.toLowerCase();
 }
 
 /** Je li datum jučerašnji dan u odnosu na `sad`. */
@@ -246,56 +274,89 @@ export function jeJucer(datum: Dayjs, sad = new Date()): boolean {
   return datum.isSame(dayjs(sad).subtract(1, 'day'), 'day');
 }
 
+/** Dio službe u odnosu na sad. */
+export interface StanjeSluzbe {
+  uTijeku: boolean;
+  /** Za koliko minuta počinje; null = već je počeo ili prošao. */
+  za: number | null;
+  /** Odvožen (kraj je prošao). */
+  gotovo: boolean;
+  /** Po lancu je tek sljedeći dan (npr. 01:45 nakon 21:50–01:40). */
+  sutradan: boolean;
+}
+
 /**
- * Dan koji vozač sad "živi": jučerašnji dok njegova služba preko ponoći još
- * traje, inače današnji. Tako noćna vožnja ne nestane u ponoć.
+ * Stanje dijela službe zadanog dana u odnosu na sad, po lancu dijelova tog
+ * dana – dio iza ponoći (01:45–04:20 nakon 21:50–01:40) vozi se sutradan.
+ */
+export function stanjeSluzbe(
+  dan: { datum: Dayjs; sluzbe?: { od?: string; do?: string }[] },
+  s: { od?: string; do?: string },
+  sad = new Date(),
+): StanjeSluzbe {
+  const dijelovi = dan.sluzbe?.includes(s as Sluzba) ? dan.sluzbe : [s];
+  const i = lanacSluzbi(dijelovi)[dijelovi.indexOf(s)];
+  if (!i) return { uTijeku: false, za: null, gotovo: false, sutradan: false };
+  const n = minuteOdDana(dan.datum, sad);
+  return {
+    uTijeku: i.pocetak <= n && n < i.kraj,
+    za: n <= i.pocetak ? i.pocetak - n : null,
+    gotovo: n >= i.kraj,
+    sutradan: i.pocetak >= 24 * 60,
+  };
+}
+
+/**
+ * Dan koji vozač sad "živi": jučerašnji dok neki dio njegove službe još nije
+ * odvožen (noćna vožnja, pauza i dijelovi nakon ponoći), inače današnji.
  */
 export function aktivniDan<T extends { datum: Dayjs; sluzbe: Sluzba[] }>(
   dani: T[],
   sad = new Date(),
 ): T | undefined {
   const jucer = dani.find((d) => jeJucer(d.datum, sad));
-  if (jucer?.sluzbe.some((s) => uSmjeniSad(s.od, s.do, sad, true))) return jucer;
+  if (jucer?.sluzbe.some((s) => !stanjeSluzbe(jucer, s, sad).gotovo)) return jucer;
   return dani.find((d) => d.datum.isSame(dayjs(sad), 'day'));
 }
 
-/**
- * Stanje službe zadanog dana u odnosu na sad: je li u tijeku i za koliko
- * minuta počinje (null = već je počela ili prošla). Služba od jučer više ne
- * počinje – samo još traje do svog `do`.
- */
-export function stanjeSluzbe(
-  dan: { datum: Dayjs },
-  s: { od?: string; do?: string },
-  sad = new Date(),
-): { uTijeku: boolean; za: number | null } {
-  const jucer = jeJucer(dan.datum, sad);
-  return {
-    uTijeku: uSmjeniSad(s.od, s.do, sad, jucer),
-    za: jucer ? null : minutaDo(s.od, sad),
-  };
+/** Broj slova P na kraju broja službe – 207 je prvi dio, 207P drugi. */
+function redDijela(br_sl?: string): number {
+  return /P*$/i.exec(br_sl ?? '')?.[0].length ?? 0;
 }
 
 /**
- * Tko od kolega trenutno vozi koji blok. Kod predaje smjene (dvije službe
- * istog V.R. se preklapaju) vozi onaj koji je ranije počeo – do zamjene.
- * `jucer` = kolege su iz jučerašnjeg rasporeda (noćne službe nakon ponoći).
+ * Tko od kolega trenutno vozi koji blok. Dijelovi službe istog vozača idu u
+ * lanac (dio nakon ponoći je sutradan), pa vrijedi i za jučerašnji raspored
+ * nakon ponoći. Kod predaje smjene (dvije službe istog V.R. se preklapaju)
+ * vozi onaj koji je ranije počeo – do zamjene.
  */
 export function aktivniPoBloku(
   kolege: Kolega[],
+  datum: Dayjs = dayjs(),
   sad = new Date(),
-  jucer = false,
 ): Map<string, Kolega> {
-  const mapa = new Map<string, Kolega>();
+  const poVozacu = new Map<string, Kolega[]>();
   for (const k of kolege) {
-    const blok = blokZa(k);
-    if (!blok || !uSmjeniSad(k.od, k.do, sad, jucer)) continue;
-    const postojeci = mapa.get(blok);
-    if (!postojeci || (minute(k.od) ?? 0) < (minute(postojeci.od) ?? 0)) {
-      mapa.set(blok, k);
-    }
+    const lista = poVozacu.get(k.sluz_broj) ?? [];
+    lista.push(k);
+    poVozacu.set(k.sluz_broj, lista);
   }
-  return mapa;
+
+  const n = minuteOdDana(datum, sad);
+  const mapa = new Map<string, { k: Kolega; pocetak: number }>();
+  for (const lista of poVozacu.values()) {
+    // Redom dijelova (207 pa 207P); isti broj zadržava poredak kakav je stigao.
+    const dijelovi = [...lista].sort((a, b) => redDijela(a.br_sl) - redDijela(b.br_sl));
+    const lanac = lanacSluzbi(dijelovi);
+    dijelovi.forEach((k, i) => {
+      const blok = blokZa(k);
+      const t = lanac[i];
+      if (!blok || !t || !(t.pocetak <= n && n < t.kraj)) return;
+      const postojeci = mapa.get(blok);
+      if (!postojeci || t.pocetak < postojeci.pocetak) mapa.set(blok, { k, pocetak: t.pocetak });
+    });
+  }
+  return new Map([...mapa].map(([b, { k }]) => [b, k]));
 }
 
 /** Vozilo na bloku iz ZET-ovog feeda. */

@@ -13,7 +13,6 @@ import {
   Kolega,
   VoziloUzivo,
   aktivniPoBloku,
-  jeJucer,
   kolegaKljuc,
   opisOdsustva,
 } from '../vozac.model';
@@ -45,6 +44,8 @@ export class DanasComponent implements OnChanges, OnDestroy {
   @Input() rasporedLoading = false;
 
   grupe: GrupaLinije[] = [];
+  /** Kolege kako su stigli (redom dijelova službe) – za lanac dijelova. */
+  private sirovo: Kolega[] = [];
   loading = false;
   greska = false;
   private ucitanoZa: string | null = null;
@@ -73,9 +74,9 @@ export class DanasComponent implements OnChanges, OnDestroy {
   osvjeziUzivo(): void {
     if (typeof document !== 'undefined' && document.hidden) return;
 
-    // Nakon ponoći dan može biti jučerašnji (noćna služba još traje).
-    const jucer = !!this.dan && jeJucer(this.dan.datum);
-    const aktivni = aktivniPoBloku(this.grupe.flatMap((g) => g.kolege), new Date(), jucer);
+    // Po lancu dijelova službe – dan može biti i jučerašnji (noćna nakon ponoći).
+    if (!this.dan) return;
+    const aktivni = aktivniPoBloku(this.sirovo, this.dan.datum);
     if (!aktivni.size) {
       this.uzivo = {};
       return;
@@ -118,6 +119,7 @@ export class DanasComponent implements OnChanges, OnDestroy {
 
     const linije = this.linije;
     this.grupe = [];
+    this.sirovo = [];
     this.greska = false;
     if (!linije.length) return;
 
@@ -128,6 +130,7 @@ export class DanasComponent implements OnChanges, OnDestroy {
       ),
     )
       .then((rez) => {
+        this.sirovo = rez.flatMap((r) => r?.voze ?? []);
         this.grupe = linije.map((linija, i) => ({
           linija,
           kolege: [...(rez[i]?.voze ?? [])].sort((a: Kolega, b: Kolega) =>

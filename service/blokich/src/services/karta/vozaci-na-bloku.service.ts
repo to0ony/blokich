@@ -23,6 +23,12 @@ export interface VozacNaBloku {
 /** Jedan dio službe na jednom bloku (linija + V.R.) jednog dana. */
 export interface SmjenaNaBloku extends VozacNaBloku {
   blok: string;
+  /**
+   * Početak i kraj u minutama od ponoći dana službe, po lancu dijelova
+   * (01:45 nakon 21:50–01:40 je 1545). Bez njih se računa iz od/do.
+   */
+  pocetak?: number;
+  kraj?: number;
 }
 
 const DANI = ['ned', 'pon', 'uto', 'sri', 'cet', 'pet', 'sub'] as const;
@@ -42,9 +48,36 @@ export function blokIz(linija?: string, vr?: string): string | null {
 }
 
 /**
+ * Dijelovi jedne službe redom (kako su u PDF-u) kao stvarni intervali u
+ * minutama od ponoći dana službe. Kad vrijeme "skoči unatrag" (01:45 nakon
+ * 21:50–01:40), dio je sutradan. Prvi dio vrijedi za dan pod kojim piše.
+ */
+export function lanacSluzbi(
+  dijelovi: { od?: string; do?: string }[],
+): ({ pocetak: number; kraj: number } | null)[] {
+  let prije: number | null = null;
+  return dijelovi.map((d) => {
+    let a = minute(d.od);
+    let b = minute(d.do);
+    if (a === null || b === null) return null;
+    // Malo preklapanje kod predaje nije novi dan – samo veliki skok unatrag.
+    if (prije !== null) while (a < prije - 12 * 60) a += 24 * 60;
+    while (b < a) b += 24 * 60;
+    prije = b;
+    return { pocetak: a, kraj: b };
+  });
+}
+
+function interval(s: SmjenaNaBloku): { pocetak: number; kraj: number } | null {
+  if (s.pocetak != null && s.kraj != null) return { pocetak: s.pocetak, kraj: s.kraj };
+  return lanacSluzbi([s])[0];
+}
+
+/**
  * Tko sad vozi koji blok. Isto pravilo kao u aplikaciji vozača: služba traje
- * od `od` do neposredno prije `do`; kod predaje (preklapanje) vozi onaj koji
- * je ranije počeo. Jučerašnje službe preko ponoći vrijede do svog `do`.
+ * od početka do neposredno prije kraja; kod predaje (preklapanje) vozi onaj
+ * koji je ranije počeo. Jučerašnje službe vrijede dok ne završe – i dijelovi
+ * koji su po lancu tek nakon ponoći (21:50–01:40 pa 01:45–04:20).
  */
 export function aktivniNaBlokovima(
   danas: SmjenaNaBloku[],
@@ -52,25 +85,22 @@ export function aktivniNaBlokovima(
   sadMin: number,
 ): Map<string, VozacNaBloku> {
   const kandidati: { s: SmjenaNaBloku; pocetak: number }[] = [];
-  for (const s of jucer) {
-    const a = minute(s.od);
-    const b = minute(s.do);
-    if (a === null || b === null || a <= b) continue;
-    if (sadMin < b) kandidati.push({ s, pocetak: a - 24 * 60 });
-  }
-  for (const s of danas) {
-    const a = minute(s.od);
-    const b = minute(s.do);
-    if (a === null || b === null) continue;
-    const u = a <= b ? sadMin >= a && sadMin < b : sadMin >= a;
-    if (u) kandidati.push({ s, pocetak: a });
+  for (const [lista, pomak] of [
+    [jucer, 24 * 60],
+    [danas, 0],
+  ] as const) {
+    for (const s of lista) {
+      const i = interval(s);
+      const n = sadMin + pomak;
+      if (i && i.pocetak <= n && n < i.kraj) kandidati.push({ s, pocetak: i.pocetak - pomak });
+    }
   }
 
   const rez = new Map<string, { v: VozacNaBloku; pocetak: number }>();
   for (const { s, pocetak } of kandidati) {
     const postojeci = rez.get(s.blok);
     if (!postojeci || pocetak < postojeci.pocetak) {
-      const { blok: _, ...v } = s;
+      const { blok: _b, pocetak: _p, kraj: _k, ...v } = s;
       rez.set(s.blok, { v, pocetak });
     }
   }
@@ -148,10 +178,12 @@ export class VozaciNaBlokuService {
     for (const r of radnici) {
       const escaped = r.br_sl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`^${escaped}(P*)$`, 'i');
-      for (const s of sveSluzbe) {
-        if (!regex.test(s.br_sl ?? '')) continue;
+      // Svi dijelovi službe redom – lanac treba i dijelove bez bloka.
+      const dijelovi = sveSluzbe.filter((s) => regex.test(s.br_sl ?? ''));
+      const lanac = lanacSluzbi(dijelovi);
+      dijelovi.forEach((s, i) => {
         const blok = blokIz(s.linija, s.varijanta);
-        if (!blok) continue;
+        if (!blok) return;
         const osoba = osobe.get(r.sluz_broj);
         smjene.push({
           blok,
@@ -161,8 +193,10 @@ export class VozaciNaBlokuService {
           br_sl: s.br_sl,
           od: s.od,
           do: s.do,
+          pocetak: lanac[i]?.pocetak,
+          kraj: lanac[i]?.kraj,
         });
-      }
+      });
     }
     return smjene;
   }

@@ -24,7 +24,6 @@ import {
   inicijali,
   slozTjedan,
   telefoni,
-  uSmjeniSad,
 } from '../../components/vozac/vozac.model';
 
 interface NavStavka {
@@ -180,16 +179,16 @@ export class DashboardDriverComponent implements OnInit {
     this.rasporedService.fetchKalendar(nedjelja.year(), nedjelja.month() + 1).subscribe({
       next: (k) => {
         const d = k?.dani?.find((x) => dayjs(x.datum).isSame(nedjelja, 'day'));
-        const sluzbe = d?.sluzbe ?? [];
-        if (!sluzbe.some((s) => uSmjeniSad(s.od, s.do, new Date(), true))) return;
-        this.prethodniDan = {
+        const kandidat: DanRasporeda = {
           ...DANI[6],
           datum: nedjelja,
-          sluzbe,
+          sluzbe: d?.sluzbe ?? [],
           odsustvo: null,
           danas: false,
           prosao: true,
         };
+        // Samo dok neki dio nedjeljne službe još nije odvožen.
+        if (aktivniDan([kandidat]) === kandidat) this.prethodniDan = kandidat;
       },
       error: () => {},
     });

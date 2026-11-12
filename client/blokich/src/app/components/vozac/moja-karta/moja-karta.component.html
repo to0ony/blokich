@@ -23,15 +23,15 @@
         </ng-container>
         <ng-container *ngSwitchCase="'cekam'">
           <strong>{{ vozilo ? 'Tvoj bus ' + vozilo.id + (gdjeJeBus ? ' · ' + gdjeJeBus : '') : 'Linija ' + dio.linija }}</strong>
-          <small>{{ vozilo ? 'Preuzimaš ga u ' + dio.od : 'Preuzimaš u ' + dio.od + ' · bus još nije na karti' }}</small>
+          <small>{{ vozilo ? 'Preuzimaš ga u ' + dio.od + sutra : 'Preuzimaš u ' + dio.od + sutra + ' · bus još nije na karti' }}</small>
         </ng-container>
         <ng-container *ngSwitchCase="'gotovo'">
           <strong>Linija {{ dio.linija }} · odvoženo</strong>
-          <small>Završilo u {{ dio.do }}</small>
+          <small>Završilo u {{ dio.do }}{{ sutra }}</small>
         </ng-container>
         <ng-container *ngSwitchDefault>
           <strong>Linija {{ dio.linija }}<ng-container *ngIf="ruta?.opis"> · {{ ruta?.opis }}</ng-container></strong>
-          <small>Kreće u {{ dio.od }}</small>
+          <small>Kreće u {{ dio.od }}{{ sutra }}</small>
         </ng-container>
       </ng-container>
     </span>

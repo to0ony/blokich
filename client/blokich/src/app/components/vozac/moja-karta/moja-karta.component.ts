@@ -21,7 +21,7 @@ import {
 } from '../../../services/karta.service';
 import { Kretanje, sljedeceStajaliste, stajalistaNaTrasi } from '../../karta/kretanje';
 import { BOJE, STIL, Tema, oznakaVozila, ucitajCss, ucitajPostavke } from '../../karta/karta-stil';
-import { DanRasporeda, Sluzba, blokZa, stanjeSluzbe } from '../vozac.model';
+import { DanRasporeda, Sluzba, blokZa, stanjeSluzbe, sutraKratko } from '../vozac.model';
 
 /** Bus koji preuzimam prati se tek 60 min prije mog nastupa (kao na kartici Danas). */
 const CEKANJE_MIN = 60;
@@ -70,6 +70,8 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
   /** Dio službe koji se prikazuje: onaj u tijeku ili sljedeći danas. */
   dio: Sluzba | null = null;
   vrsta: Vrsta | null = null;
+  /** Dio se vozi tek sutradan (nakon ponoći), npr. " · pet" uz vrijeme. */
+  sutra = '';
   vozilo: VoziloKarta | null = null;
   ruta: LinijaKarta | null = null;
   sad = Date.now();
@@ -143,6 +145,8 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
           : null;
 
     const promjena = dio !== this.dio || vrsta !== this.vrsta;
+    this.sutra =
+      dan && dio && stanja.find((x) => x.s === dio)?.sutradan ? ` · ${sutraKratko(dan.datum)}` : '';
     this.dio = dio;
     this.vrsta = vrsta;
     if (!promjena) return;
