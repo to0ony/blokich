@@ -17,23 +17,29 @@
   </div>
 
   <ng-container *ngIf="d.sluzbe.length; else danasSlobodno">
-    <div
-      class="rs-today-time"
-      *ngFor="let s of d.sluzbe; let i = index"
-      [class.is-gotovo]="stanje(d, s).gotovo"
-      [class.is-sad]="stanje(d, s).uTijeku"
-    >
-      <span class="t">{{ s.od }}</span>
-      <i class="pi pi-arrow-right"></i>
-      <span class="t">{{ s.do }}</span>
-      <!-- Dio koji se po redu dijelova vozi tek sutradan (nakon ponoći) -->
-      <span class="rs-today-sutra" *ngIf="stanje(d, s).sutradan">{{ sutraKratko(d.datum) }}</span>
-      <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
-      <span class="rs-today-line" *ngIf="s.linija"
-        >{{ s.linija
-        }}<span class="rs-today-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span></span
+    <ng-container *ngFor="let s of d.sluzbe; let i = index">
+      <!-- Razdjelnik ispred prvog dijela koji se po redu dijelova vozi tek sutradan (nakon ponoći) -->
+      <div
+        class="rs-today-sutra"
+        *ngIf="stanje(d, s).sutradan && (i === 0 || !stanje(d, d.sluzbe[i - 1]).sutradan)"
       >
-    </div>
+        <span>{{ sutraNaziv(d.datum) }}</span>
+      </div>
+      <div
+        class="rs-today-time"
+        [class.is-gotovo]="stanje(d, s).gotovo"
+        [class.is-sad]="stanje(d, s).uTijeku"
+      >
+        <span class="t">{{ s.od }}</span>
+        <i class="pi pi-arrow-right"></i>
+        <span class="t">{{ s.do }}</span>
+        <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
+        <span class="rs-today-line" *ngIf="s.linija"
+          >{{ s.linija
+          }}<span class="rs-today-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span></span
+        >
+      </div>
+    </ng-container>
     <div class="rs-today-place">
       {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
     </div>

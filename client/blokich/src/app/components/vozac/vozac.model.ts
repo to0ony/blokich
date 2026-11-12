@@ -269,6 +269,11 @@ export function sutraKratko(datum: Dayjs): string {
   return DANI[datum.add(1, 'day').isoWeekday() - 1].kratko.toLowerCase();
 }
 
+/** Puni naziv sljedećeg dana, malim slovima ("petak" za četvrtak). */
+export function sutraNaziv(datum: Dayjs): string {
+  return DANI[datum.add(1, 'day').isoWeekday() - 1].naziv.toLowerCase();
+}
+
 /** Je li datum jučerašnji dan u odnosu na `sad`. */
 export function jeJucer(datum: Dayjs, sad = new Date()): boolean {
   return datum.isSame(dayjs(sad).subtract(1, 'day'), 'day');

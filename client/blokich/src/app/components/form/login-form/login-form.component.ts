@@ -142,6 +142,13 @@ export class LoginFormComponent implements OnInit {
     localStorage.setItem('recentDriverNumbers', JSON.stringify(numbers));
   }
 
+  /** Službeni broj ima 5 znamenki – nule slijeva (564 → 00564). */
+  dopuniNulama() {
+    const ctrl = this.loginForm.get('sluzbeniBroj');
+    const v = String(ctrl?.value ?? '').trim();
+    if (/^\d{1,4}$/.test(v)) ctrl?.setValue(v.padStart(5, '0'));
+  }
+
   selectRecentNumber(broj: string) {
     this.loginForm.get('sluzbeniBroj')?.setValue(broj);
     this.loginForm.get('sluzbeniBroj')?.markAsTouched();
@@ -157,6 +164,7 @@ export class LoginFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.dopuniNulama();
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.loginGreska = '';

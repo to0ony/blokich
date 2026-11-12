@@ -52,6 +52,7 @@
         formControlName="sluzbeniBroj"
         class="lg-input"
         (input)="loginGreska = ''"
+        (blur)="dopuniNulama()"
       />
       <span
         class="lg-error"

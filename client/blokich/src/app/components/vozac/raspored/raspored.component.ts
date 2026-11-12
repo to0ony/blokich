@@ -39,7 +39,7 @@ import {
   procjenaDolaska,
   slozTjedan,
   stanjeSluzbe,
-  sutraKratko,
+  sutraNaziv,
 } from '../vozac.model';
 import dayjs from 'dayjs';
 
@@ -100,7 +100,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   readonly opisOdsustva = opisOdsustva;
   readonly jePricuva = jePricuva;
   readonly stanje = stanjeSluzbe;
-  readonly sutraKratko = sutraKratko;
+  readonly sutraNaziv = sutraNaziv;
 
   tjedanOpcije = [
     { label: 'Ovaj tjedan', value: 'trenutni' as TjedanTip, disabled: false },
