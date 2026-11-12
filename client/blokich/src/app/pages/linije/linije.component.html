@@ -1,0 +1,187 @@
+<app-pregled-okvir>
+  <!-- ---------- Popis linija ---------- -->
+  <ng-container *ngIf="!broj">
+    <header class="vz-page-head">
+      <h1>Linije</h1>
+      <p>Trase, stajališta i polasci svih ZET linija.</p>
+    </header>
+
+    <div class="vz-card lp-search">
+      <span class="lp-input">
+        <i class="pi pi-search"></i>
+        <input
+          type="search"
+          name="upit"
+          autocomplete="off"
+          enterkeyhint="go"
+          placeholder="Broj ili naziv, npr. 132 ili Brezovica"
+          [(ngModel)]="upit"
+          (keydown.enter)="potvrdi()"
+        />
+      </span>
+      <div class="lp-tipovi" role="group" aria-label="Vrsta">
+        <button type="button" [class.is-on]="tip === 'sve'" (click)="tip = 'sve'">Sve</button>
+        <button type="button" [class.is-on]="tip === 'autobus'" (click)="tip = 'autobus'">
+          <i class="pi pi-car"></i> Autobusi
+        </button>
+        <button type="button" [class.is-on]="tip === 'tramvaj'" (click)="tip = 'tramvaj'">
+          <i class="pi pi-bolt"></i> Tramvaji
+        </button>
+      </div>
+    </div>
+
+    <p class="lp-stanje" *ngIf="ucitavaPopis">Učitavam linije…</p>
+    <p class="lp-stanje is-err" *ngIf="greskaPopisa">Linije trenutno nije moguće učitati.</p>
+
+    <ul class="lp-lista" *ngIf="!ucitavaPopis && !greskaPopisa">
+      <li *ngFor="let r of filtrirane">
+        <button type="button" class="lp-red" (click)="otvori(r)">
+          <span class="lp-broj" [class.is-tram]="r.tip === 0">{{ r.naziv }}</span>
+          <span class="lp-opis">{{ r.opis || 'Linija ' + r.naziv }}</span>
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </li>
+      <li class="lp-stanje" *ngIf="!filtrirane.length">Nema linije za "{{ upit }}".</li>
+    </ul>
+  </ng-container>
+
+  <!-- ---------- Odabrana linija ---------- -->
+  <ng-container *ngIf="broj">
+    <button type="button" class="lp-natrag" (click)="natrag()">
+      <i class="pi pi-arrow-left"></i> Sve linije
+    </button>
+
+    <header class="lp-head">
+      <span class="lp-broj is-big" [class.is-tram]="linija?.tip === 'tramvaj'">{{ linija?.broj ?? broj }}</span>
+      <div>
+        <h1>{{ linija?.opis || 'Linija ' + broj }}</h1>
+        <p *ngIf="linija">{{ linija.tip === 'tramvaj' ? 'Tramvaj' : 'Autobus' }}</p>
+      </div>
+    </header>
+
+    <p class="lp-stanje" *ngIf="ucitavaLiniju">Učitavam liniju…</p>
+    <p class="lp-stanje is-err" *ngIf="greskaLinije">Linija {{ broj }} nije pronađena u voznom redu.</p>
+
+    <ng-container *ngIf="linija && trasa as t">
+      <!-- Dan -->
+      <div class="lp-dani" role="group" aria-label="Dan">
+        <button
+          *ngFor="let d of dani"
+          type="button"
+          [class.is-on]="d.datum === dan"
+          [attr.aria-pressed]="d.datum === dan"
+          (click)="odaberiDan(d.datum)"
+        >
+          <strong>{{ d.naziv }}</strong>
+          <small>{{ d.podnaslov }}</small>
+        </button>
+      </div>
+
+      <!-- Smjer -->
+      <div class="lp-smjerovi" *ngIf="smjerovi.length > 1" role="group" aria-label="Smjer">
+        <button
+          *ngFor="let s of smjerovi; let i = index"
+          type="button"
+          [class.is-on]="i === smjer"
+          [attr.aria-pressed]="i === smjer"
+          (click)="odaberiSmjer(i)"
+        >
+          <i class="pi pi-arrow-right"></i>
+          <span>{{ s.cilj || 'Smjer ' + (i + 1) }}</span>
+        </button>
+      </div>
+
+      <!-- Varijante -->
+      <section class="vz-card lp-varijante" *ngIf="varijante.length > 1">
+        <span class="vz-label">Varijante trase</span>
+        <button
+          *ngFor="let v of varijante; let i = index"
+          type="button"
+          class="lp-var"
+          [class.is-on]="i === varijanta"
+          [attr.aria-pressed]="i === varijanta"
+          (click)="odaberiVarijantu(i)"
+        >
+          <i class="pi" [class.pi-star]="v.glavna" [class.pi-directions]="!v.glavna"></i>
+          <span class="lp-var-opis">{{ v.opis }}</span>
+          <span class="lp-var-broj" *ngIf="polasciZa(v.oblik) as p; else bezBroja" [class.is-nula]="!p.length">
+            {{ p.length ? p.length + '×' : 'ne vozi' }}
+          </span>
+          <ng-template #bezBroja><span class="lp-var-broj">…</span></ng-template>
+        </button>
+      </section>
+
+      <!-- Sažetak -->
+      <div class="lp-sazetak">
+        <div>
+          <strong>{{ km !== null ? '~' + decimalno(km) : '–' }}</strong>
+          <small>km</small>
+        </div>
+        <div>
+          <strong>{{ trajanje !== null ? trajanje : '–' }}</strong>
+          <small>min vožnje</small>
+        </div>
+        <div>
+          <strong>{{ t.stajalista.length }}</strong>
+          <small>stajališta</small>
+        </div>
+        <div>
+          <strong>{{ vozniRed ? polasci.length : '–' }}</strong>
+          <small>polazaka</small>
+        </div>
+      </div>
+
+      <a class="lp-karta" routerLink="/karta" [queryParams]="{ linija: linija.broj }">
+        <i class="pi pi-map"></i> Prikaži liniju na karti
+      </a>
+
+      <!-- Polasci -->
+      <h2 class="vz-section-title">
+        Polasci · {{ danNaziv }}
+        <span *ngIf="t.stajalista.length">s {{ t.stajalista[0].naziv }}</span>
+      </h2>
+      <section class="vz-card lp-polasci">
+        <p class="lp-stanje" *ngIf="ucitavaVozniRed">Učitavam polaske…</p>
+        <p class="lp-stanje" *ngIf="!ucitavaVozniRed && !vozniRed">Polaske trenutno nije moguće učitati.</p>
+        <p class="lp-stanje" *ngIf="vozniRed && !polasci.length">Ova trasa {{ danNaziv }} ne vozi.</p>
+        <div class="lp-sat" *ngFor="let s of satiPolazaka">
+          <span class="lp-sat-h">{{ s.sat }}</span>
+          <span class="lp-sat-m">
+            <button
+              *ngFor="let p of s.polasci"
+              type="button"
+              [class.is-proslo]="p.proslo"
+              [class.is-on]="p.indeks === polazak"
+              [attr.aria-pressed]="p.indeks === polazak"
+              [attr.aria-label]="'Polazak ' + p.vrijeme"
+              (click)="odaberiPolazak(p.indeks)"
+            >
+              {{ p.vrijeme.slice(3) }}
+            </button>
+          </span>
+        </div>
+        <p class="lp-napomena" *ngIf="polasci.length">
+          Dodirni polazak za vremena po stajalištima.
+        </p>
+      </section>
+
+      <!-- Stajališta -->
+      <h2 class="vz-section-title">
+        Stajališta
+        <span *ngIf="polazak !== null">polazak {{ polasci[polazak] }}</span>
+      </h2>
+      <ol class="vz-card lp-stajalista">
+        <li *ngFor="let r of stajalista; let first = first; let last = last" [class.is-kraj]="first || last">
+          <span class="lp-st-vrijeme">
+            <ng-container *ngIf="r.vrijeme; else odPolaska">{{ r.vrijeme }}</ng-container>
+            <ng-template #odPolaska>{{ r.min !== null ? '+' + r.min + "'" : '' }}</ng-template>
+          </span>
+          <span class="lp-st-tocka" aria-hidden="true"></span>
+          <span class="lp-st-naziv">{{ r.stajaliste.naziv }}</span>
+          <span class="lp-st-km">{{ r.m !== null ? decimalno(r.m / 1000) + ' km' : '' }}</span>
+        </li>
+      </ol>
+      <p class="lp-napomena">Vremena i kilometraža su okvirni, prema ZET-ovom voznom redu i obliku trase.</p>
+    </ng-container>
+  </ng-container>
+</app-pregled-okvir>

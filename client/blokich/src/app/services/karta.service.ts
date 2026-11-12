@@ -50,7 +50,20 @@ export interface RutaKarta {
   tip: number;
 }
 
-/** Ruta linije: za svaki smjer glavna trasa i stajališta. */
+/** Jedna trasa smjera linije: glavna ili rjeđa varijanta. */
+export interface VarijantaKarta {
+  oblik: string;
+  cilj: string | null;
+  tocke: [number, number][];
+  stajalista: StajalisteKarta[];
+  /** Najviše vožnji tom trasom u jednom danu. */
+  voznji: number;
+  glavna: boolean;
+  /** Npr. "Glavna trasa", "preko Jadranska av.-Arena", "do Petlja - izlaz". */
+  opis: string;
+}
+
+/** Ruta linije: za svaki smjer glavna trasa i stajališta, plus sve varijante. */
 export interface LinijaKarta {
   broj: string;
   opis: string;
@@ -61,7 +74,18 @@ export interface LinijaKarta {
     oblik: string;
     tocke: [number, number][];
     stajalista: StajalisteKarta[];
+    /** Prva je glavna. Stariji API ih ne šalje. */
+    varijante?: VarijantaKarta[];
   }[];
+}
+
+/** Vozni red linije za jedan dan (vidi /api/karta/vozni-red). */
+export interface VozniRedKarta {
+  broj: string;
+  /** YYYYMMDD */
+  datum: string;
+  /** shape_id -> polasci (HH:MM, redom) i minute od polaska do svakog stajališta. */
+  oblici: Record<string, { polasci: string[]; vremena: number[] | null }>;
 }
 
 /** Skretanje na trasi (vidi /api/karta/navigacija). */
@@ -111,6 +135,13 @@ export class KartaService {
   linija(broj: string) {
     const params = new HttpParams().set('broj', broj);
     return this.api.get<LinijaKarta>('karta/linija', params);
+  }
+
+  /** Vozni red linije na dan (YYYYMMDD, zadano danas): polasci po trasi. */
+  vozniRed(broj: string, datum?: string) {
+    let params = new HttpParams().set('broj', broj);
+    if (datum) params = params.set('datum', datum);
+    return this.api.get<VozniRedKarta>('karta/vozni-red', params);
   }
 
   /** Skretanja po trasi za navigaciju. */

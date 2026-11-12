@@ -1,0 +1,547 @@
+:host {
+  --lp-bus: #0f172a;
+  --lp-tram: #2563eb;
+}
+
+button {
+  font: inherit;
+}
+
+.lp-stanje {
+  margin: 12px 4px;
+  color: var(--vz-muted);
+  font-size: 14px;
+  list-style: none;
+
+  &.is-err {
+    color: #b91c1c;
+  }
+}
+
+.lp-napomena {
+  margin: 10px 4px 0;
+  color: var(--vz-muted);
+  font-size: 12px;
+}
+
+// ---------- Popis ----------
+
+.lp-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0 12px;
+}
+
+.lp-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface-2);
+
+  .pi {
+    color: var(--vz-muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 46px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--vz-text);
+    font-size: 16px;
+  }
+
+  &:focus-within {
+    border-color: var(--p-primary-400);
+  }
+}
+
+.lp-tipovi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 4px;
+    border: 1px solid var(--vz-border);
+    border-radius: 10px;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+
+    .pi {
+      font-size: 12px;
+      color: var(--vz-muted);
+    }
+
+    &.is-on {
+      border-color: var(--p-primary-300);
+      background: var(--p-primary-50);
+      color: var(--p-primary-700);
+
+      .pi {
+        color: var(--p-primary-600);
+      }
+    }
+  }
+}
+
+.lp-lista {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--vz-border);
+  border-radius: 20px;
+  background: var(--vz-surface);
+  list-style: none;
+
+  li + li {
+    border-top: 1px solid var(--vz-border);
+  }
+
+  .lp-stanje {
+    margin: 0;
+    padding: 16px;
+  }
+}
+
+.lp-red {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--vz-text);
+  text-align: left;
+  cursor: pointer;
+
+  &:active {
+    background: var(--vz-surface-2);
+  }
+
+  > .pi {
+    color: var(--vz-muted);
+    font-size: 12px;
+  }
+}
+
+.lp-broj {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 46px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 9px;
+  background: var(--lp-bus);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+
+  &.is-tram {
+    background: var(--lp-tram);
+  }
+
+  &.is-big {
+    min-width: 64px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 22px;
+  }
+}
+
+.lp-opis {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// ---------- Linija ----------
+
+.lp-natrag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px -4px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--p-primary-700);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+
+  .pi {
+    font-size: 13px;
+  }
+}
+
+.lp-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+
+  > div {
+    min-width: 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -0.3px;
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 2px 0 0;
+    color: var(--vz-muted);
+    font-size: 13px;
+  }
+}
+
+.lp-dani {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 6px;
+  margin-bottom: 10px;
+
+  button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 0;
+    padding: 8px 2px;
+    border: 1px solid var(--vz-border);
+    border-radius: 12px;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    cursor: pointer;
+
+    strong {
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    small {
+      color: var(--vz-muted);
+      font-size: 11.5px;
+    }
+
+    &.is-on {
+      border-color: var(--p-primary-500);
+      background: var(--p-primary-500);
+      color: #fff;
+
+      small {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+  }
+}
+
+.lp-smjerovi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--vz-border);
+    border-radius: 14px;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .pi {
+      color: var(--vz-muted);
+      font-size: 12px;
+    }
+
+    &.is-on {
+      border-color: var(--p-primary-300);
+      background: var(--p-primary-50);
+
+      .pi {
+        color: var(--p-primary-600);
+      }
+    }
+  }
+}
+
+.lp-varijante {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 12px;
+
+  .vz-label {
+    margin: 0 4px 2px;
+  }
+}
+
+.lp-var {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--vz-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--vz-text);
+  font-size: 14px;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+
+  .pi {
+    flex: none;
+    color: var(--vz-muted);
+    font-size: 12px;
+  }
+
+  &.is-on {
+    border-color: var(--p-primary-300);
+    background: var(--p-primary-50);
+
+    .pi {
+      color: var(--p-primary-600);
+    }
+  }
+}
+
+.lp-var-opis {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lp-var-broj {
+  flex: none;
+  color: var(--vz-muted);
+  font-size: 12.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+
+  &.is-nula {
+    font-weight: 500;
+  }
+}
+
+.lp-sazetak {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    padding: 10px 4px;
+    border: 1px solid var(--vz-border);
+    border-radius: 14px;
+    background: var(--vz-surface);
+  }
+
+  strong {
+    font-size: 18px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  small {
+    color: var(--vz-muted);
+    font-size: 11.5px;
+    text-align: center;
+  }
+}
+
+.lp-karta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 11px;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  color: var(--p-primary-700);
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.lp-polasci {
+  margin-bottom: 18px;
+  padding: 8px 12px 12px;
+
+  .lp-stanje {
+    margin: 8px 4px;
+  }
+}
+
+.lp-sat {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+
+  & + & {
+    border-top: 1px solid var(--vz-border);
+  }
+}
+
+.lp-sat-h {
+  flex: none;
+  width: 28px;
+  padding-top: 5px;
+  font-size: 15px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-sat-m {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  button {
+    min-width: 40px;
+    padding: 5px 6px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--vz-surface-2);
+    color: var(--vz-text);
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+
+    &.is-proslo {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    &.is-on {
+      border-color: var(--p-primary-500);
+      background: var(--p-primary-500);
+      color: #fff;
+    }
+  }
+}
+
+.lp-stajalista {
+  margin: 0;
+  padding: 6px 14px;
+  list-style: none;
+
+  li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+  }
+
+  // Okomita crta kroz točke stajališta.
+  li::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 54px;
+    width: 2px;
+    background: var(--vz-border);
+    content: '';
+  }
+
+  li:first-child::before {
+    top: 50%;
+  }
+
+  li:last-child::before {
+    bottom: 50%;
+  }
+}
+
+.lp-st-vrijeme {
+  flex: none;
+  width: 40px;
+  color: var(--vz-muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.lp-st-tocka {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--p-primary-500);
+  border-radius: 50%;
+  background: var(--vz-surface);
+
+  .is-kraj & {
+    background: var(--p-primary-500);
+  }
+}
+
+.lp-st-naziv {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  font-size: 14px;
+
+  .is-kraj & {
+    font-weight: 700;
+  }
+}
+
+.lp-st-km {
+  flex: none;
+  color: var(--vz-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
