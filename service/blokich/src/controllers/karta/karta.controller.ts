@@ -78,6 +78,24 @@ export class KartaController {
   }
 
   /**
+   * GET /api/karta/vozni-red?broj=132&datum=20261113 – polasci svake trase
+   * linije na dan (zadano danas) i vremena vožnje do stajališta.
+   */
+  @Get('vozni-red')
+  @Header('Cache-Control', 'private, max-age=900')
+  vozniRed(@Query('broj') broj?: string, @Query('datum') datum?: string) {
+    if (!broj || !/^[\w.-]{1,10}$/.test(broj)) {
+      throw new BadRequestException('Neispravan broj linije.');
+    }
+    if (datum !== undefined && !/^\d{8}$/.test(datum)) {
+      throw new BadRequestException('Neispravan datum (YYYYMMDD).');
+    }
+    const v = this.kartaService.vozniRed(broj, datum);
+    if (!v) throw new NotFoundException('Linija nije pronađena.');
+    return v;
+  }
+
+  /**
    * GET /api/karta/navigacija?oblik=137_3 – skretanja po trasi za navigaciju:
    * s imenima ulica ako je postavljen OSRM_URL, inače iz oblika trase.
    */

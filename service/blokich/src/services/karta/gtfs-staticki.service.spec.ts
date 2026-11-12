@@ -46,6 +46,7 @@ describe('obradiGtfs', () => {
       smjer: 0,
       cilj: 'Dubrava',
       servis: '0_11',
+      polazak: 300,
     });
   });
 
@@ -57,6 +58,10 @@ describe('obradiGtfs', () => {
       lon: 15.93493,
     });
     expect(g.stajalistaOblika.get('109_1')).toEqual(['98_1', '99_2']);
+  });
+
+  it('minute od polaska do stajališta trase', () => {
+    expect(g.vremenaOblika?.get('109_1')).toEqual([0, 10]);
   });
 
   it('točke trase po redoslijedu', () => {

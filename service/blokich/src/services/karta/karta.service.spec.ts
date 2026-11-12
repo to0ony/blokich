@@ -1,5 +1,5 @@
-import { KartaService, opisVarijante, spojiVozilo } from './karta.service';
-import { GtfsPodaci, glavneTraseLinija } from './gtfs-staticki.service';
+import { KartaService, danasZagreb, opisVarijante, spojiVozilo, vozniRed } from './karta.service';
+import { GtfsPodaci, glavneTraseLinija, kalendarGtfs, servisiNaDan } from './gtfs-staticki.service';
 import { VOZNI_PARK } from '../zet-uzivo/zet-uzivo.service';
 
 const gtfs: GtfsPodaci = {
@@ -228,5 +228,72 @@ describe('KartaService.linija', () => {
 
   it('nepoznata linija = null', () => {
     expect(s.linija('999')).toBeNull();
+  });
+});
+
+describe('vozni red', () => {
+  const kalendar = kalendarGtfs(
+    [
+      {
+        service_id: 'radni',
+        monday: '1',
+        tuesday: '1',
+        wednesday: '1',
+        thursday: '1',
+        friday: '1',
+        saturday: '0',
+        sunday: '0',
+        start_date: '20261101',
+        end_date: '20261231',
+      },
+    ],
+    [
+      { service_id: 'radni', date: '20261113', exception_type: '2' },
+      { service_id: 'blagdan', date: '20261113', exception_type: '1' },
+      { service_id: 'sub', date: '20261114', exception_type: '1' },
+    ],
+  );
+
+  it('servisi po danu u tjednu i iznimkama', () => {
+    expect([...servisiNaDan(kalendar, '20261112')]).toEqual(['radni']);
+    expect([...servisiNaDan(kalendar, '20261113')]).toEqual(['blagdan']);
+    expect([...servisiNaDan(kalendar, '20261114')]).toEqual(['sub']);
+    expect([...servisiNaDan(kalendar, '20261115')]).toEqual([]);
+  });
+
+  it('polasci trase redom, samo servisi tog dana, preko ponoći', () => {
+    const v = (oblik: string, servis: string, polazak: number) => ({
+      ruta: '132',
+      oblik,
+      smjer: 0,
+      cilj: 'Brezovica',
+      servis,
+      polazak,
+    });
+    const g: GtfsPodaci = {
+      ...gtfs,
+      voznje: new Map([
+        ['a', v('132_5', 'radni', 8 * 60 + 15)],
+        ['b', v('132_5', 'radni', 4 * 60 + 10)],
+        ['c', v('132_5', 'radni', 24 * 60 + 5)],
+        ['d', v('132_8', 'radni', 5 * 60)],
+        ['e', v('132_5', 'sub', 6 * 60)],
+      ]),
+      vremenaOblika: new Map([['132_5', [0, 2, 29]]]),
+      kalendar,
+    };
+    const ruta = { id: '132', naziv: '132', opis: '', tip: 3 };
+    expect(vozniRed(g, ruta, '20261112')).toEqual({
+      broj: '132',
+      datum: '20261112',
+      oblici: {
+        '132_5': { polasci: ['04:10', '08:15', '00:05'], vremena: [0, 2, 29] },
+        '132_8': { polasci: ['05:00'], vremena: null },
+      },
+    });
+  });
+
+  it('danasZagreb po zagrebačkom vremenu', () => {
+    expect(danasZagreb(new Date('2026-11-12T23:30:00Z'))).toBe('20261113');
   });
 });

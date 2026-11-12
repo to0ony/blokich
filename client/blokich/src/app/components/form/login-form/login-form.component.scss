@@ -176,7 +176,8 @@
 }
 
 // Neparan broj linkova: zadnji ide preko cijele širine
-.lg-links > .lg-link:last-child:nth-child(odd) {
+.lg-links > .lg-link:last-child:nth-child(odd),
+.lg-links > .lg-link.is-wide {
   grid-column: 1 / -1;
 }
 

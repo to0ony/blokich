@@ -59,6 +59,13 @@ export const routes: Routes = [
         (m) => m.VozniParkComponent,
       ),
   },
+  // Preglednik linija: trase, varijante, stajališta i polasci
+  {
+    canActivate: [PristupGuard],
+    path: 'linije',
+    loadComponent: () =>
+      import('./pages/linije/linije.component').then((m) => m.LinijePreglednikComponent),
+  },
   // Karta uživo s login ekrana (otključan uređaj)
   {
     canActivate: [PristupGuard],
