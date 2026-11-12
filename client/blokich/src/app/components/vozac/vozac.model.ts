@@ -222,33 +222,74 @@ function minute(hhmm: string | undefined): number | null {
 }
 
 /**
- * Je li služba sad u tijeku: od `od` do neposredno prije `do` (i preko
- * ponoći). U minuti predaje vozi onaj koji preuzima.
+ * Je li služba sad u tijeku: od `od` do neposredno prije `do`. U minuti
+ * predaje vozi onaj koji preuzima. Služba preko ponoći (20:00–01:30) svog
+ * dana traje od `od` do ponoći, a sutradan (`jucer` = služba je od jučer)
+ * od ponoći do `do` – isto pravilo kao na backendu (aktivniNaBlokovima).
  */
 export function uSmjeniSad(
   od?: string,
   doo?: string,
   sad = new Date(),
+  jucer = false,
 ): boolean {
   const a = minute(od);
   const b = minute(doo);
   if (a === null || b === null) return false;
   const n = sad.getHours() * 60 + sad.getMinutes();
-  return a <= b ? n >= a && n < b : n >= a || n < b;
+  if (jucer) return a > b && n < b;
+  return a <= b ? n >= a && n < b : n >= a;
+}
+
+/** Je li datum jučerašnji dan u odnosu na `sad`. */
+export function jeJucer(datum: Dayjs, sad = new Date()): boolean {
+  return datum.isSame(dayjs(sad).subtract(1, 'day'), 'day');
+}
+
+/**
+ * Dan koji vozač sad "živi": jučerašnji dok njegova služba preko ponoći još
+ * traje, inače današnji. Tako noćna vožnja ne nestane u ponoć.
+ */
+export function aktivniDan<T extends { datum: Dayjs; sluzbe: Sluzba[] }>(
+  dani: T[],
+  sad = new Date(),
+): T | undefined {
+  const jucer = dani.find((d) => jeJucer(d.datum, sad));
+  if (jucer?.sluzbe.some((s) => uSmjeniSad(s.od, s.do, sad, true))) return jucer;
+  return dani.find((d) => d.datum.isSame(dayjs(sad), 'day'));
+}
+
+/**
+ * Stanje službe zadanog dana u odnosu na sad: je li u tijeku i za koliko
+ * minuta počinje (null = već je počela ili prošla). Služba od jučer više ne
+ * počinje – samo još traje do svog `do`.
+ */
+export function stanjeSluzbe(
+  dan: { datum: Dayjs },
+  s: { od?: string; do?: string },
+  sad = new Date(),
+): { uTijeku: boolean; za: number | null } {
+  const jucer = jeJucer(dan.datum, sad);
+  return {
+    uTijeku: uSmjeniSad(s.od, s.do, sad, jucer),
+    za: jucer ? null : minutaDo(s.od, sad),
+  };
 }
 
 /**
  * Tko od kolega trenutno vozi koji blok. Kod predaje smjene (dvije službe
  * istog V.R. se preklapaju) vozi onaj koji je ranije počeo – do zamjene.
+ * `jucer` = kolege su iz jučerašnjeg rasporeda (noćne službe nakon ponoći).
  */
 export function aktivniPoBloku(
   kolege: Kolega[],
   sad = new Date(),
+  jucer = false,
 ): Map<string, Kolega> {
   const mapa = new Map<string, Kolega>();
   for (const k of kolege) {
     const blok = blokZa(k);
-    if (!blok || !uSmjeniSad(k.od, k.do, sad)) continue;
+    if (!blok || !uSmjeniSad(k.od, k.do, sad, jucer)) continue;
     const postojeci = mapa.get(blok);
     if (!postojeci || (minute(k.od) ?? 0) < (minute(postojeci.od) ?? 0)) {
       mapa.set(blok, k);

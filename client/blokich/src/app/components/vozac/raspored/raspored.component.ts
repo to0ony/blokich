@@ -29,15 +29,16 @@ import {
   Kolega,
   RasporedOdgovor,
   TjedanTip,
+  aktivniDan,
   blokZa,
+  jeJucer,
   jePricuva,
   kasniZnatno,
-  minutaDo,
   opisKasnjenja,
   opisOdsustva,
   procjenaDolaska,
   slozTjedan,
-  uSmjeniSad,
+  stanjeSluzbe,
 } from '../vozac.model';
 
 /** Bus koji preuzimam prikazuje se tek 60 min prije mog nastupa. */
@@ -85,6 +86,8 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @Input() error: string | null = null;
   @Input() tjedan: TjedanTip = 'trenutni';
   @Input() naredniDostupan = false;
+  /** Ponedjeljak: nedjelja prošlog tjedna, dok njena noćna služba još traje. */
+  @Input() prethodniDan: DanRasporeda | null = null;
   @Output() tjedanChange = new EventEmitter<TjedanTip>();
   @Output() retry = new EventEmitter<void>();
   @Output() otvoriKalendar = new EventEmitter<void>();
@@ -130,7 +133,6 @@ export class RasporedComponent implements OnChanges, OnDestroy {
 
   private pokreniUzivo(): void {
     this.zaustaviUzivo();
-    if (!this.danas?.sluzbe.some((s) => blokZa(s))) return;
     this.osvjeziMojBus();
     this.uzivoTimer = setInterval(() => this.osvjeziMojBus(), UZIVO_INTERVAL_MS);
   }
@@ -142,15 +144,15 @@ export class RasporedComponent implements OnChanges, OnDestroy {
    */
   osvjeziMojBus(): void {
     if (typeof document !== 'undefined' && document.hidden) return;
-    const sluzbe = this.danas?.sluzbe ?? [];
+    const dan = this.danas;
+    const sluzbe = (dan?.sluzbe ?? []).filter((s) => blokZa(s));
+    const stanja = dan ? sluzbe.map((s) => ({ s, ...stanjeSluzbe(dan, s) })) : [];
 
-    const sad = sluzbe.find((s) => blokZa(s) && uSmjeniSad(s.od, s.do));
+    const sad = stanja.find((x) => x.uTijeku)?.s;
     const sljedeca = sad
       ? undefined
-      : sluzbe
-          .filter((s) => blokZa(s))
-          .map((s) => ({ s, za: minutaDo(s.od) }))
-          .filter((x) => x.za !== null && x.za! <= CEKANJE_MIN)
+      : stanja
+          .filter((x) => x.za !== null && x.za <= CEKANJE_MIN)
           .sort((a, b) => a.za! - b.za!)[0]?.s;
 
     const cilj = sad ?? sljedeca;
@@ -192,8 +194,23 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Dan za karticu "Danas" i kartu: današnji, a nakon ponoći jučerašnji dok
+   * njegova noćna služba još traje (računa se iznova pri svakom prikazu).
+   */
   get danas(): DanRasporeda | undefined {
-    return this.tjedan === 'trenutni' ? this.dani.find((d) => d.danas) : undefined;
+    if (this.tjedan !== 'trenutni') return undefined;
+    return aktivniDan(this.prethodniDan ? [this.prethodniDan, ...this.dani] : this.dani);
+  }
+
+  /** Kartica Danas prikazuje jučerašnji dan (noćna služba nakon ponoći). */
+  odJucer(dan: DanRasporeda): boolean {
+    return jeJucer(dan.datum);
+  }
+
+  /** Dan je iz prošlog tjedna – za njega nema popisa kolega. */
+  izProslogTjedna(dan: DanRasporeda): boolean {
+    return dan === this.prethodniDan;
   }
 
   get rasponTjedna(): string {
@@ -271,10 +288,11 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   /** Indeks linije koja je sad u tijeku, inače sljedeće danas, inače prve. */
   private aktualnaLinija(dan: DanRasporeda): number {
     const linije = this.linijeKarte(dan);
-    const sluzbe = dan.sluzbe.filter((s) => blokZa(s) && s.linija);
-    const sad = sluzbe.find((s) => uSmjeniSad(s.od, s.do));
-    const sljedeca = sluzbe
-      .map((s) => ({ s, za: minutaDo(s.od) }))
+    const stanja = dan.sluzbe
+      .filter((s) => blokZa(s) && s.linija)
+      .map((s) => ({ s, ...stanjeSluzbe(dan, s) }));
+    const sad = stanja.find((x) => x.uTijeku)?.s;
+    const sljedeca = stanja
       .filter((x) => x.za !== null)
       .sort((a, b) => a.za! - b.za!)[0]?.s;
     const i = linije.indexOf((sad ?? sljedeca)?.linija ?? '');

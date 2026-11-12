@@ -7,10 +7,12 @@
 <section
   class="rs-today"
   *ngIf="!loading && danas as d"
-  (click)="d.sluzbe.length && otvoriSmjenu(d)"
+  (click)="d.sluzbe.length && !izProslogTjedna(d) && otvoriSmjenu(d)"
 >
   <div class="rs-today-top">
-    <span class="rs-today-label">Danas · {{ d.naziv }} {{ d.datum.format("D.M.") }}</span>
+    <span class="rs-today-label"
+      >{{ odJucer(d) ? 'Noćna od jučer' : 'Danas' }} · {{ d.naziv }} {{ d.datum.format("D.M.") }}</span
+    >
     <span class="rs-today-sl" *ngIf="d.sluzbe.length">Sl. {{ d.sluzbe[0].br_sl }}</span>
   </div>
 
@@ -42,7 +44,7 @@
       </ng-container>
     </div>
     <!-- Uz poruku o busu gumb ide na desnu stranu kartice -->
-    <div class="rs-today-actions" [class.is-right]="mojBus" *ngIf="linije(d).length">
+    <div class="rs-today-actions" [class.is-right]="mojBus" *ngIf="linije(d).length && !izProslogTjedna(d)">
       <p-button
         label="Tko još vozi danas"
         icon="pi pi-users"

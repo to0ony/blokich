@@ -21,7 +21,7 @@ import {
 } from '../../../services/karta.service';
 import { Kretanje, sljedeceStajaliste, stajalistaNaTrasi } from '../../karta/kretanje';
 import { BOJE, STIL, Tema, oznakaVozila, ucitajCss, ucitajPostavke } from '../../karta/karta-stil';
-import { DanRasporeda, Sluzba, blokZa, minutaDo, uSmjeniSad } from '../vozac.model';
+import { DanRasporeda, Sluzba, blokZa, stanjeSluzbe } from '../vozac.model';
 
 /** Bus koji preuzimam prati se tek 60 min prije mog nastupa (kao na kartici Danas). */
 const CEKANJE_MIN = 60;
@@ -115,15 +115,18 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   /** Služba u tijeku → vozim; sljedeća unutar sat vremena → čekam bus; kasnije → samo ruta. */
   private odrediDio(): void {
-    const sluzbe = (this.dan?.sluzbe ?? []).filter(
+    const dan = this.dan;
+    const sluzbe = (dan?.sluzbe ?? []).filter(
       (s) => blokZa(s) && s.linija && (!this.linija || s.linija === this.linija),
     );
-    const sad = sluzbe.find((s) => uSmjeniSad(s.od, s.do));
+    // Služba od jučer (noćna, nakon ponoći) samo još traje – ne "kreće" ponovno.
+    const stanja = dan ? sluzbe.map((s) => ({ s, ...stanjeSluzbe(dan, s) })) : [];
+    const sad = stanja.find((x) => x.uTijeku)?.s;
     const sljedeca = sad
       ? undefined
-      : sluzbe
-          .map((s) => ({ s, za: minutaDo(s.od) }))
+      : stanja
           .filter((x) => x.za !== null)
+          .map((x) => ({ s: x.s, za: x.za }))
           .sort((a, b) => a.za! - b.za!)[0];
 
     // Kad je linija jedna od više, odvožena ostaje (s trasom), da klizač ne mijenja broj kartica.

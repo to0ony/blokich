@@ -5,6 +5,7 @@ import { PrimeNG } from 'primeng/config';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import dayjs from 'dayjs';
 import { DriverScheduleService } from '../../services/driver-schedule.service';
 import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
 import { RasporedComponent } from '../../components/vozac/raspored/raspored.component';
@@ -14,13 +15,16 @@ import { LinijeComponent } from '../../components/vozac/linije/linije.component'
 import { SluzbeComponent } from '../../components/vozac/sluzbe/sluzbe.component';
 import { DriverStatsComponent } from '../../components/stats/driver-stats/driver-stats.component';
 import {
+  DANI,
   DanRasporeda,
   RasporedOdgovor,
   TjedanTip,
   VozacView,
+  aktivniDan,
   inicijali,
   slozTjedan,
   telefoni,
+  uSmjeniSad,
 } from '../../components/vozac/vozac.model';
 
 interface NavStavka {
@@ -81,9 +85,16 @@ export class DashboardDriverComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  /** Današnji dan iz tekućeg tjedna – za pogled "Danas". */
-  danas: DanRasporeda | undefined;
+  /** Dani tekućeg tjedna – iz njih se bira aktivni dan za pogled "Danas". */
+  private daniTekuci: DanRasporeda[] = [];
   danasLoading = true;
+  /** Ponedjeljak nakon ponoći: nedjelja prošlog tjedna dok njena noćna služba traje. */
+  prethodniDan: DanRasporeda | null = null;
+
+  /** Današnji dan, a nakon ponoći jučerašnji dok njegova noćna služba traje. */
+  get danas(): DanRasporeda | undefined {
+    return aktivniDan(this.daniTekuci);
+  }
 
   constructor() {
     postaviPrimeNgTemu(inject(PrimeNG));
@@ -150,11 +161,38 @@ export class DashboardDriverComponent implements OnInit {
   }
 
   private postaviDanas(data: RasporedOdgovor): void {
-    this.danas = slozTjedan(data).find((d) => d.danas);
+    this.daniTekuci = slozTjedan(data);
     this.danasLoading = false;
+    this.ucitajProsluNedjelju();
     // Stare komponente (navbar) čitaju današnje linije iz sessionStorage.
     const linije = [...new Set((this.danas?.sluzbe ?? []).map((s) => s.linija).filter(Boolean))];
     sessionStorage.setItem('danasnjeLinije', JSON.stringify(linije));
+  }
+
+  /**
+   * U ponedjeljak je nedjeljna služba u prošlom tjednu – dohvati je iz
+   * kalendara, da noćna vožnja ne nestane u ponoć.
+   */
+  private ucitajProsluNedjelju(): void {
+    const sad = dayjs();
+    if (sad.isoWeekday() !== 1 || this.prethodniDan) return;
+    const nedjelja = sad.subtract(1, 'day').startOf('day');
+    this.rasporedService.fetchKalendar(nedjelja.year(), nedjelja.month() + 1).subscribe({
+      next: (k) => {
+        const d = k?.dani?.find((x) => dayjs(x.datum).isSame(nedjelja, 'day'));
+        const sluzbe = d?.sluzbe ?? [];
+        if (!sluzbe.some((s) => uSmjeniSad(s.od, s.do, new Date(), true))) return;
+        this.prethodniDan = {
+          ...DANI[6],
+          datum: nedjelja,
+          sluzbe,
+          odsustvo: null,
+          danas: false,
+          prosao: true,
+        };
+      },
+      error: () => {},
+    });
   }
 
   odjava(): void {

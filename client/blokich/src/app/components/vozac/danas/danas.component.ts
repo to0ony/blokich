@@ -13,6 +13,7 @@ import {
   Kolega,
   VoziloUzivo,
   aktivniPoBloku,
+  jeJucer,
   kolegaKljuc,
   opisOdsustva,
 } from '../vozac.model';
@@ -72,7 +73,9 @@ export class DanasComponent implements OnChanges, OnDestroy {
   osvjeziUzivo(): void {
     if (typeof document !== 'undefined' && document.hidden) return;
 
-    const aktivni = aktivniPoBloku(this.grupe.flatMap((g) => g.kolege));
+    // Nakon ponoći dan može biti jučerašnji (noćna služba još traje).
+    const jucer = !!this.dan && jeJucer(this.dan.datum);
+    const aktivni = aktivniPoBloku(this.grupe.flatMap((g) => g.kolege), new Date(), jucer);
     if (!aktivni.size) {
       this.uzivo = {};
       return;
