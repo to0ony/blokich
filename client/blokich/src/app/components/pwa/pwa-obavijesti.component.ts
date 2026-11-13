@@ -10,7 +10,7 @@ import { PwaService } from '../../services/pwa.service';
       @if (!pwa.online()) {
         <div class="po-pill">
           <i class="pi pi-wifi"></i>
-          <span>Nema veze · prikazani su zadnji spremljeni podaci</span>
+          <span>Nema veze s internetom</span>
         </div>
       }
       @if (pwa.novaVerzija()) {

@@ -36,7 +36,7 @@ bootstrapApplication(AppComponent, {
     // PrimeNG tema se postavlja tek na admin stranici (vidi DashboardAdminComponent),
     // da vozači ne skidaju PrimeNG u početnom bundleu.
     provideAnimationsAsync(),
-    // Offline ljuska aplikacije i spremljeni raspored (ngsw-config.json); samo u produkciji.
+    // Ljuska aplikacije u kešu i obavijest o novoj verziji (ngsw-config.json); samo u produkciji.
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
