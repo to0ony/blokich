@@ -1,18 +1,50 @@
+/*
+ * Dvije sekcije (grupiranje po blizini): "sada" (Danas + karta) i "tjedan".
+ * Razmak između sekcija je osjetno veći nego unutar njih.
+ */
 :host {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 30px;
 }
 
-/* Tjedan: naslov, prekidač i traka s danima u jednoj kartici */
+.rs-grupa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+/* "Sada": kartica Danas i karta ispod nje spojene u jedan blok */
+.rs-grupa.rs-sad {
+  gap: 0;
+
+  /* Karta je odmah ispod – donji kutovi idu karti */
+  > .rs-today:not(:last-child) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  /* Više linija: svaka karta preko cijele širine, da se spoji s karticom */
+  .rs-klizac > app-moja-karta {
+    flex-basis: 100%;
+  }
+}
+
+:host ::ng-deep .rs-sad .mk {
+  margin-top: 0;
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+}
+
+/* Zaglavlje sekcije tjedna: naslov, prekidač i traka dana, bez okvira */
 .rs-week {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  background: var(--vz-surface);
-  border: 1px solid var(--vz-border);
-  border-radius: 20px;
+  gap: 12px;
 }
 
 .rs-week-head {
@@ -92,13 +124,13 @@
     padding: 0;
     border: 0;
     border-radius: 4px;
-    background: #cbd5e1;
+    background: var(--vz-dot);
     cursor: pointer;
     transition: width 0.2s;
 
     &.is-on {
       width: 18px;
-      background: #1b3654;
+      background: var(--vz-hero);
     }
   }
 }
@@ -109,7 +141,7 @@
   padding: 18px 18px 16px;
   border-radius: 20px;
   color: #fff;
-  background: #1b3654;
+  background: var(--vz-hero);
   cursor: pointer;
 }
 
@@ -319,9 +351,9 @@
   align-items: center;
   gap: 1px;
   padding: 8px 0 7px;
-  border: 1px solid transparent;
+  border: 1px solid var(--vz-border);
   border-radius: 12px;
-  background: var(--vz-surface-2);
+  background: var(--vz-surface);
   color: var(--vz-muted);
   cursor: pointer;
   transition: transform 0.1s;
@@ -336,19 +368,24 @@
 
   /* Vikend i blagdani: blaga nijansa, danas je i dalje plav */
   &.is-sat {
-    background: color-mix(in srgb, #13804b 8%, var(--vz-surface-2));
+    background: color-mix(in srgb, var(--vz-green) 8%, var(--vz-surface));
 
     .rs-chip-day {
-      color: color-mix(in srgb, #13804b 70%, var(--vz-muted));
+      color: color-mix(in srgb, var(--vz-green) 70%, var(--vz-muted));
     }
   }
 
   &.is-sun {
-    background: color-mix(in srgb, #d93025 8%, var(--vz-surface-2));
+    background: color-mix(in srgb, var(--vz-red) 8%, var(--vz-surface));
 
     .rs-chip-day {
-      color: color-mix(in srgb, #d93025 70%, var(--vz-muted));
+      color: color-mix(in srgb, var(--vz-red) 70%, var(--vz-muted));
     }
+  }
+
+  /* Dan prikazan u klizaču ispod */
+  &.is-shown {
+    border-color: var(--p-primary-300);
   }
 
   &.is-today {
@@ -394,9 +431,79 @@
 
 /* Dani */
 .rs-list {
+  position: relative;
+  scroll-margin: 90px;
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /*
+   * Rubovi kartice ne smiju biti odrezani: širina 90% daje dijelove piksela,
+   * a klizač staje na cijelom pikselu. 4px zraka oko kartica, i za plavi
+   * okvir današnjeg dana (margina vraća poravnanje sa stranicom).
+   */
+  margin: -4px;
+  padding: 4px;
+  scroll-padding: 0 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Kartica uz lijevi rub, sljedeća malo viri desno – vidi se da se lista. */
+  > .rs-day {
+    flex: 0 0 90%;
+    min-width: 0;
+    scroll-snap-align: start;
+    /* Jedno povlačenje = najviše jedan dan, i kod brzog poteza */
+    scroll-snap-stop: always;
+  }
+
+  /* Jednom: kartice se malo pomaknu ulijevo i vrate – "povuci me". */
+  &.is-hint > .rs-day {
+    animation: rs-nagovjestaj 1.4s ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.is-hint > .rs-day {
+      animation: none;
+    }
+  }
+
+  /* Rubna kartica za prelazak u drugi tjedan (uska, puna visine reda) */
+  > .rs-rub {
+    flex: 0 0 104px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 8px;
+    border: 1px dashed var(--vz-border);
+    border-radius: 18px;
+    background: none;
+    color: var(--vz-muted);
+    font-size: 13px;
+    font-weight: 650;
+    text-align: center;
+    cursor: pointer;
+    scroll-snap-align: start;
+
+    .pi {
+      font-size: 16px;
+      color: var(--p-primary-600);
+    }
+  }
+
+  /* Mjesto iza nedjelje, da se i ona poravna uz lijevi rub. */
+  &::after {
+    content: '';
+    flex: 0 0 calc(10% - 10px);
+  }
 }
 
 .rs-day {
@@ -405,7 +512,6 @@
   background: var(--vz-surface);
   border: 1px solid var(--vz-border);
   border-radius: 18px;
-  scroll-margin: 90px;
 
   &.is-today {
     border-color: var(--p-primary-400);
@@ -438,10 +544,10 @@
   color: var(--vz-text);
 
   .is-sat & {
-    color: #13804b;
+    color: var(--vz-green);
   }
   .is-sun & {
-    color: #d93025;
+    color: var(--vz-red);
   }
   .is-today & {
     color: var(--p-primary-600);
@@ -486,17 +592,14 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    ".     sl    ."
     "od    track do"
     "pod   .     pdo";
   column-gap: 12px;
   align-items: center;
 }
 
-.chip.rs-sl {
-  grid-area: sl;
-  justify-self: center;
-  margin-bottom: 4px;
+.chip.rs-day-sl {
+  margin-left: auto;
   padding: 2px 9px;
   font-size: 12px;
   color: var(--vz-muted);
@@ -541,6 +644,25 @@
   justify-content: center;
   height: 29px;
   align-items: center;
+  /* Pilula linije se prilagođava širini crte, ne ekrana */
+  container-type: inline-size;
+}
+
+/* Preusko za cijelu pilulu: samo "linija | V.R." */
+@container (max-width: 130px) {
+  .rs-mid {
+    gap: 5px;
+    padding: 4px 9px;
+
+    .pi,
+    .rs-mid-vr-label {
+      display: none;
+    }
+  }
+
+  .rs-mid-vr {
+    padding-left: 5px;
+  }
 }
 
 .rs-track-line {
@@ -602,8 +724,8 @@
   }
 
   &.is-res {
-    border-color: #ffe0b2;
-    color: #a35400;
+    border-color: var(--vz-orange-border);
+    color: var(--vz-orange);
     font-weight: 650;
   }
 }
@@ -634,9 +756,9 @@
 }
 
 .chip-res {
-  background: #fff3e0;
-  border-color: #ffe0b2;
-  color: #a35400;
+  background: var(--vz-orange-bg);
+  border-color: var(--vz-orange-border);
+  color: var(--vz-orange);
 }
 
 .rs-day-more {
@@ -674,8 +796,8 @@
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: #fdecea;
-  color: #d93025;
+  background: var(--vz-red-bg);
+  color: var(--vz-red);
   font-size: 15px;
   font-weight: 700;
 }
@@ -700,4 +822,43 @@
   color: var(--vz-muted);
   text-align: center;
   padding: 12px 0;
+}
+
+@keyframes rs-nagovjestaj {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-36px);
+  }
+  55% {
+    transform: translateX(0);
+  }
+  70% {
+    transform: translateX(-12px);
+  }
+  85% {
+    transform: translateX(0);
+  }
+}
+
+/* Promjena tjedna: traka i kartice dana glatko uđu (bez skeletona) */
+.rs-ulaz {
+  animation: rs-ulaz 0.22s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes rs-ulaz {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

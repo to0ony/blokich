@@ -1,5 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
 
+/*
+ * Bez zooma na dvostruki dodir (često se slučajno aktivira na mobitelu);
+ * zoom s dva prsta ostaje. Usput nestaje i odgoda dodira.
+ */
+html {
+  touch-action: manipulation;
+}
+
+/* Tamna tema: i pozadina iza stranice (povlačenje preko ruba na mobitelu) */
+html.blokich-dark,
+html.blokich-dark body {
+  background: #0b1220;
+}
+
 /* ---------- Vozačka aplikacija (redizajn) ---------- */
 .vz-app {
   --vz-bg: #f3f5f8;
@@ -8,6 +22,20 @@
   --vz-border: #e3e8ee;
   --vz-text: #0f172a;
   --vz-muted: #64748b;
+  /* Tamnoplava kartica Danas */
+  --vz-hero: #1b3654;
+  --vz-dot: #cbd5e1;
+  --vz-topbar: rgba(255, 255, 255, 0.88);
+  --vz-bottombar: rgba(255, 255, 255, 0.94);
+  /* Subota / zeleno stanje, nedjelja i blagdani, pričuva i upozorenja */
+  --vz-green: #13804b;
+  --vz-green-bg: #e9f7ee;
+  --vz-green-border: #c9ecd6;
+  --vz-red: #d93025;
+  --vz-red-bg: #fdecea;
+  --vz-orange: #a35400;
+  --vz-orange-bg: #fff3e0;
+  --vz-orange-border: #ffe0b2;
 
   color: var(--vz-text);
   -webkit-font-smoothing: antialiased;
@@ -93,6 +121,37 @@
       font-size: 22px;
     }
   }
+}
+
+/*
+ * Tamna tema (klasa na <html>, vidi TemaService). Vrijedi i za donje panele,
+ * koji se renderiraju u <body> s klasom vz-app.
+ */
+.blokich-dark .vz-app {
+  --vz-bg: #0b1220;
+  --vz-surface: #121b2b;
+  --vz-surface-2: #182338;
+  --vz-border: #25324a;
+  --vz-text: #e6ebf2;
+  --vz-muted: #94a3b8;
+  --vz-hero: #17304d;
+  --vz-dot: #3a4860;
+  --vz-topbar: rgba(18, 27, 43, 0.88);
+  --vz-bottombar: rgba(18, 27, 43, 0.94);
+  --vz-green: #4ade80;
+  --vz-green-bg: rgba(74, 222, 128, 0.12);
+  --vz-green-border: rgba(74, 222, 128, 0.28);
+  --vz-red: #f87171;
+  --vz-red-bg: rgba(248, 113, 113, 0.13);
+  --vz-orange: #fbbf24;
+  --vz-orange-bg: rgba(251, 191, 36, 0.12);
+  --vz-orange-border: rgba(251, 191, 36, 0.3);
+  /* Svijetle plave podloge i tamnoplavi tekst ne idu na tamnu pozadinu */
+  --p-primary-50: rgba(4, 132, 241, 0.16);
+  --p-primary-100: rgba(4, 132, 241, 0.24);
+  --p-primary-200: rgba(89, 176, 255, 0.35);
+  --p-primary-600: #59b0ff;
+  --p-primary-700: #8ecdff;
 }
 
 .vz-app .p-selectbutton {

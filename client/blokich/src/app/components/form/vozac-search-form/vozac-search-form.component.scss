@@ -1,57 +1,43 @@
 :host {
-  display: block;
+  display: contents;
 }
 
-.vs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  background: var(--vz-surface);
-  border: 1px solid var(--vz-border);
-  border-radius: 20px;
-}
-
+/* Polje za pretragu s ikonom, na vrhu panela */
 .vs-bar {
-  display: flex;
-  gap: 8px;
+  position: relative;
+  margin-bottom: 12px;
+
+  > .pi {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    color: var(--vz-muted);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
 }
 
 .vs-input {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border-radius: 14px;
+  /* 16px: iPhone ne zumira stranicu kad se dodirne polje */
   font-size: 16px;
 }
 
-.vs-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 4px 2px 0;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+.vs-hint {
+  margin: 4px 2px 8px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--vz-muted);
-}
-
-.vs-close {
-  border: none;
-  background: none;
-  padding: 0;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--p-primary-600);
-  cursor: pointer;
 }
 
 .vs-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 320px;
+  /* Visina panela: popis lista sam, polje ostaje gore */
+  max-height: 52vh;
   overflow-y: auto;
 }
 

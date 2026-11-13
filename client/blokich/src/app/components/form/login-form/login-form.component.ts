@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -46,9 +46,6 @@ export class LoginFormComponent implements OnInit {
   lozinka = '';
   loginGreska = '';
   lozinkaGreska = '';
-
-  @ViewChild(VozacSearchFormComponent)
-  vozacSearchFormComponent?: VozacSearchFormComponent;
 
   constructor(
     private fb: FormBuilder,
@@ -116,10 +113,6 @@ export class LoginFormComponent implements OnInit {
     this.otkljucano = false;
     this.showSearchForm = false;
     this.lozinkaGreska = poruka ?? '';
-  }
-
-  toggleSearchForm() {
-    this.showSearchForm = !this.showSearchForm;
   }
 
   onVozacSelected(sluzbeniBroj: string) {

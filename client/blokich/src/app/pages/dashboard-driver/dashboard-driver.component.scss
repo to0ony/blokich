@@ -13,7 +13,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--vz-topbar);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--vz-border);
@@ -32,6 +32,20 @@
 
 .vz-logo {
   height: 24px;
+}
+
+/* Tamna tema: potpuno bijeli logo */
+.vz-logo-tamni {
+  display: none;
+}
+
+:host-context(.blokich-dark) {
+  .vz-logo-svijetli {
+    display: none;
+  }
+  .vz-logo-tamni {
+    display: block;
+  }
 }
 
 .vz-user {
@@ -152,7 +166,7 @@
   z-index: 60;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--vz-bottombar);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-top: 1px solid var(--vz-border);

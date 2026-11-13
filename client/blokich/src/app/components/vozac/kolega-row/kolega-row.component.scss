@@ -102,8 +102,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #e7f8ef;
-  color: #13804b;
+  background: var(--vz-green-bg);
+  color: var(--vz-green);
   text-decoration: none;
   flex-shrink: 0;
   transition: transform 0.1s;
@@ -205,9 +205,9 @@
   flex-direction: column;
   gap: 1px;
   padding: 6px 14px;
-  border-top: 1px solid #c9ecd6;
-  background: #effaf3;
-  color: #13804b;
+  border-top: 1px solid var(--vz-green-border);
+  background: var(--vz-green-bg);
+  color: var(--vz-green);
   font-size: 12.5px;
   font-weight: 600;
   white-space: nowrap;
@@ -218,9 +218,9 @@
   }
 
   &.is-late {
-    border-top-color: #fde2b8;
-    background: #fff7ea;
-    color: #b45309;
+    border-top-color: var(--vz-orange-border);
+    background: var(--vz-orange-bg);
+    color: var(--vz-orange);
   }
 }
 

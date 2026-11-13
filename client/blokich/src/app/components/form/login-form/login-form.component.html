@@ -119,8 +119,7 @@
       <button
         type="button"
         class="lg-link"
-        [class.is-open]="showSearchForm"
-        (click)="toggleSearchForm()"
+        (click)="showSearchForm = true"
       >
         <i class="pi pi-search"></i> Pretraga vozača
       </button>
@@ -135,8 +134,9 @@
       </a>
     </div>
 
+    <!-- Pretraga vozača u donjem panelu -->
     <app-vozac-search-form
-      *ngIf="showSearchForm"
+      [(visible)]="showSearchForm"
       (selectVozac)="onVozacSelected($event)"
     />
   </ng-template>
