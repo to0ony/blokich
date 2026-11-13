@@ -259,9 +259,19 @@ export function lanacSluzbi(
   });
 }
 
-/** Minute od ponoći zadanog dana do `sad` (jučer u 00:30 = 1470). */
+/**
+ * Minute od ponoći zadanog dana do `sad` (jučer u 00:30 = 1470), po satu na
+ * zidu kao i vremena u službi – noć promjene ljetnog/zimskog vremena ne
+ * pomiče kraj službe za sat.
+ */
 export function minuteOdDana(datum: Dayjs, sad = new Date()): number {
-  return dayjs(sad).diff(datum.startOf('day'), 'minute');
+  const s = dayjs(sad);
+  const dani = Math.round(
+    (Date.UTC(s.year(), s.month(), s.date()) -
+      Date.UTC(datum.year(), datum.month(), datum.date())) /
+      86_400_000,
+  );
+  return dani * 24 * 60 + s.hour() * 60 + s.minute();
 }
 
 /** Kratki naziv sljedećeg dana, malim slovima ("pet" za četvrtak). */

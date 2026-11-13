@@ -5,6 +5,7 @@ import {
   aktivniDan,
   aktivniPoBloku,
   lanacSluzbi,
+  minuteOdDana,
   stanjeSluzbe,
   sutraKratko,
   uSmjeniSad,
@@ -109,5 +110,24 @@ describe('noćna služba u dva dijela (21:50–01:40, 01:45–04:20)', () => {
     expect(aktivniPoBloku(kolege, datum, pet('02:30')).get('11801')?.sluz_broj).toBe('00007');
     expect(aktivniPoBloku(kolege, datum, pet('02:30')).has('13201')).toBeFalse();
     expect(aktivniPoBloku(kolege, datum, cet('02:30')).size).toBe(0);
+  });
+});
+
+describe('noć promjene ljetnog/zimskog vremena (služba 22:00–04:00)', () => {
+  // Vremena u službi su po satu na zidu, a noć promjene ima 25 odnosno 23 sata.
+  it('zimsko (25.10.2026., 03:00 → 02:00): u 03:30 služba još traje', () => {
+    const d = dan('2026-10-24', [sluzba('22:00', '04:00')]);
+    const s = d.sluzbe[0];
+    expect(minuteOdDana(d.datum, new Date('2026-10-25T03:30:00'))).toBe(1650);
+    expect(stanjeSluzbe(d, s, new Date('2026-10-25T03:30:00')).uTijeku).toBeTrue();
+    expect(stanjeSluzbe(d, s, new Date('2026-10-25T04:00:00')).gotovo).toBeTrue();
+  });
+
+  it('ljetno (29.3.2026., 02:00 → 03:00): u 04:30 služba je gotova', () => {
+    const d = dan('2026-03-28', [sluzba('22:00', '04:00')]);
+    const s = d.sluzbe[0];
+    expect(minuteOdDana(d.datum, new Date('2026-03-29T04:30:00'))).toBe(1710);
+    expect(stanjeSluzbe(d, s, new Date('2026-03-29T03:30:00')).uTijeku).toBeTrue();
+    expect(stanjeSluzbe(d, s, new Date('2026-03-29T04:30:00')).gotovo).toBeTrue();
   });
 });
