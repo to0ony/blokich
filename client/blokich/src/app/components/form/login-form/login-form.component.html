@@ -52,22 +52,8 @@
         formControlName="sluzbeniBroj"
         class="lg-input"
         (input)="loginGreska = ''"
-        (blur)="ukloniVodeceNule(); zatvoriPrijedloge()"
+        (blur)="ukloniVodeceNule()"
       />
-      <!-- Prijedlozi vozača dok se upisuje broj -->
-      <ul class="lg-sug" *ngIf="prijedlozi.length" role="listbox" aria-label="Vozači">
-        <li *ngFor="let v of prijedlozi">
-          <button
-            type="button"
-            role="option"
-            (mousedown)="$event.preventDefault()"
-            (click)="odaberiPrijedlog(v)"
-          >
-            <span class="lg-sug-num">{{ v.sluz_broj }}</span>
-            <span class="lg-sug-ime">{{ v.ime_prezime }}</span>
-          </button>
-        </li>
-      </ul>
       <span
         class="lg-error"
         *ngIf="

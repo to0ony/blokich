@@ -1,6 +1,4 @@
-import { Component, DestroyRef, OnInit, ViewChild, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -18,11 +16,6 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
 import { PristupStorage } from '../../../services/pristup-storage';
-import { VozacInfo, VozaciService } from '../../../services/vozaci.service';
-
-/** Prijedlozi vozača tek od ovoliko upisanih znamenki. */
-const PRIJEDLOZI_OD = 2;
-const PRIJEDLOGA = 6;
 
 dayjs.extend(isoWeek);
 
@@ -53,10 +46,6 @@ export class LoginFormComponent implements OnInit {
   lozinka = '';
   loginGreska = '';
   lozinkaGreska = '';
-  /** Vozači čiji broj počinje upisanim znamenkama. */
-  prijedlozi: VozacInfo[] = [];
-  private readonly vozaciService = inject(VozaciService);
-  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild(VozacSearchFormComponent)
   vozacSearchFormComponent?: VozacSearchFormComponent;
@@ -74,22 +63,6 @@ export class LoginFormComponent implements OnInit {
     this.loginForm = this.fb.group({
       sluzbeniBroj: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     });
-
-    // Dok se upisuje broj: prijedlozi vozača (zadnji upit pobjeđuje).
-    this.loginForm
-      .get('sluzbeniBroj')!
-      .valueChanges.pipe(
-        map((v) => String(v ?? '').trim()),
-        debounceTime(200),
-        distinctUntilChanged(),
-        switchMap((q) =>
-          /^\d+$/.test(q) && q.replace(/^0+/, '').length >= PRIJEDLOZI_OD
-            ? this.vozaciService.searchVozaci(q, PRIJEDLOGA).pipe(catchError(() => of([])))
-            : of([]),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((r) => (this.prijedlozi = r ?? []));
 
     this.uploadService.fetchLastDisponentUpload().subscribe({
       next: (res) => {
@@ -174,21 +147,6 @@ export class LoginFormComponent implements OnInit {
     const ctrl = this.loginForm.get('sluzbeniBroj');
     const v = String(ctrl?.value ?? '').trim();
     if (/^\d+$/.test(v)) ctrl?.setValue(v.replace(/^0+(?=\d)/, ''));
-  }
-
-  /** Dodir na prijedlog: upiši broj i zatvori popis. */
-  odaberiPrijedlog(v: VozacInfo): void {
-    // Bez valueChanges, da se popis odmah opet ne otvori.
-    const ctrl = this.loginForm.get('sluzbeniBroj');
-    ctrl?.setValue(String(v.sluz_broj).replace(/^0+(?=\d)/, ''), { emitEvent: false });
-    ctrl?.markAsTouched();
-    this.loginGreska = '';
-    this.prijedlozi = [];
-  }
-
-  /** Popis se zatvori kad polje izgubi fokus (dodir na prijedlog ide prije). */
-  zatvoriPrijedloge(): void {
-    setTimeout(() => (this.prijedlozi = []), 150);
   }
 
   selectRecentNumber(broj: string) {

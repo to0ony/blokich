@@ -6,11 +6,10 @@ export class VozaciController {
   constructor(private readonly vozaciService: VozaciService) {}
 
   @Get('search')
-  async search(@Query('q') q: string, @Query('limit') limit?: string) {
+  async search(@Query('q') q: string) {
     if (!q) {
       throw new BadRequestException('Query param "q" is required');
     }
-    const n = limit ? parseInt(limit, 10) : undefined;
-    return this.vozaciService.search(q, Number.isFinite(n) ? n : undefined);
+    return this.vozaciService.search(q);
   }
 }
