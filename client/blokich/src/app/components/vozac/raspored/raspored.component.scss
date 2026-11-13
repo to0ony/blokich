@@ -1,17 +1,26 @@
+/*
+ * Dvije sekcije (grupiranje po blizini): "sada" (Danas + karta) i "tjedan".
+ * Razmak između sekcija je osjetno veći nego unutar njih.
+ */
 :host {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 30px;
 }
 
-/* "Sada": kartica Danas i karta ispod nje spojene u jedan blok */
-.rs-sad {
+.rs-grupa {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 
   &:empty {
     display: none;
   }
+}
+
+/* "Sada": kartica Danas i karta ispod nje spojene u jedan blok */
+.rs-grupa.rs-sad {
+  gap: 0;
 
   /* Karta je odmah ispod – donji kutovi idu karti */
   > .rs-today:not(:last-child) {
@@ -31,15 +40,11 @@
   border-radius: 0 0 20px 20px;
 }
 
-/* Tjedan: naslov, prekidač i traka s danima u jednoj kartici */
+/* Zaglavlje sekcije tjedna: naslov, prekidač i traka dana, bez okvira */
 .rs-week {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  background: var(--vz-surface);
-  border: 1px solid var(--vz-border);
-  border-radius: 20px;
+  gap: 12px;
 }
 
 .rs-week-head {
@@ -346,9 +351,9 @@
   align-items: center;
   gap: 1px;
   padding: 8px 0 7px;
-  border: 1px solid transparent;
+  border: 1px solid var(--vz-border);
   border-radius: 12px;
-  background: var(--vz-surface-2);
+  background: var(--vz-surface);
   color: var(--vz-muted);
   cursor: pointer;
   transition: transform 0.1s;
@@ -363,7 +368,7 @@
 
   /* Vikend i blagdani: blaga nijansa, danas je i dalje plav */
   &.is-sat {
-    background: color-mix(in srgb, #13804b 8%, var(--vz-surface-2));
+    background: color-mix(in srgb, #13804b 8%, var(--vz-surface));
 
     .rs-chip-day {
       color: color-mix(in srgb, #13804b 70%, var(--vz-muted));
@@ -371,7 +376,7 @@
   }
 
   &.is-sun {
-    background: color-mix(in srgb, #d93025 8%, var(--vz-surface-2));
+    background: color-mix(in srgb, #d93025 8%, var(--vz-surface));
 
     .rs-chip-day {
       color: color-mix(in srgb, #d93025 70%, var(--vz-muted));
