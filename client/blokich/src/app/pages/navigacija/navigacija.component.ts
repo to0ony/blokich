@@ -17,7 +17,19 @@ import {
   LinijaKarta,
   ManevarKarta,
   StajalisteKarta,
+  VozniRedKarta,
 } from '../../services/karta.service';
+import { odabranaTema } from '../../theme/tema.service';
+import { jeNoc } from '../../components/karta/sunce';
+import {
+  kasnjenje,
+  minuteNaTrasi,
+  odaberiPolazak,
+  sadMinute,
+  sljedeciPolazak,
+  uMinute,
+  uSate,
+} from '../../components/karta/vozni-red-voznje';
 import { Pracenje, Status, smjerIzmedu, trasaOdgovara, udaljenost } from '../../components/karta/pracenje';
 import {
   Trasa,
@@ -31,7 +43,6 @@ import {
   Tema,
   oznakaVozila,
   slobodnaKamera,
-  temaKarte,
   ucitajCss,
 } from '../../components/karta/karta-stil';
 import {
@@ -55,6 +66,17 @@ const PROBA_STAJANJE_S = 4;
 const NAJAVA_DALEKO_M = 250;
 const NAJAVA_BLIZU_M = 45;
 const NAJAVA_STAJALISTA_M = 180;
+/** Karta pomaknuta rukom vraća se na praćenje nakon ovoliko bez dodira. */
+const AUTO_CENTAR_MS = 10_000;
+/** Pregled cijele trase (dodir na traku napretka) traje ovoliko. */
+const PREGLED_MS = 8000;
+/** Stajalište se na karti ističe kad je bliže od ovoga. */
+const STAJALISTE_BLIZU_M = 150;
+/** Kartica skretanja se počinje puniti na ovoj udaljenosti, puna je na drugoj. */
+const SKRETANJE_PUNJENJE_OD_M = 200;
+const SKRETANJE_PUNJENJE_DO_M = 20;
+/** Za dan/noć (tamna karta) – sve linije su u Zagrebu. */
+const ZAGREB = { lat: 45.81, lon: 15.98 };
 
 /** Ono što slijedi na ruti: skretanje ili stajalište, s udaljenošću. */
 export type Dogadaj =
@@ -104,6 +126,24 @@ function razlikaKuta(a: number, b: number): number {
   return ((b - a + 540) % 360) - 180;
 }
 
+/** 1 stajalište, 2 stajališta, 11 stajališta, 21 stajalište. */
+function stajalistaRijec(n: number): string {
+  return n % 10 === 1 && n % 100 !== 11 ? 'stajalište' : 'stajališta';
+}
+
+/**
+ * Tema karte: izbor iz profila; kad je "prema sustavu", u navigaciji vrijedi
+ * dan/noć (tamna karta od sumraka do zore).
+ */
+function temaNavigacije(): Tema {
+  const t = odabranaTema();
+  if (t === 'tamna' || t === 'svijetla') return t;
+  return jeNoc(new Date(), ZAGREB.lat, ZAGREB.lon) ? 'tamna' : 'svijetla';
+}
+
+/** Stajalište na karti: prođeno, sljedeće (blizu ili ne) ili dalje ispred. */
+type StanjeStajalista = 'iza' | 'sljedece' | 'blizu' | 'ispred';
+
 /**
  * Navigacija po trasi linije: prava lokacija telefona (ili probna vožnja),
  * karta okrenuta u smjeru vožnje, 2D/3D, skretanja i stajališta s glasom.
@@ -140,8 +180,9 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   /** Kad vozač nije na ruti: udaljenost i kut strelice prema ruti (na ekranu). */
   doRute: { m: number; kut: number } | null = null;
   private doRuteTocka: { lat: number; lon: number } | null = null;
-  /** Kratka obavijest gore (npr. "Prebačeno na smjer …"). */
+  /** Kratka obavijest gore (npr. "Prebačeno na smjer …", slaba baterija). */
   obavijest: string | null = null;
+  obavijestVrsta: 'smjer' | 'baterija' = 'smjer';
   private obavijestDo = 0;
   nacin: Nacin;
   treceD: boolean;
@@ -152,7 +193,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     { vrijednost: 'skretanja', naziv: 'Samo skretanja', opis: 'Bez najave stajališta' },
     { vrijednost: 'ne', naziv: 'Isključeno', opis: 'Bez glasa' },
   ];
-  readonly tema: Tema = temaKarte();
+  tema: Tema = temaNavigacije();
+  private temaTimer: ReturnType<typeof setInterval> | null = null;
 
   ucitano = false;
   greska: string | null = null;
@@ -171,6 +213,46 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   /** Traka lijevo: prijeđeni dio trase (0–1) i položaji stajališta na njoj. */
   napredak = 0;
   tockeStajalista: number[] = [];
+  /** Dodir na traku: karta nakratko pokaže cijelu trasu. */
+  pregled = false;
+  private pregledDo = 0;
+  /** Zadnji dodir karte – nakon AUTO_CENTAR_MS bez dodira karta opet prati vozilo. */
+  private zadnjiDodir = 0;
+  private vracam = false;
+  /** Gdje je oznaka vozača zadnji put nacrtana (za povratak kamere). */
+  private zadnjaPozicija: { lat: number; lon: number } | null = null;
+
+  /** Vozni red linije danas: kasnjenje, preostalo vrijeme i sljedeći polazak. */
+  private vozniRed: VozniRedKarta | null = null;
+  /** Polazak (minute od ponoći) kojim vozač vjerojatno vozi – bira se jednom po trasi. */
+  private polazak: number | null = null;
+  /** Kasnjenje prema voznom redu u minutama (negativno = ranije); samo GPS. */
+  kasniMin: number | null = null;
+  /** "još 7 stajališta · ~14 min · dolazak 10:42" */
+  ostatak: string | null = null;
+  /** Na kraju vožnje: prvi polazak u drugom smjeru. */
+  sljedecaVoznja: { vrijeme: string; za: number; cilj: string | null } | null = null;
+  private stajalistaKljuc = '';
+
+  /** Baterija (samo gdje preglednik daje podatak): upozori na 15 % i 5 %. */
+  private baterija: any = null;
+  private upozorenoBaterija = 100;
+  private readonly naBateriju = () => {
+    const b = this.baterija;
+    if (!b) return;
+    if (b.charging) {
+      this.upozorenoBaterija = 100;
+      return;
+    }
+    const posto = Math.round(b.level * 100);
+    for (const prag of [5, 15]) {
+      if (posto <= prag && this.upozorenoBaterija > prag) {
+        this.upozorenoBaterija = prag;
+        this.zone.run(() => this.pokaziObavijest(`Baterija ${posto} % – priključi punjač.`, 'baterija', 10_000));
+        return;
+      }
+    }
+  };
 
   /** Dvije kartice gore: sljedeće skretanje ili stajalište, i ono iza njega. */
   dogadaji: Dogadaj[] = [];
@@ -253,6 +335,12 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       // Vozač pomakne kartu → prestani pratiti dok ne stisne "Centriraj".
       this.kameraSlobodna = slobodnaKamera(mapa);
       mapa.on('dragstart', () => this.zone.run(() => (this.pratim = false)));
+      // Svaki dodir: odgađa automatski povratak i prekida pregled trase.
+      const dodir = () => {
+        this.zadnjiDodir = performance.now();
+        if (this.pregled) this.zone.run(() => (this.pregled = false));
+      };
+      for (const e of ['touchstart', 'touchmove', 'mousedown', 'wheel'] as const) mapa.on(e, dodir);
       // Zumiranje prstima: kao + i − – privremeno, pa natrag na optimalni zoom.
       mapa.on('zoomend', (e) => {
         if (!(e as { originalEvent?: unknown }).originalEvent) return;
@@ -265,6 +353,19 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     document.addEventListener('visibilitychange', this.naVidljivost);
     void this.zakljucajEkran();
     this.uiTimer = setInterval(() => this.osvjeziPrikaz(), 300);
+    this.temaTimer = setInterval(() => this.provjeriTemu(), 60_000);
+    try {
+      (navigator as any)
+        .getBattery?.()
+        .then((b: any) => {
+          if (this.unisten) return;
+          this.baterija = b;
+          b.addEventListener('levelchange', this.naBateriju);
+          b.addEventListener('chargingchange', this.naBateriju);
+          this.naBateriju();
+        })
+        .catch(() => {});
+    } catch {}
   }
 
   ngOnDestroy(): void {
@@ -272,6 +373,9 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.zaustaviGps();
     cancelAnimationFrame(this.frame);
     if (this.uiTimer) clearInterval(this.uiTimer);
+    if (this.temaTimer) clearInterval(this.temaTimer);
+    this.baterija?.removeEventListener('levelchange', this.naBateriju);
+    this.baterija?.removeEventListener('chargingchange', this.naBateriju);
     document.removeEventListener('visibilitychange', this.naVidljivost);
     void this.wakeLock?.release().catch(() => {});
     try {
@@ -308,6 +412,10 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
         next: (l) => (this.smjeroviLinije = l?.smjerovi ?? []),
         error: () => {},
       });
+      this.servis.vozniRed(this.linija).subscribe({
+        next: (r) => (this.vozniRed = r),
+        error: () => {},
+      });
     }
   }
 
@@ -321,6 +429,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.pracenje = new Pracenje(trasa);
     this.d = this.dCilj = d;
     this.kraj = false;
+    this.polazak = null;
     this.izgovoreno.clear();
     this.manevri = [];
     this.prikazaniPrvi = -1;
@@ -370,9 +479,10 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private pokaziObavijest(tekst: string): void {
+  private pokaziObavijest(tekst: string, vrsta: 'smjer' | 'baterija' = 'smjer', ms = 5000): void {
     this.obavijest = tekst;
-    this.obavijestDo = performance.now() + 5000;
+    this.obavijestVrsta = vrsta;
+    this.obavijestDo = performance.now() + ms;
   }
 
   // ---------- GPS ----------
@@ -476,6 +586,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     if (this.nacin === 'proba') this.status = 'na-ruti';
     this.d = this.dCilj = 0;
     this.kraj = false;
+    this.polazak = null;
     this.pauza = false;
     this.izgovoreno.clear();
     this.stajanjeDo = 0;
@@ -527,7 +638,107 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   }
 
   centriraj(): void {
-    this.pratim = true;
+    this.vratiPracenje();
+  }
+
+  /** Kamera se glatko vrati na vozilo, pa ga opet prati. */
+  private vratiPracenje(): void {
+    this.pregled = false;
+    const mapa = this.mapa;
+    const p = this.zadnjaPozicija;
+    if (!mapa || !p) {
+      this.pratim = true;
+      return;
+    }
+    this.vracam = true;
+    const pocetak = performance.now();
+    mapa.easeTo({
+      center: [p.lon, p.lat],
+      bearing: this.smjer,
+      pitch: this.treceD ? 55 : 0,
+      zoom: this.optimalniZoom,
+      padding: this.paddingPracenja(),
+      duration: 700,
+    });
+    setTimeout(() => {
+      this.vracam = false;
+      // Vozač je u međuvremenu opet dirnuo kartu → ostaje slobodna.
+      if (this.zadnjiDodir <= pocetak) this.pratim = true;
+    }, 750);
+  }
+
+  /**
+   * Dodir na traku napretka: karta pokaže cijelu trasu (sjever gore, preko
+   * cijelog zaslona), pa se nakon nekoliko sekundi sama vrati. Drugi dodir – odmah natrag.
+   */
+  pregledTrase(): void {
+    if (this.pregled) {
+      this.vratiPracenje();
+      return;
+    }
+    const mapa = this.mapa;
+    const t = this.trasa;
+    if (!mapa || !t) return;
+    let [zap, jug, ist, sje] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const [la, lo] of t.tocke) {
+      zap = Math.min(zap, lo);
+      ist = Math.max(ist, lo);
+      jug = Math.min(jug, la);
+      sje = Math.max(sje, la);
+    }
+    if (ist - zap < 1e-4 && sje - jug < 1e-4) return;
+    this.pratim = false;
+    this.pregled = true;
+    this.pregledDo = performance.now() + PREGLED_MS;
+    const { clientWidth: w, clientHeight: h } = this.mapaEl.nativeElement;
+    // Cijela trasa preko cijelog zaslona, sjever gore – rubovi samo koliko traže gumbi i traka.
+    const padding = this.lezeci()
+      ? { top: 24, bottom: 24, left: Math.min(420, w * 0.47), right: 76 }
+      : { top: Math.min(48, h * 0.06), bottom: Math.min(100, h * 0.12), left: 48, right: 76 };
+    mapa.fitBounds(
+      [
+        [zap, jug],
+        [ist, sje],
+      ],
+      { padding, bearing: 0, pitch: 0, duration: 800 },
+    );
+  }
+
+  /** Telefon vodoravno (u držaču): kartice lijevo, karta desno. Isto kao u SCSS-u. */
+  private lezeci(): boolean {
+    const { clientWidth: w, clientHeight: h } = this.mapaEl.nativeElement;
+    return w > h && h <= 600;
+  }
+
+  /** Vozilo u donjem dijelu ekrana (vodoravno: u desnom dijelu) – više se vidi ispred. */
+  private paddingPracenja(): { top: number; bottom: number; left: number; right: number } {
+    const { clientWidth: w, clientHeight: h } = this.mapaEl.nativeElement;
+    if (this.lezeci()) return { top: h * 0.3, bottom: 30, left: Math.min(400, w * 0.45), right: 70 };
+    return { top: h * 0.42, bottom: 90, left: 0, right: 0 };
+  }
+
+  /** Dan ↔ noć: zamijeni podlogu (slojevi se postave ponovno na style.load). */
+  private provjeriTemu(): void {
+    const nova = temaNavigacije();
+    if (nova === this.tema || !this.mapa) return;
+    this.tema = nova;
+    this.mapa.setStyle(STIL[nova], { diff: false });
+  }
+
+  /** Kartica skretanja se puni kako se vozač približava (0–1). */
+  blizinaSkretanja(m: number): number {
+    const k = (SKRETANJE_PUNJENJE_OD_M - m) / (SKRETANJE_PUNJENJE_OD_M - SKRETANJE_PUNJENJE_DO_M);
+    return Math.max(0, Math.min(1, k));
+  }
+
+  get kasniTekst(): string {
+    const k = this.kasniMin ?? 0;
+    return k === 0 ? 'Na vrijeme' : k > 0 ? `+${k} min` : `−${-k} min`;
+  }
+
+  get kasniOpis(): string {
+    const k = this.kasniMin ?? 0;
+    return k === 0 ? 'Na vrijeme prema voznom redu' : k > 0 ? `Kasni ${k} min` : `Ranije ${-k} min`;
   }
 
   izadi(): void {
@@ -606,6 +817,9 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.doStajalista = i >= 0 ? this.udaljenosti[i] - this.d : 0;
     this.zatimStajaliste = i >= 0 ? (this.stajalista[i + 1]?.naziv ?? null) : null;
     this.kraj = (this.nacin === 'proba' || this.status === 'na-ruti') && this.d >= this.trasa.duljina - 15;
+    this.osvjeziVozniRed(i);
+    this.osvjeziStajalista(i);
+    this.osvjeziKameru();
     this.napredak = this.trasa.duljina > 0 ? Math.min(1, Math.max(0, this.d / this.trasa.duljina)) : 0;
 
     // Skretanja i stajališta ispred, po udaljenosti – prva dva idu u kartice.
@@ -631,6 +845,92 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
 
     this.crtajStrelice();
     this.najave();
+  }
+
+  /** Karta pomaknuta rukom ili u pregledu: vrati se sama na praćenje. */
+  private osvjeziKameru(): void {
+    const sad = performance.now();
+    if (this.vracam) return;
+    if (this.pregled) {
+      if (sad > this.pregledDo) this.vratiPracenje();
+    } else if (!this.pratim && sad - this.zadnjiDodir > AUTO_CENTAR_MS) {
+      this.vratiPracenje();
+    }
+  }
+
+  /** Preostalo do kraja, kasnjenje prema voznom redu i (na kraju) sljedeći polazak. */
+  private osvjeziVozniRed(sljedece: number): void {
+    const t = this.trasa!;
+    const red = this.oblikTrenutni ? this.vozniRed?.oblici[this.oblikTrenutni] : undefined;
+    const vremena = red?.vremena && red.vremena.length === this.udaljenosti.length ? red.vremena : null;
+    const sad = sadMinute();
+    const tu = vremena ? minuteNaTrasi(this.d, this.udaljenosti, vremena) : 0;
+
+    const dijelovi: string[] = [];
+    const preostalo = sljedece >= 0 ? this.udaljenosti.length - sljedece : 0;
+    if (preostalo) dijelovi.push(`${preostalo} ${stajalistaRijec(preostalo)}`);
+    if (vremena) {
+      const doKraja = Math.max(0, vremena[vremena.length - 1] - tu);
+      dijelovi.push(`~${Math.max(1, Math.round(doKraja))} min`, `dolazak ${uSate(sad + doKraja)}`);
+    } else if (t.duljina - this.d > 50) {
+      dijelovi.push(opisUdaljenosti(t.duljina - this.d));
+    }
+    this.ostatak = this.kraj || !dijelovi.length ? null : `još ${dijelovi.join(' · ')}`;
+
+    this.kasniMin = null;
+    if (red && vremena && this.nacin === 'gps' && this.status === 'na-ruti' && !this.kraj) {
+      if (this.polazak === null) {
+        const polasci = red.polasci.map(uMinute).filter((x): x is number => x !== null);
+        this.polazak = odaberiPolazak(polasci, tu, sad);
+      }
+      if (this.polazak !== null) {
+        const k = kasnjenje(this.polazak, tu, sad);
+        // Daleko izvan okvira → vjerojatno druga vožnja; odaberi ponovno.
+        if (k > 45 || k < -20) this.polazak = null;
+        else this.kasniMin = Math.round(k);
+      }
+    }
+
+    this.sljedecaVoznja = this.kraj ? this.sljedeciPolazakNatrag(sad) : null;
+  }
+
+  /** Prvi polazak u drugom smjeru linije (sve njegove trase), od sad nadalje. */
+  private sljedeciPolazakNatrag(sad: number): { vrijeme: string; za: number; cilj: string | null } | null {
+    const red = this.vozniRed;
+    if (!red) return null;
+    const obliciSmjera = (s: LinijaKarta['smjerovi'][number]) => [s.oblik, ...(s.varijante ?? []).map((v) => v.oblik)];
+    const ovaj = this.smjeroviLinije.find((s) => obliciSmjera(s).includes(this.oblikTrenutni ?? ''));
+    let najbolji: { vrijeme: string; za: number; cilj: string | null } | null = null;
+    for (const s of this.smjeroviLinije) {
+      if (s === ovaj) continue;
+      const polasci = [...new Set(obliciSmjera(s))]
+        .flatMap((o) => red.oblici[o]?.polasci ?? [])
+        .map(uMinute)
+        .filter((x): x is number => x !== null);
+      const p = sljedeciPolazak(polasci, sad);
+      if (p && (!najbolji || p.za < najbolji.za)) najbolji = { ...p, cilj: s.cilj };
+    }
+    return najbolji;
+  }
+
+  /** Stajališta na karti: sljedeće veće (još veće kad je blizu), prođena blijeda. */
+  private osvjeziStajalista(sljedece: number): void {
+    const izvor = this.mapa?.getSource('stajalista') as GeoJSONSource | undefined;
+    if (!izvor) return;
+    const blizu = sljedece >= 0 && this.udaljenosti[sljedece] - this.d <= STAJALISTE_BLIZU_M;
+    const kljuc = `${this.oblikTrenutni}:${sljedece}:${blizu}`;
+    if (kljuc === this.stajalistaKljuc) return;
+    this.stajalistaKljuc = kljuc;
+    const stanje = (j: number): StanjeStajalista =>
+      sljedece < 0 || j < sljedece ? 'iza' : j === sljedece ? (blizu ? 'blizu' : 'sljedece') : 'ispred';
+    izvor.setData({
+      type: 'FeatureCollection',
+      features: this.stajalista.map((s, j) => ({
+        type: 'Feature',
+        properties: { naziv: s.naziv, stanje: stanje(j) },
+        geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
+      })),
+    });
   }
 
   // ---------- MapLibre ----------
@@ -732,10 +1032,12 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       type: 'circle',
       source: 'stajalista',
       paint: {
-        'circle-radius': 6,
+        'circle-radius': ['match', ['get', 'stanje'], 'blizu', 11, 'sljedece', 8.5, 'iza', 4.5, 6],
         'circle-color': b.stajalisteIspuna,
         'circle-stroke-color': b.trasa,
-        'circle-stroke-width': 3,
+        'circle-stroke-width': ['match', ['get', 'stanje'], 'blizu', 4.5, 'sljedece', 4, 3],
+        'circle-opacity': ['match', ['get', 'stanje'], 'iza', 0.4, 1],
+        'circle-stroke-opacity': ['match', ['get', 'stanje'], 'iza', 0.4, 1],
         'circle-pitch-alignment': 'map',
       },
     });
@@ -743,10 +1045,13 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       id: 'stajalista-naziv',
       type: 'symbol',
       source: 'stajalista',
+      // Prođena bez naziva; sljedeće ima prednost i veći naziv.
+      filter: ['!=', ['get', 'stanje'], 'iza'],
       layout: {
         'text-field': ['get', 'naziv'],
         'text-font': ['Noto Sans Bold'],
-        'text-size': 13,
+        'text-size': ['match', ['get', 'stanje'], 'blizu', 16, 'sljedece', 15, 12],
+        'symbol-sort-key': ['match', ['get', 'stanje'], 'blizu', 0, 'sljedece', 0, 1],
         'text-anchor': 'left',
         'text-offset': [1, 0],
         'text-optional': true,
@@ -818,18 +1123,11 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     vrhovi.setData({ type: 'FeatureCollection', features: vrh });
   }
 
-  /** Stajališta (jednom) – trasa ispred/iza se crta u svakom frameu. */
+  /** Stajališta (odmah, pa kad se promijeni sljedeće) – trasa ispred/iza se crta u svakom frameu. */
   private postaviTrasu(): void {
-    const izvor = this.mapa?.getSource('stajalista') as GeoJSONSource | undefined;
-    if (!izvor || !this.trasa) return;
-    izvor.setData({
-      type: 'FeatureCollection',
-      features: this.stajalista.map((s) => ({
-        type: 'Feature',
-        properties: { naziv: s.naziv },
-        geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-      })),
-    });
+    if (!this.mapa?.getSource('stajalista') || !this.trasa) return;
+    this.stajalistaKljuc = '';
+    this.osvjeziStajalista(this.udaljenosti.findIndex((u) => u > this.d + 10));
     if (this.mapa && !this.zadnjiFix) {
       const p = tockaNa(this.trasa, 0);
       this.mapa.jumpTo({ center: [p.lon, p.lat], bearing: p.smjer, zoom: 16.5 });
@@ -918,6 +1216,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       lon = naTrasi.lon;
       ciljSmjer = udaljenost(naTrasi, ispredT) > 0.1 ? smjerTrase : null;
     }
+    this.zadnjaPozicija = { lat, lon };
     if (ciljSmjer !== null) {
       this.smjer = (this.smjer + razlikaKuta(this.smjer, ciljSmjer) * Math.min(1, dt * 2.5) + 360) % 360;
     }
@@ -981,14 +1280,12 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
       const zoom = this.optimalniZoom + this.zoomPomak;
       // Ručna promjena brzo, povratak na optimalni polako i glatko.
       const brzinaZooma = rucno ? 4 : 1;
-      const h = this.mapaEl.nativeElement.clientHeight;
       mapa.jumpTo({
         center: [lon, lat],
         bearing: this.smjer,
         pitch: this.treceD ? 55 : 0,
         zoom: mapa.getZoom() + (zoom - mapa.getZoom()) * Math.min(1, dt * brzinaZooma),
-        // Vozilo u donjem dijelu ekrana – više se vidi ispred.
-        padding: { top: h * 0.42, bottom: 90, left: 0, right: 0 },
+        padding: this.paddingPracenja(),
       });
     }
   }

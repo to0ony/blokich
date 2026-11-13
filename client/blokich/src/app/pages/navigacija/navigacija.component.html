@@ -8,8 +8,8 @@
     </button>
 
     <div class="nv-kartice">
-      <div class="nv-obavijest" *ngIf="obavijest" role="status">
-        <i class="pi pi-sync"></i> {{ obavijest }}
+      <div class="nv-obavijest" *ngIf="obavijest" role="status" [class.is-baterija]="obavijestVrsta === 'baterija'">
+        <i class="pi" [ngClass]="obavijestVrsta === 'baterija' ? 'pi-exclamation-circle' : 'pi-sync'"></i> {{ obavijest }}
       </div>
 
       <!-- GPS statusi (samo navigacija; probna vožnja je uvijek "na ruti") -->
@@ -53,6 +53,10 @@
         <i class="pi pi-flag"></i>
         <span>
           Kraj vožnje<ng-container *ngIf="cilj"> · {{ cilj }}</ng-container>
+          <small *ngIf="sljedecaVoznja" class="nv-sljedeca">
+            Sljedeći polazak<ng-container *ngIf="sljedecaVoznja.cilj"> prema {{ sljedecaVoznja.cilj }}</ng-container>:
+            <b>{{ sljedecaVoznja.vrijeme }}</b> ({{ sljedecaVoznja.za ? 'za ' + sljedecaVoznja.za + ' min' : 'sad' }})
+          </small>
           <small *ngIf="nacin === 'gps' && linija">Kad krenete u drugom smjeru, navigacija nastavlja sama.</small>
         </span>
       </div>
@@ -63,6 +67,8 @@
           class="nv-kartica"
           [class.is-druga]="i > 0"
           [class.is-stajaliste]="e.vrsta === 'stajaliste'"
+          [class.is-blizu]="i === 0 && e.vrsta === 'skretanje' && e.do <= 45"
+          [style.--nv-blizu]="i === 0 && e.vrsta === 'skretanje' ? blizinaSkretanja(e.do) : 0"
         >
           <span class="nv-ikona" aria-hidden="true">
             <ng-container *ngIf="e.vrsta === 'skretanje'">
@@ -102,16 +108,26 @@
   </header>
 
   <!-- Lijevo: odokativni napredak po trasi (dolje početak, gore kraj) -->
-  <div class="nv-napredak" *ngIf="ucitano" aria-hidden="true">
-    <div class="nv-napredak-puna" [style.height.%]="napredak * 100"></div>
-    <span
-      *ngFor="let t of tockeStajalista"
-      class="nv-napredak-st"
-      [class.is-prodeno]="t <= napredak"
-      [style.bottom.%]="t * 100"
-    ></span>
-    <span class="nv-napredak-ja" [style.bottom.%]="napredak * 100"></span>
-  </div>
+  <!-- Dodir: pregled cijele trase -->
+  <button
+    type="button"
+    class="nv-napredak"
+    *ngIf="ucitano"
+    [class.is-pregled]="pregled"
+    [attr.aria-label]="pregled ? 'Natrag na vožnju' : 'Pregled cijele trase'"
+    (click)="pregledTrase()"
+  >
+    <span class="nv-napredak-traka">
+      <span class="nv-napredak-puna" [style.height.%]="napredak * 100"></span>
+      <span
+        *ngFor="let t of tockeStajalista"
+        class="nv-napredak-st"
+        [class.is-prodeno]="t <= napredak"
+        [style.bottom.%]="t * 100"
+      ></span>
+      <span class="nv-napredak-ja" [style.bottom.%]="napredak * 100"></span>
+    </span>
+  </button>
 
   <!-- Desno: 2D/3D, glas, centriranje -->
   <div class="nv-tools">
@@ -181,10 +197,22 @@
       <button type="button" class="nv-link" (click)="probnaVoznja()">Probna vožnja</button>
     </div>
 
-    <div class="nv-traka" *ngIf="ucitano && (linija || cilj || nacin === 'proba')">
+    <div class="nv-traka" *ngIf="ucitano && (linija || cilj || ostatak || nacin === 'proba')">
       <span class="nv-linija" *ngIf="linija">{{ linija }}</span>
-      <span class="nv-smjer" *ngIf="cilj">Smjer {{ cilj }}</span>
+      <div class="nv-info" *ngIf="cilj || ostatak">
+        <span class="nv-smjer" *ngIf="cilj">Smjer {{ cilj }}</span>
+        <small class="nv-ostatak" *ngIf="ostatak">{{ ostatak }}</small>
+      </div>
       <span class="nv-razmak"></span>
+      <span
+        class="nv-kasni"
+        *ngIf="kasniMin !== null"
+        [class.is-kasni]="kasniMin >= 3"
+        [class.is-rano]="kasniMin < 0"
+        [attr.aria-label]="kasniOpis"
+        [title]="kasniOpis"
+        >{{ kasniTekst }}</span
+      >
       <ng-container *ngIf="nacin === 'proba'">
         <button type="button" class="nv-btn" [attr.aria-label]="pauza ? 'Nastavi' : 'Pauza'" (click)="prebaciPauzu()">
           <i class="pi" [ngClass]="pauza ? 'pi-play' : 'pi-pause'"></i>
