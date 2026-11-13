@@ -304,12 +304,6 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     this.nagovjestajPromatrac.observe(el);
   }
 
-  /** Strelica: prethodni ili sljedeći dan. */
-  pokaziSusjedni(smjer: -1 | 1): void {
-    const i = Math.min(Math.max(this.prikazanDan + smjer, 0), this.dani.length - 1);
-    this.pokaziDan(i);
-  }
-
   /** Prvi prikazani dan: aktivni (ili današnji), za naredni tjedan ponedjeljak. */
   private pocetniDan(): number {
     const i = this.dani.findIndex((d) => this.istaknut(d));
