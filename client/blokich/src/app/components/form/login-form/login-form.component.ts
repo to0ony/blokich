@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
 import { PristupStorage } from '../../../services/pristup-storage';
+import { verzijaAplikacije } from '../../../services/verzija';
 
 dayjs.extend(isoWeek);
 
@@ -46,6 +47,8 @@ export class LoginFormComponent implements OnInit {
   lozinka = '';
   loginGreska = '';
   lozinkaGreska = '';
+  /** Verzija iz zadnjeg GitHub releasea, na dnu prijave. */
+  verzija: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -55,6 +58,7 @@ export class LoginFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    verzijaAplikacije().then((v) => (this.verzija = v));
     this.loadRecentNumbers();
 
     this.loginForm = this.fb.group({

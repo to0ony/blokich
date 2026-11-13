@@ -147,6 +147,12 @@
   }
 }
 
+/* Tamna tema: svjetlija plava, da se kartica odvoji od tamne pozadine */
+:host-context(.blokich-dark) .lg-map {
+  background: #1f3a5c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .lg-map-dot {
   width: 10px;
   height: 10px;
@@ -231,4 +237,14 @@
     opacity: 1;
     background: var(--vz-surface-2);
   }
+}
+
+/* Verzija iz zadnjeg releasea, na samom dnu */
+.lg-verzija {
+  align-self: center;
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--vz-muted);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
 }
