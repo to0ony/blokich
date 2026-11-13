@@ -34,6 +34,20 @@
   height: 24px;
 }
 
+/* Tamna tema: potpuno bijeli logo */
+.vz-logo-tamni {
+  display: none;
+}
+
+:host-context(.blokich-dark) {
+  .vz-logo-svijetli {
+    display: none;
+  }
+  .vz-logo-tamni {
+    display: block;
+  }
+}
+
 .vz-user {
   display: flex;
   align-items: center;

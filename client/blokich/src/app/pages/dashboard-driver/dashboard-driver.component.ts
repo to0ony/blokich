@@ -94,8 +94,12 @@ export class DashboardDriverComponent implements OnInit, OnDestroy {
           opcija('sustav', 'Kao na mobitelu', 'pi pi-mobile'),
         ],
       },
-      { separator: true },
-      { label: 'Odjava', icon: 'pi pi-sign-out', command: () => this.odjava() },
+      // Uz grupu "Tema" PrimeNG stavke na prvoj razini prikazuje kao naslove
+      // koji se ne mogu kliknuti – zato je i Odjava u svojoj grupi.
+      {
+        label: 'Račun',
+        items: [{ label: 'Odjava', icon: 'pi pi-sign-out', command: () => this.odjava() }],
+      },
     ];
   }
 
