@@ -195,7 +195,10 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     if (changes['data']) {
       this.dani = this.data ? slozTjedan(this.data) : [];
       // Klizač dana odmah na aktivnom danu (naredni tjedan: ponedjeljak).
-      setTimeout(() => this.pokaziDan(this.pocetniDan(), false));
+      setTimeout(() => {
+        this.pokaziDan(this.pocetniDan(), false);
+        this.nagovijestiJednom();
+      });
       if (this.tjedan === 'trenutni' && this.danas) this.pokreniUzivo();
       else this.zaustaviUzivo();
     }
@@ -263,6 +266,28 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @ViewChild('daniKlizac') private daniKlizac?: ElementRef<HTMLDivElement>;
   /** Indeks dana koji je sad prikazan u klizaču (označen u traci dana). */
   prikazanDan = 0;
+
+  /** Kartice se jednom malo pomaknu ulijevo – vidi se da se dani listaju. */
+  nagovijestiKlizanje = false;
+
+  private nagovijestiJednom(): void {
+    const KLJUC = 'blokich.klizacDanaNagovijesten';
+    if (this.prikazanDan >= this.dani.length - 1) return;
+    try {
+      if (localStorage.getItem(KLJUC)) return;
+      localStorage.setItem(KLJUC, '1');
+    } catch {
+      return;
+    }
+    setTimeout(() => (this.nagovijestiKlizanje = true), 700);
+    setTimeout(() => (this.nagovijestiKlizanje = false), 700 + 1400);
+  }
+
+  /** Strelica: prethodni ili sljedeći dan. */
+  pokaziSusjedni(smjer: -1 | 1): void {
+    const i = Math.min(Math.max(this.prikazanDan + smjer, 0), this.dani.length - 1);
+    this.pokaziDan(i);
+  }
 
   /** Prvi prikazani dan: aktivni (ili današnji), za naredni tjedan ponedjeljak. */
   private pocetniDan(): number {

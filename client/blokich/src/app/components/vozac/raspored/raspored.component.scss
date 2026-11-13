@@ -398,6 +398,53 @@
 
 
 /* Dani */
+/* Omotač klizača dana – nosi strelice (klizač sam skrola) */
+.rs-dani {
+  position: relative;
+}
+
+.rs-dani-arrow {
+  display: none;
+}
+
+/* Strelice samo na uređajima s mišem */
+@media (hover: hover) and (pointer: fine) {
+  .rs-dani-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--vz-border);
+    border-radius: 50%;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: opacity 0.15s;
+
+    &.is-prev {
+      left: -12px;
+    }
+    &.is-next {
+      right: -12px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--vz-surface-2);
+    }
+
+    &:disabled {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
+
 .rs-list {
   position: relative;
   scroll-margin: 90px;
@@ -426,6 +473,17 @@
     flex: 0 0 90%;
     min-width: 0;
     scroll-snap-align: start;
+  }
+
+  /* Jednom: kartice se malo pomaknu ulijevo i vrate – "povuci me". */
+  &.is-hint > .rs-day {
+    animation: rs-nagovjestaj 1.4s ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.is-hint > .rs-day {
+      animation: none;
+    }
   }
 
   /* Mjesto iza nedjelje, da se i ona poravna uz lijevi rub. */
@@ -751,4 +809,23 @@
   color: var(--vz-muted);
   text-align: center;
   padding: 12px 0;
+}
+
+@keyframes rs-nagovjestaj {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-36px);
+  }
+  55% {
+    transform: translateX(0);
+  }
+  70% {
+    transform: translateX(-12px);
+  }
+  85% {
+    transform: translateX(0);
+  }
 }
