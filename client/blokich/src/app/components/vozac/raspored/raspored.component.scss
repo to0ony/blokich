@@ -308,27 +308,6 @@
   }
 }
 
-.rs-today-actions {
-  display: flex;
-
-  &.is-right {
-    justify-content: flex-end;
-  }
-}
-
-:host ::ng-deep .rs-today-btn {
-  margin-top: 14px;
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
-
-  &:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: transparent;
-    color: #fff;
-  }
-}
-
 .rs-today-free {
   display: flex;
   align-items: center;

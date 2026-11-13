@@ -62,16 +62,6 @@
           <span class="rs-live-sub rs-live-model" *ngIf="b.model">{{ b.model }}</span>
         </ng-container>
       </div>
-      <!-- Uz poruku o busu gumb ide na desnu stranu kartice -->
-      <div class="rs-today-actions" [class.is-right]="mojBus" *ngIf="linije(d).length && !izProslogTjedna(d)">
-        <p-button
-          label="Tko još vozi danas"
-          icon="pi pi-users"
-          size="small"
-          styleClass="rs-today-btn"
-          (onClick)="$event.stopPropagation(); otvoriSmjenu(d)"
-        />
-      </div>
     </ng-container>
     <ng-template #danasSlobodno>
       <div class="rs-today-free">
