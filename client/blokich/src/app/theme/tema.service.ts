@@ -23,6 +23,11 @@ function sustavJeTamni(): boolean {
   }
 }
 
+/** Izbor teme u profilu (zadano: prema sustavu). */
+export function odabranaTema(): Tema {
+  return procitaj();
+}
+
 /** Je li prema izboru u profilu sad tamna tema (i za karte). */
 export function tamnaTema(): boolean {
   const t = procitaj();

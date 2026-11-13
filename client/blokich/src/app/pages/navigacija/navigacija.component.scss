@@ -97,9 +97,30 @@
   background: var(--nv-skretanje);
   color: #fff;
   box-shadow: 0 6px 20px var(--nv-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s;
+
+  // Prvo skretanje se puni slijeva kako mu se vozač približava.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.16);
+    transform: scaleX(var(--nv-blizu, 0));
+    transform-origin: left;
+    transition: transform 0.3s linear;
+    pointer-events: none;
+  }
+  > * {
+    position: relative;
+  }
 
   &.is-stajaliste {
     background: var(--nv-stajaliste);
+  }
+  &.is-blizu {
+    background: #15803d;
   }
 
   // Druga kartica: manja i prozirnija – "zatim".
@@ -201,6 +222,10 @@
   font-size: 15px;
   font-weight: 700;
   box-shadow: 0 6px 20px var(--nv-shadow);
+
+  &.is-baterija {
+    background: #b45309;
+  }
 }
 
 .nv-upozorenje small {
@@ -228,19 +253,39 @@
   }
 }
 
-// ---------- Lijevo: napredak po trasi ----------
+// ---------- Lijevo: napredak po trasi (dodir = pregled trase) ----------
 .nv-napredak {
   position: absolute;
-  left: 14px;
+  left: 0;
   // Između kartica gore i donje trake.
   top: calc(max(12px, env(safe-area-inset-top)) + 210px);
   bottom: calc(max(12px, env(safe-area-inset-bottom)) + 112px);
   z-index: 1;
+  // Široko za prst, vidljiva je samo tanka traka.
+  width: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &.is-pregled .nv-napredak-traka {
+    box-shadow:
+      0 0 0 3px var(--nv-accent),
+      0 2px 8px var(--nv-shadow);
+  }
+}
+
+.nv-napredak-traka {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
   width: 6px;
   border-radius: 3px;
   background: var(--nv-panel);
   box-shadow: 0 2px 8px var(--nv-shadow);
-  pointer-events: none;
+  transition: box-shadow 0.2s;
 }
 
 .nv-napredak-puna {
@@ -510,12 +555,71 @@
   font-weight: 800;
 }
 
-.nv-smjer {
+.nv-info {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.nv-smjer,
+.nv-ostatak {
   overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.nv-smjer {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.nv-ostatak {
+  color: var(--nv-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+// Kasnjenje prema voznom redu: na vrijeme zeleno, kasni narančasto, ranije plavo.
+.nv-kasni {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &.is-kasni {
+    background: #ffedd5;
+    color: #9a3412;
+  }
+  &.is-rano {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+.nv.is-dark .nv-kasni {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+
+  &.is-kasni {
+    background: rgba(249, 115, 22, 0.2);
+    color: #fdba74;
+  }
+  &.is-rano {
+    background: rgba(59, 130, 246, 0.22);
+    color: #93c5fd;
+  }
+}
+
+.nv-sljedeca b {
+  font-variant-numeric: tabular-nums;
 }
 
 .nv-razmak {
@@ -550,4 +654,55 @@
   font-size: 11.5px;
   text-align: center;
   text-shadow: 0 0 4px var(--nv-panel);
+}
+
+// ---------- Vodoravno (telefon u držaču): kartice i traka lijevo, karta desno ----------
+@media (orientation: landscape) and (max-height: 600px) {
+  .nv-top,
+  .nv-dno {
+    right: auto;
+    width: min(380px, 45vw);
+    max-width: none;
+    margin: 0;
+  }
+
+  .nv-top {
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+
+  .nv-dno {
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+
+  .nv-kartica {
+    padding: 8px 12px;
+
+    .nv-ikona {
+      width: 40px;
+      height: 40px;
+
+      svg {
+        width: 36px;
+        height: 36px;
+      }
+      .pi {
+        font-size: 26px;
+      }
+    }
+    .nv-kartica-txt strong {
+      font-size: 22px;
+    }
+  }
+
+  // Traka napretka uz desni rub stupca s karticama.
+  .nv-napredak {
+    left: calc(min(380px, 45vw) + max(0px, env(safe-area-inset-left)));
+    top: max(12px, env(safe-area-inset-top));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .nv-tools {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    right: max(12px, env(safe-area-inset-right));
+  }
 }
