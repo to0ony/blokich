@@ -287,7 +287,12 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     const kartica = el?.children[i] as HTMLElement | undefined;
     if (!el || !kartica) return;
     this.prikazanDan = i;
-    el.scrollTo({ left: kartica.offsetLeft, behavior: glatko ? 'smooth' : 'auto' });
+    el.scrollTo({ left: this.pomakKartice(el, kartica), behavior: glatko ? 'smooth' : 'auto' });
+  }
+
+  /** Položaj kartice u klizaču, bez unutarnjeg ruba klizača. */
+  private pomakKartice(el: HTMLElement, kartica: HTMLElement): number {
+    return kartica.offsetLeft - (el.firstElementChild as HTMLElement).offsetLeft;
   }
 
   /** Koja je kartica poravnata uz lijevi rub klizača. */
@@ -295,7 +300,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     let najblizi = 0;
     let razmak = Infinity;
     Array.from(el.children).forEach((c, i) => {
-      const r = Math.abs((c as HTMLElement).offsetLeft - el.scrollLeft);
+      const r = Math.abs(this.pomakKartice(el, c as HTMLElement) - el.scrollLeft);
       if (r < razmak) {
         razmak = r;
         najblizi = i;
