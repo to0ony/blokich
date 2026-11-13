@@ -351,6 +351,11 @@
     }
   }
 
+  /* Dan prikazan u klizaču ispod */
+  &.is-shown {
+    border-color: var(--p-primary-300);
+  }
+
   &.is-today {
     background: var(--p-primary-500);
     border-color: var(--p-primary-500);
@@ -394,9 +399,28 @@
 
 /* Dani */
 .rs-list {
+  position: relative;
+  scroll-margin: 90px;
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* Rubovi kartice ne smiju biti odrezani */
+  padding: 1px 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Susjedna kartica malo viri – vidi se da se lista. */
+  > .rs-day {
+    flex: 0 0 90%;
+    min-width: 0;
+    scroll-snap-align: center;
+  }
 }
 
 .rs-day {
@@ -405,7 +429,6 @@
   background: var(--vz-surface);
   border: 1px solid var(--vz-border);
   border-radius: 18px;
-  scroll-margin: 90px;
 
   &.is-today {
     border-color: var(--p-primary-400);

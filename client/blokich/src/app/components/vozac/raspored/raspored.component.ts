@@ -194,7 +194,8 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
       this.dani = this.data ? slozTjedan(this.data) : [];
-      if (this.tjedan === 'trenutni') setTimeout(() => this.skrolajNaDanas());
+      // Klizač dana odmah na aktivnom danu (naredni tjedan: ponedjeljak).
+      setTimeout(() => this.pokaziDan(this.pocetniDan(), false));
       if (this.tjedan === 'trenutni' && this.danas) this.pokreniUzivo();
       else this.zaustaviUzivo();
     }
@@ -257,20 +258,49 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     if (value && value !== this.tjedan) this.tjedanChange.emit(value);
   }
 
-  skrolajNa(dan: DanRasporeda): void {
-    document
-      .getElementById(`dan-${dan.key}`)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // ---------- Klizač dana (kartice dana lijevo-desno) ----------
+
+  @ViewChild('daniKlizac') private daniKlizac?: ElementRef<HTMLDivElement>;
+  /** Indeks dana koji je sad prikazan u klizaču (označen u traci dana). */
+  prikazanDan = 0;
+
+  /** Prvi prikazani dan: aktivni (ili današnji), za naredni tjedan ponedjeljak. */
+  private pocetniDan(): number {
+    const i = this.dani.findIndex((d) => this.istaknut(d));
+    return i >= 0 ? i : 0;
   }
 
-  private skrolajNaDanas(): void {
-    const danas = this.dani.find((d) => d.danas);
-    // Samo ako je današnji dan niže na stranici (ne skrolaj kad je pon/uto).
-    if (danas && ['cet', 'pet', 'sub', 'ned'].includes(danas.key)) {
-      document
-        .getElementById(`dan-${danas.key}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+  /** Dodir na dan u traci: klizač pređe na taj dan i bude vidljiv na ekranu. */
+  odaberiDan(dan: DanRasporeda): void {
+    this.pokaziDan(this.dani.indexOf(dan));
+    this.daniKlizac?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  private pokaziDan(i: number, glatko = true): void {
+    const el = this.daniKlizac?.nativeElement;
+    const kartica = el?.children[i] as HTMLElement | undefined;
+    if (!el || !kartica) return;
+    this.prikazanDan = i;
+    el.scrollTo({
+      left: kartica.offsetLeft - (el.clientWidth - kartica.offsetWidth) / 2,
+      behavior: glatko ? 'smooth' : 'auto',
+    });
+  }
+
+  /** Koja je kartica najbliže sredini klizača. */
+  naKlizanjuDana(el: HTMLElement): void {
+    const sredina = el.scrollLeft + el.clientWidth / 2;
+    let najblizi = 0;
+    let razmak = Infinity;
+    Array.from(el.children).forEach((c, i) => {
+      const k = c as HTMLElement;
+      const r = Math.abs(k.offsetLeft + k.offsetWidth / 2 - sredina);
+      if (r < razmak) {
+        razmak = r;
+        najblizi = i;
+      }
+    });
+    this.prikazanDan = najblizi;
   }
 
   linije(dan: DanRasporeda): string[] {

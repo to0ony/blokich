@@ -154,7 +154,7 @@
 
   <nav class="rs-strip" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
     <button
-      *ngFor="let d of dani"
+      *ngFor="let d of dani; let i = index"
       type="button"
       class="rs-chip"
       [class.is-work]="d.sluzbe.length"
@@ -162,8 +162,10 @@
       [class.is-past]="d.prosao"
       [class.is-sat]="d.key === 'sub'"
       [class.is-sun]="d.key === 'ned' || praznik(d)"
+      [class.is-shown]="i === prikazanDan"
       [attr.title]="praznik(d)"
-      (click)="skrolajNa(d)"
+      [attr.aria-current]="i === prikazanDan ? 'true' : null"
+      (click)="odaberiDan(d)"
     >
       <span class="rs-chip-day">{{ d.kratko }}</span>
       <span class="rs-chip-num">{{ d.datum.date() }}</span>
@@ -186,8 +188,14 @@
 </ng-container>
 
 <ng-container *ngIf="!loading && dani.length">
-  <!-- Dani -->
-  <div class="rs-list">
+  <!-- Dani: klizač lijevo-desno, prošli dani ostaju lijevo -->
+  <div
+    class="rs-list"
+    #daniKlizac
+    role="region"
+    aria-label="Dani u tjednu"
+    (scroll)="naKlizanjuDana(daniKlizac)"
+  >
     <article
       *ngFor="let d of dani"
       class="rs-day"
