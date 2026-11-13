@@ -199,6 +199,10 @@ export class RasporedComponent implements OnChanges, OnDestroy {
       // da ostanu i dok je prikazan sljedeći tjedan.
       const tekuci = this.dani.some((d) => d.danas);
       if (tekuci) this.daniTekuci = this.dani;
+      // Rubne kartice za prelazak tjedna ovise o prikazanim podacima, ne o
+      // prekidaču (on se promijeni prije nego stigne novi tjedan).
+      this.prikazanTekuci = tekuci;
+      this.prelazim = false;
       // Novi tjedan glatko uđe; klizač dana odmah na aktivnom danu.
       this.ulaz = false;
       setTimeout(() => {
@@ -316,10 +320,37 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     this.nagovjestajPromatrac.observe(el);
   }
 
+  /** Prikazani podaci su tekući tjedan (sadrže današnji dan). */
+  prikazanTekuci = false;
+  /** Prelazak u drugi tjedan povlačenjem je pokrenut, čeka se novi tjedan. */
+  private prelazim = false;
+  /** Natrag u ovaj tjedan povlačenjem: otvori nedjelju, ne današnji dan. */
+  private natragNaKraj = false;
+  private klizanjeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Rubna kartica "Sljedeći tjedan" iza nedjelje. */
+  get imaSljedeciRub(): boolean {
+    return this.prikazanTekuci && this.naredniDostupan;
+  }
+
+  /** Rubna kartica "Ovaj tjedan" ispred ponedjeljka sljedećeg tjedna. */
+  get imaPrethodniRub(): boolean {
+    return !this.prikazanTekuci && this.dani.length > 0 && this.daniTekuci.length > 0;
+  }
+
   /** Prvi prikazani dan: aktivni (ili današnji), za naredni tjedan ponedjeljak. */
   private pocetniDan(): number {
+    if (this.natragNaKraj) {
+      this.natragNaKraj = false;
+      return this.dani.length - 1;
+    }
     const i = this.dani.findIndex((d) => this.istaknut(d));
     return i >= 0 ? i : 0;
+  }
+
+  /** Kartice dana u klizaču (bez rubnih kartica za prelazak tjedna). */
+  private kartice(el: HTMLElement): HTMLElement[] {
+    return Array.from(el.querySelectorAll<HTMLElement>(':scope > .rs-day'));
   }
 
   /**
@@ -336,7 +367,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
 
   private pokaziDan(i: number, glatko = true): void {
     const el = this.daniKlizac?.nativeElement;
-    const kartica = el?.children[i] as HTMLElement | undefined;
+    const kartica = el ? this.kartice(el)[i] : undefined;
     if (!el || !kartica) return;
     this.prikazanDan = i;
     el.scrollTo({ left: this.pomakKartice(el, kartica), behavior: glatko ? 'smooth' : 'auto' });
@@ -351,14 +382,31 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   naKlizanjuDana(el: HTMLElement): void {
     let najblizi = 0;
     let razmak = Infinity;
-    Array.from(el.children).forEach((c, i) => {
-      const r = Math.abs(this.pomakKartice(el, c as HTMLElement) - el.scrollLeft);
+    this.kartice(el).forEach((c, i) => {
+      const r = Math.abs(this.pomakKartice(el, c) - el.scrollLeft);
       if (r < razmak) {
         razmak = r;
         najblizi = i;
       }
     });
     this.prikazanDan = najblizi;
+
+    // Kad se klizanje smiri na rubnoj kartici: prijeđi u drugi tjedan.
+    if (this.klizanjeTimer) clearTimeout(this.klizanjeTimer);
+    this.klizanjeTimer = setTimeout(() => this.provjeriRub(el), 180);
+  }
+
+  private provjeriRub(el: HTMLElement): void {
+    if (this.prelazim) return;
+    const kraj = el.scrollWidth - el.clientWidth;
+    if (this.imaSljedeciRub && el.scrollLeft >= kraj - 2) {
+      this.prelazim = true;
+      this.tjedanChange.emit('naredni');
+    } else if (this.imaPrethodniRub && el.scrollLeft <= 2) {
+      this.prelazim = true;
+      this.natragNaKraj = true;
+      this.tjedanChange.emit('trenutni');
+    }
   }
 
   linije(dan: DanRasporeda): string[] {

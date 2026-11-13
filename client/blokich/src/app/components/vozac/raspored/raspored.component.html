@@ -203,6 +203,16 @@
       aria-label="Dani u tjednu"
       (scroll)="naKlizanjuDana(daniKlizac)"
     >
+      <!-- Sljedeći tjedan: rub ispred ponedjeljka vodi natrag u ovaj tjedan -->
+      <button
+        *ngIf="imaPrethodniRub"
+        type="button"
+        class="rs-rub"
+        (click)="onTjedan('trenutni')"
+      >
+        <i class="pi pi-arrow-left"></i>
+        <span>Ovaj tjedan</span>
+      </button>
       <article
         *ngFor="let d of dani"
         class="rs-day"
@@ -266,6 +276,16 @@
           </button>
         </ng-container>
       </article>
+      <!-- Iza nedjelje: povuci dalje za sljedeći tjedan -->
+      <button
+        *ngIf="imaSljedeciRub"
+        type="button"
+        class="rs-rub"
+        (click)="onTjedan('naredni')"
+      >
+        <i class="pi pi-arrow-right"></i>
+        <span>Sljedeći tjedan</span>
+      </button>
     </div>
   </ng-container>
 </div>
