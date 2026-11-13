@@ -1,5 +1,5 @@
-<!-- Sekcija "sada": kartica Danas i karta (samo tekući tjedan) -->
-<div class="rs-grupa" *ngIf="tjedan === 'trenutni'">
+<!-- "Sada": kartica Danas i karta spojene u jedan blok (samo tekući tjedan) -->
+<div class="rs-sad" *ngIf="tjedan === 'trenutni'">
   <!-- Danas (samo za tekući tjedan) -->
   <p-skeleton
     *ngIf="loading && tjedan === 'trenutni'"
@@ -107,77 +107,74 @@
   </ng-container>
 </div>
 
-<!-- Sekcija "tjedan": naslov, prekidač, traka dana i kartice dana -->
-<div class="rs-grupa">
-  <!-- Zaglavlje sekcije tjedna (bez vlastitog okvira) -->
-  <section class="rs-week">
-    <div class="rs-week-head">
-      <div class="rs-week-title">
-        <h1 *ngIf="data && !loading; else naslovSkeleton">Tjedan {{ data.tjedan }}</h1>
-        <ng-template #naslovSkeleton>
-          <p-skeleton width="8rem" height="1.6rem" />
-        </ng-template>
-        <span class="rs-week-sub" *ngIf="dani.length && !loading">
-          {{ rasponTjedna }} · {{ brojRadnihDana }}
-          {{ brojRadnihDana === 1 ? "radni dan" : "radnih dana" }}
-        </span>
-      </div>
-      <div class="rs-week-actions">
-        <p-button
-          icon="pi pi-calendar"
-          [rounded]="true"
-          [text]="true"
-          severity="secondary"
-          ariaLabel="Kalendar"
-          (onClick)="otvoriKalendar.emit()"
-        />
-        <p-button
-          icon="pi pi-share-alt"
-          [rounded]="true"
-          [text]="true"
-          severity="secondary"
-          ariaLabel="Podijeli raspored"
-          [disabled]="!data || loading"
-          (onClick)="podijeli()"
-        />
-      </div>
+<!-- Tjedan: jedna kartica – naslov, prekidač, traka dana i kartice dana -->
+<section class="rs-week">
+  <div class="rs-week-head">
+    <div class="rs-week-title">
+      <h1 *ngIf="data && !loading; else naslovSkeleton">Tjedan {{ data.tjedan }}</h1>
+      <ng-template #naslovSkeleton>
+        <p-skeleton width="8rem" height="1.6rem" />
+      </ng-template>
+      <span class="rs-week-sub" *ngIf="dani.length && !loading">
+        {{ rasponTjedna }} · {{ brojRadnihDana }}
+        {{ brojRadnihDana === 1 ? "radni dan" : "radnih dana" }}
+      </span>
     </div>
-
-    <p-selectbutton
-      [options]="tjedanOpcije"
-      optionLabel="label"
-      optionValue="value"
-      optionDisabled="disabled"
-      [allowEmpty]="false"
-      [ngModel]="tjedan"
-      (ngModelChange)="onTjedan($event)"
-    />
-
-    <div class="rs-strip" *ngIf="loading">
-      <p-skeleton *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" height="62px" borderRadius="12px" />
+    <div class="rs-week-actions">
+      <p-button
+        icon="pi pi-calendar"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        ariaLabel="Kalendar"
+        (onClick)="otvoriKalendar.emit()"
+      />
+      <p-button
+        icon="pi pi-share-alt"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        ariaLabel="Podijeli raspored"
+        [disabled]="!data || loading"
+        (onClick)="podijeli()"
+      />
     </div>
+  </div>
 
-    <nav class="rs-strip" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
-      <button
-        *ngFor="let d of dani; let i = index"
-        type="button"
-        class="rs-chip"
-        [class.is-work]="d.sluzbe.length"
-        [class.is-today]="istaknut(d)"
-        [class.is-past]="d.prosao"
-        [class.is-sat]="d.key === 'sub'"
-        [class.is-sun]="d.key === 'ned' || praznik(d)"
-        [class.is-shown]="i === prikazanDan"
-        [attr.title]="praznik(d)"
-        [attr.aria-current]="i === prikazanDan ? 'true' : null"
-        (click)="odaberiDan(d)"
-      >
-        <span class="rs-chip-day">{{ d.kratko }}</span>
-        <span class="rs-chip-num">{{ d.datum.date() }}</span>
-        <span class="rs-chip-dot"></span>
-      </button>
-    </nav>
-  </section>
+  <p-selectbutton
+    [options]="tjedanOpcije"
+    optionLabel="label"
+    optionValue="value"
+    optionDisabled="disabled"
+    [allowEmpty]="false"
+    [ngModel]="tjedan"
+    (ngModelChange)="onTjedan($event)"
+  />
+
+  <div class="rs-strip" *ngIf="loading">
+    <p-skeleton *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" height="62px" borderRadius="12px" />
+  </div>
+
+  <nav class="rs-strip" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
+    <button
+      *ngFor="let d of dani; let i = index"
+      type="button"
+      class="rs-chip"
+      [class.is-work]="d.sluzbe.length"
+      [class.is-today]="istaknut(d)"
+      [class.is-past]="d.prosao"
+      [class.is-sat]="d.key === 'sub'"
+      [class.is-sun]="d.key === 'ned' || praznik(d)"
+      [class.is-shown]="i === prikazanDan"
+      [attr.title]="praznik(d)"
+      [attr.aria-current]="i === prikazanDan ? 'true' : null"
+      (click)="odaberiDan(d)"
+    >
+      <span class="rs-chip-day">{{ d.kratko }}</span>
+      <span class="rs-chip-num">{{ d.datum.date() }}</span>
+      <span class="rs-chip-dot"></span>
+    </button>
+  </nav>
 
   <!-- Greška -->
   <p-message *ngIf="error && !loading" severity="error" styleClass="rs-error">
@@ -267,7 +264,7 @@
       </article>
     </div>
   </ng-container>
-</div>
+</section>
 
 <!-- Smjena (donji panel) -->
 <p-drawer
