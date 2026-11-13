@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 /* "Sada": kartica Danas i karta ispod nje spojene u jedan blok */
@@ -31,7 +31,7 @@
   border-radius: 0 0 20px 20px;
 }
 
-/* Tjedan: jedna kartica – naslov, prekidač, traka dana i kartice dana */
+/* Tjedan: naslov, prekidač i traka s danima u jednoj kartici */
 .rs-week {
   display: flex;
   flex-direction: column;
@@ -437,12 +437,12 @@
   scrollbar-width: none;
   /*
    * Rubovi kartice ne smiju biti odrezani: širina 90% daje dijelove piksela,
-   * a klizač staje na cijelom pikselu. 4px zraka gore/dolje za plavi okvir
-   * današnjeg dana; lijevo-desno klizač ide do ruba kartice tjedna.
+   * a klizač staje na cijelom pikselu. 4px zraka oko kartica, i za plavi
+   * okvir današnjeg dana (margina vraća poravnanje sa stranicom).
    */
-  margin: -4px -16px;
-  padding: 4px 16px;
-  scroll-padding: 0 16px;
+  margin: -4px;
+  padding: 4px;
+  scroll-padding: 0 4px;
 
   &::-webkit-scrollbar {
     display: none;

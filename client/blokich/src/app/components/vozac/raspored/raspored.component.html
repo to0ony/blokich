@@ -107,7 +107,7 @@
   </ng-container>
 </div>
 
-<!-- Tjedan: jedna kartica – naslov, prekidač, traka dana i kartice dana -->
+<!-- Tjedan: naslov, prekidač i dani u jednoj kartici -->
 <section class="rs-week">
   <div class="rs-week-head">
     <div class="rs-week-title">
@@ -175,96 +175,96 @@
       <span class="rs-chip-dot"></span>
     </button>
   </nav>
+</section>
 
-  <!-- Greška -->
-  <p-message *ngIf="error && !loading" severity="error" styleClass="rs-error">
-    <div class="rs-error-body">
-      <span>{{ error }}</span>
-      <p-button label="Pokušaj ponovno" size="small" (onClick)="retry.emit()" />
-    </div>
-  </p-message>
+<!-- Greška -->
+<p-message *ngIf="error && !loading" severity="error" styleClass="rs-error">
+  <div class="rs-error-body">
+    <span>{{ error }}</span>
+    <p-button label="Pokušaj ponovno" size="small" (onClick)="retry.emit()" />
+  </div>
+</p-message>
 
-  <ng-container *ngIf="loading">
-    <p-skeleton height="150px" borderRadius="18px" />
-    <p-skeleton height="150px" borderRadius="18px" />
-  </ng-container>
+<ng-container *ngIf="loading">
+  <p-skeleton height="150px" borderRadius="18px" />
+  <p-skeleton height="150px" borderRadius="18px" />
+</ng-container>
 
-  <ng-container *ngIf="!loading && dani.length">
-    <!-- Dani: klizač lijevo-desno, prošli dani ostaju lijevo -->
-    <div
-      class="rs-list"
-      [class.is-hint]="nagovijestiKlizanje"
-      #daniKlizac
-      role="region"
-      aria-label="Dani u tjednu"
-      (scroll)="naKlizanjuDana(daniKlizac)"
+<ng-container *ngIf="!loading && dani.length">
+  <!-- Dani: klizač lijevo-desno, prošli dani ostaju lijevo -->
+  <div
+    class="rs-list"
+    [class.is-hint]="nagovijestiKlizanje"
+    #daniKlizac
+    role="region"
+    aria-label="Dani u tjednu"
+    (scroll)="naKlizanjuDana(daniKlizac)"
+  >
+    <article
+      *ngFor="let d of dani"
+      class="rs-day"
+      [id]="'dan-' + d.key"
+      [class.is-today]="istaknut(d)"
+      [class.is-past]="d.prosao"
+      [class.is-off]="!d.sluzbe.length"
+      [class.is-sat]="d.key === 'sub'"
+      [class.is-sun]="d.key === 'ned' || praznik(d)"
     >
-      <article
-        *ngFor="let d of dani"
-        class="rs-day"
-        [id]="'dan-' + d.key"
-        [class.is-today]="istaknut(d)"
-        [class.is-past]="d.prosao"
-        [class.is-off]="!d.sluzbe.length"
-        [class.is-sat]="d.key === 'sub'"
-        [class.is-sun]="d.key === 'ned' || praznik(d)"
-      >
-        <!-- Zaglavlje dana preko cijele širine -->
-        <header class="rs-day-head">
-          <span class="rs-day-name">{{ d.naziv }}</span>
-          <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
-          <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
-            d.odsustvo
-          }}</span>
-          <!-- Služba pripada danu: jedna pilula u zaglavlju -->
-          <span class="chip rs-day-sl" *ngIf="d.sluzbe.length">Služba {{ d.sluzbe[0].br_sl }}</span>
-        </header>
+      <!-- Zaglavlje dana preko cijele širine -->
+      <header class="rs-day-head">
+        <span class="rs-day-name">{{ d.naziv }}</span>
+        <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
+        <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
+          d.odsustvo
+        }}</span>
+        <!-- Služba pripada danu: jedna pilula u zaglavlju -->
+        <span class="chip rs-day-sl" *ngIf="d.sluzbe.length">Služba {{ d.sluzbe[0].br_sl }}</span>
+      </header>
 
-        <!-- Slobodan dan: tekst uvijek centriran, neovisno o oznaci -->
-        <div class="rs-day-free" *ngIf="!d.sluzbe.length">
-          <lucide-icon [img]="OdmorIcon" [size]="20" [strokeWidth]="2.2" />
-          {{ opisOdsustva(d.odsustvo) }}
+      <!-- Slobodan dan: tekst uvijek centriran, neovisno o oznaci -->
+      <div class="rs-day-free" *ngIf="!d.sluzbe.length">
+        <lucide-icon [img]="OdmorIcon" [size]="20" [strokeWidth]="2.2" />
+        {{ opisOdsustva(d.odsustvo) }}
+      </div>
+
+      <ng-container *ngIf="d.sluzbe.length">
+        <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
+          <!-- Vremenska crta: nastup lijevo, završetak desno, služba i linija u sredini -->
+          <div class="rs-line">
+            <span class="rs-time">{{ s.od }}</span>
+            <div class="rs-track">
+              <span class="rs-track-line"></span>
+              <a
+                *ngIf="s.linija; else pricuva"
+                class="rs-mid"
+                routerLink="/karta"
+                [queryParams]="{ linija: s.linija }"
+                (click)="$event.stopPropagation()"
+                [attr.aria-label]="'Karta linije ' + s.linija"
+              >
+                <i class="pi pi-map"></i>
+                <strong>{{ s.linija }}</strong>
+                <span class="rs-mid-vr" *ngIf="s.varijanta"><span class="rs-mid-vr-label">V.R. </span>{{ s.varijanta }}</span>
+              </a>
+              <ng-template #pricuva>
+                <span class="rs-mid is-res">Pričuva</span>
+              </ng-template>
+            </div>
+            <span class="rs-time right">{{ s.do }}</span>
+
+            <span class="rs-place">{{ s.nastup_sluzbe }}</span>
+            <span class="rs-place right">{{ s.zavrsna_sluzba }}</span>
+          </div>
         </div>
 
-        <ng-container *ngIf="d.sluzbe.length">
-          <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
-            <!-- Vremenska crta: nastup lijevo, završetak desno, služba i linija u sredini -->
-            <div class="rs-line">
-              <span class="rs-time">{{ s.od }}</span>
-              <div class="rs-track">
-                <span class="rs-track-line"></span>
-                <a
-                  *ngIf="s.linija; else pricuva"
-                  class="rs-mid"
-                  routerLink="/karta"
-                  [queryParams]="{ linija: s.linija }"
-                  (click)="$event.stopPropagation()"
-                  [attr.aria-label]="'Karta linije ' + s.linija"
-                >
-                  <i class="pi pi-map"></i>
-                  <strong>{{ s.linija }}</strong>
-                  <span class="rs-mid-vr" *ngIf="s.varijanta"><span class="rs-mid-vr-label">V.R. </span>{{ s.varijanta }}</span>
-                </a>
-                <ng-template #pricuva>
-                  <span class="rs-mid is-res">Pričuva</span>
-                </ng-template>
-              </div>
-              <span class="rs-time right">{{ s.do }}</span>
-
-              <span class="rs-place">{{ s.nastup_sluzbe }}</span>
-              <span class="rs-place right">{{ s.zavrsna_sluzba }}</span>
-            </div>
-          </div>
-
-          <button type="button" class="rs-day-more" (click)="otvoriSmjenu(d)">
-            <span><i class="pi pi-users"></i> Smjena i detalji</span>
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </ng-container>
-      </article>
-    </div>
-  </ng-container>
-</section>
+        <button type="button" class="rs-day-more" (click)="otvoriSmjenu(d)">
+          <span><i class="pi pi-users"></i> Smjena i detalji</span>
+          <i class="pi pi-angle-right"></i>
+        </button>
+      </ng-container>
+    </article>
+  </div>
+</ng-container>
 
 <!-- Smjena (donji panel) -->
 <p-drawer
