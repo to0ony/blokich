@@ -20,7 +20,9 @@ import {
   VoziloKarta,
 } from '../../../services/karta.service';
 import { Kretanje, sljedeceStajaliste, stajalistaNaTrasi } from '../../karta/kretanje';
-import { BOJE, STIL, Tema, oznakaVozila, ucitajCss, ucitajPostavke } from '../../karta/karta-stil';
+import { BOJE, STIL, Tema, oznakaVozila, temaKarte, ucitajCss } from '../../karta/karta-stil';
+import { Subscription } from 'rxjs';
+import { TemaService } from '../../../theme/tema.service';
 import { DanRasporeda, Sluzba, blokZa, stanjeSluzbe, sutraKratko } from '../vozac.model';
 
 /** Bus koji preuzimam prati se tek 60 min prije mog nastupa (kao na kartici Danas). */
@@ -76,8 +78,11 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
   ruta: LinijaKarta | null = null;
   sad = Date.now();
 
-  /** Profil je svijetao – tamna karta samo ako ju je vozač izabrao na punoj karti. */
-  private readonly tema: Tema = ucitajPostavke().tema ?? 'svijetla';
+  /** Tema karte prati temu iz profila; mijenja se uživo kad se promijeni. */
+  private tema: Tema = temaKarte();
+  private readonly temaPretplata: Subscription = inject(TemaService).promjena$.subscribe(() =>
+    this.primijeniTemu(),
+  );
   private mapa: MapaLibre | null = null;
   private spremna = false;
   private readonly kretanje = new Kretanje();
@@ -106,6 +111,7 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.temaPretplata.unsubscribe();
     this.unisten = true;
     if (this.timer) clearInterval(this.timer);
     if (this.sat) clearInterval(this.sat);
@@ -275,6 +281,15 @@ export class MojaKartaComponent implements OnChanges, AfterViewInit, OnDestroy {
       mapa.on('style.load', () => this.postaviSlojeve(mapa));
       this.mapa = mapa;
     });
+  }
+
+  /** Tema promijenjena u profilu: zamijeni stil; style.load vrati slojeve i trasu. */
+  private primijeniTemu(): void {
+    const tema = temaKarte();
+    if (tema === this.tema) return;
+    this.tema = tema;
+    this.spremna = false;
+    this.zone.runOutsideAngular(() => this.mapa?.setStyle(STIL[this.tema], { diff: false }));
   }
 
   private postaviSlojeve(mapa: MapaLibre): void {

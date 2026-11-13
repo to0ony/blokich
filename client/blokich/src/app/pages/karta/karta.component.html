@@ -16,14 +16,6 @@
           [(ngModel)]="trazi"
         />
       </div>
-      <button
-        type="button"
-        class="km-btn"
-        [attr.aria-label]="tema === 'tamna' ? 'Svijetla karta' : 'Tamna karta'"
-        (click)="prebaciTemu()"
-      >
-        <i class="pi" [ngClass]="tema === 'tamna' ? 'pi-sun' : 'pi-moon'"></i>
-      </button>
     </div>
 
     <ul class="km-results" *ngIf="rezultati.length">

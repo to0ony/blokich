@@ -1,5 +1,6 @@
 /** Zajedničko za punu kartu i karticu vozača: podloga, boje, oznaka vozila. */
 import type { Map as MapaLibre } from 'maplibre-gl';
+import { tamnaTema } from '../../theme/tema.service';
 
 /**
  * Smije li kamera sad pratiti vozilo? Ne dok vozač dira kartu (i malo
@@ -104,9 +105,9 @@ export function sustavTamna(): boolean {
   }
 }
 
-/** Tema karte: spremljeni izbor s pune karte, inače postavka telefona. */
+/** Tema karte prati temu odabranu u profilu (Svijetla / Tamna / Kao na mobitelu). */
 export function temaKarte(): Tema {
-  return ucitajPostavke().tema ?? (sustavTamna() ? 'tamna' : 'svijetla');
+  return tamnaTema() ? 'tamna' : 'svijetla';
 }
 
 /** MapLibre CSS se učitava tek kad karta zatreba. */

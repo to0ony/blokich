@@ -26,6 +26,8 @@ import {
   stajalistaNaTrasi,
 } from '../../components/karta/kretanje';
 import { kasniZnatno, opisKasnjenja } from '../../components/vozac/vozac.model';
+import { Subscription } from 'rxjs';
+import { TemaService } from '../../theme/tema.service';
 import {
   BOJE,
   POSTAVKE_KEY,
@@ -33,7 +35,7 @@ import {
   STIL,
   Tema,
   oznakaVozila,
-  sustavTamna,
+  temaKarte,
   ucitajCss,
   ucitajPostavke,
   slobodnaKamera,
@@ -78,6 +80,8 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapa', { static: true }) mapaEl!: ElementRef<HTMLDivElement>;
 
   private readonly servis = inject(KartaService);
+  private readonly temaService = inject(TemaService);
+  private temaPretplata?: Subscription;
   private readonly zone = inject(NgZone);
   private readonly router = inject(Router);
   /** false dok vozač dira kartu – tada je kamera ne smije pomicati. */
@@ -134,7 +138,9 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     const p = ucitajPostavke();
     this.samoPodsused = p.samoPodsused;
     this.tramvaji = p.tramvaji;
-    this.tema = p.tema ?? (sustavTamna() ? 'tamna' : 'svijetla');
+    // Tema karte se bira u profilu; ovdje je samo pratimo.
+    this.tema = temaKarte();
+    this.temaPretplata = this.temaService.promjena$.subscribe(() => this.primijeniTemu());
 
     const q = inject(ActivatedRoute).snapshot.queryParamMap;
     this.ciljVozilo = q.get('vozilo');
@@ -223,6 +229,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.temaPretplata?.unsubscribe();
     this.unisten = true;
     if (this.timer) clearInterval(this.timer);
     if (this.sat) clearInterval(this.sat);
@@ -283,7 +290,7 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
 
   private spremiPostavke(): void {
     try {
-      const p: PostavkeKarte = { samoPodsused: this.samoPodsused, tramvaji: this.tramvaji, tema: this.tema };
+      const p: PostavkeKarte = { samoPodsused: this.samoPodsused, tramvaji: this.tramvaji, tema: null };
       localStorage.setItem(POSTAVKE_KEY, JSON.stringify(p));
     } catch {}
   }
@@ -321,12 +328,14 @@ export class KartaComponent implements AfterViewInit, OnDestroy {
     if (this.odabrano && !this.prikazana.some((v) => v.id === this.odabrano!.id)) this.zatvori();
   }
 
-  prebaciTemu(): void {
-    this.tema = this.tema === 'tamna' ? 'svijetla' : 'tamna';
-    this.spremiPostavke();
+  /** Promijenila se tema u profilu (ili na mobitelu): zamijeni stil karte. */
+  private primijeniTemu(): void {
+    const tema = temaKarte();
+    if (tema === this.tema) return;
+    this.tema = tema;
     this.spremna = false;
     // style.load ponovno doda slojeve i podatke.
-    this.mapa?.setStyle(STIL[this.tema]);
+    this.zone.runOutsideAngular(() => this.mapa?.setStyle(STIL[this.tema], { diff: false }));
   }
 
   // ---------- Prikaz ----------
