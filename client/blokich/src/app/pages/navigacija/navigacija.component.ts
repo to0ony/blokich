@@ -68,7 +68,7 @@ const NAJAVA_BLIZU_M = 45;
 const NAJAVA_STAJALISTA_M = 180;
 /** Karta pomaknuta rukom vraća se na praćenje nakon ovoliko bez dodira. */
 const AUTO_CENTAR_MS = 10_000;
-/** Pregled preostale trase (dodir na traku napretka) traje ovoliko. */
+/** Pregled cijele trase (dodir na traku napretka) traje ovoliko. */
 const PREGLED_MS = 8000;
 /** Stajalište se na karti ističe kad je bliže od ovoga. */
 const STAJALISTE_BLIZU_M = 150;
@@ -213,7 +213,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   /** Traka lijevo: prijeđeni dio trase (0–1) i položaji stajališta na njoj. */
   napredak = 0;
   tockeStajalista: number[] = [];
-  /** Dodir na traku: karta nakratko pokaže cijelu preostalu trasu. */
+  /** Dodir na traku: karta nakratko pokaže cijelu trasu. */
   pregled = false;
   private pregledDo = 0;
   /** Zadnji dodir karte – nakon AUTO_CENTAR_MS bez dodira karta opet prati vozilo. */
@@ -668,8 +668,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Dodir na traku napretka: karta pokaže cijelu preostalu trasu (u smjeru
-   * vožnje), pa se nakon nekoliko sekundi sama vrati. Drugi dodir – odmah natrag.
+   * Dodir na traku napretka: karta pokaže cijelu trasu (sjever gore, preko
+   * cijelog zaslona), pa se nakon nekoliko sekundi sama vrati. Drugi dodir – odmah natrag.
    */
   pregledTrase(): void {
     if (this.pregled) {
@@ -679,10 +679,8 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     const mapa = this.mapa;
     const t = this.trasa;
     if (!mapa || !t) return;
-    const tu = tockaNa(t, this.d);
-    let [zap, jug, ist, sje] = [tu.lon, tu.lat, tu.lon, tu.lat];
-    const idx = t.d.findIndex((x) => x > this.d);
-    for (const [la, lo] of idx < 0 ? [] : t.tocke.slice(idx)) {
+    let [zap, jug, ist, sje] = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const [la, lo] of t.tocke) {
       zap = Math.min(zap, lo);
       ist = Math.max(ist, lo);
       jug = Math.min(jug, la);
@@ -693,15 +691,16 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.pregled = true;
     this.pregledDo = performance.now() + PREGLED_MS;
     const { clientWidth: w, clientHeight: h } = this.mapaEl.nativeElement;
+    // Cijela trasa preko cijelog zaslona, sjever gore – rubovi samo koliko traže gumbi i traka.
     const padding = this.lezeci()
-      ? { top: 30, bottom: 30, left: Math.min(420, w * 0.47), right: 80 }
-      : { top: Math.min(220, h * 0.32), bottom: Math.min(140, h * 0.2), left: 50, right: 80 };
+      ? { top: 24, bottom: 24, left: Math.min(420, w * 0.47), right: 76 }
+      : { top: Math.min(48, h * 0.06), bottom: Math.min(100, h * 0.12), left: 48, right: 76 };
     mapa.fitBounds(
       [
         [zap, jug],
         [ist, sje],
       ],
-      { padding, bearing: this.smjer, pitch: 0, duration: 800, maxZoom: 16.5 },
+      { padding, bearing: 0, pitch: 0, duration: 800 },
     );
   }
 

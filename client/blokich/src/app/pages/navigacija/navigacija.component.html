@@ -108,13 +108,13 @@
   </header>
 
   <!-- Lijevo: odokativni napredak po trasi (dolje početak, gore kraj) -->
-  <!-- Dodir: pregled cijele preostale trase -->
+  <!-- Dodir: pregled cijele trase -->
   <button
     type="button"
     class="nv-napredak"
     *ngIf="ucitano"
     [class.is-pregled]="pregled"
-    [attr.aria-label]="pregled ? 'Natrag na vožnju' : 'Pregled preostale trase'"
+    [attr.aria-label]="pregled ? 'Natrag na vožnju' : 'Pregled cijele trase'"
     (click)="pregledTrase()"
   >
     <span class="nv-napredak-traka">
