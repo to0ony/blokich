@@ -1,15 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="hr">
   <head>
     <meta charset="utf-8" />
     <title>Blokich</title>
     <base href="/" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="description" content="Raspored, smjene, kolege i karta uživo za vozače AP Podsused." />
+
+    <!-- PWA: instalacija na početni zaslon, boja trake sustava prati temu (TemaService) -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#f3f5f8" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Blokich" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+
     <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
   </head>
   <body>
     <app-root></app-root>
+    <noscript>Za Blokich je potreban JavaScript.</noscript>
   </body>
 </html>

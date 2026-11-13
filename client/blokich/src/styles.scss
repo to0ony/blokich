@@ -8,6 +8,111 @@ html {
   touch-action: manipulation;
 }
 
+/* ---------- Ponašanje kao aplikacija (mobitel) ---------- */
+
+/*
+ * Bez "gumenog" odbijanja cijele stranice i preglednikovog povuci-za-osvježavanje
+ * (vozačka aplikacija ima svoj, vidi PovuciOsvjeziDirective).
+ */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
+/* Dugi pritisak na gumb, tab ili sliku ne označava tekst i ne otvara izbornik slike. */
+button,
+[role='button'],
+nav,
+.p-button,
+.p-menu {
+  -webkit-user-select: none;
+  user-select: none;
+}
+a,
+button,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+/* Povuci-za-osvježavanje (PovuciOsvjeziDirective): izlazi ispod gornje trake */
+.po-osvjezi {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 20px);
+  left: 50%;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  color: #1b3654;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  transform: translate(-50%, 0);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+    opacity 0.25s;
+  pointer-events: none;
+
+  .pi {
+    font-size: 16px;
+  }
+  &.is-vuce {
+    transition: none;
+  }
+  &.is-spremno .pi {
+    color: #13804b;
+  }
+  &.is-vrti .pi {
+    animation: po-vrti 0.8s linear infinite;
+  }
+}
+html.blokich-dark .po-osvjezi {
+  background: #1f2b3f;
+  color: #e2e8f0;
+}
+@keyframes po-vrti {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Prijelaz između stranica: kratko pretapanje s blagim pomakom (View Transitions API). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+::view-transition-old(root) {
+  animation-name: vt-izlaz;
+}
+::view-transition-new(root) {
+  animation-name: vt-ulaz;
+}
+@keyframes vt-izlaz {
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+@keyframes vt-ulaz {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 /* Tamna tema: i pozadina iza stranice (povlačenje preko ruba na mobitelu) */
 html.blokich-dark,
 html.blokich-dark body {

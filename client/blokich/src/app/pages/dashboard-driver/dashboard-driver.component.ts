@@ -15,6 +15,7 @@ import { KalendarComponent } from '../../components/vozac/kalendar/kalendar.comp
 import { LinijeComponent } from '../../components/vozac/linije/linije.component';
 import { SluzbeComponent } from '../../components/vozac/sluzbe/sluzbe.component';
 import { DriverStatsComponent } from '../../components/stats/driver-stats/driver-stats.component';
+import { PovuciOsvjeziDirective } from '../../shared/povuci-osvjezi.directive';
 import {
   DANI,
   DanRasporeda,
@@ -48,6 +49,7 @@ const VIEWS: VozacView[] = ['raspored', 'kalendar', 'danas', 'linije', 'sluzbe',
     LinijeComponent,
     SluzbeComponent,
     DriverStatsComponent,
+    PovuciOsvjeziDirective,
   ],
   templateUrl: './dashboard-driver.component.html',
   styleUrls: ['./dashboard-driver.component.scss'],
@@ -111,6 +113,10 @@ export class DashboardDriverComponent implements OnInit {
   podaci: RasporedOdgovor | null = null;
   loading = true;
   error: string | null = null;
+  /** Povuci-za-osvježavanje u tijeku (vrti se indikator). */
+  osvjezava = false;
+  /** Mijenja se pri osvježavanju – ponovno stvara prikazani pogled. */
+  osvjezenje = 0;
 
   /** Dani tekućeg tjedna – iz njih se bira aktivni dan za pogled "Danas". */
   private daniTekuci: DanRasporeda[] = [];
@@ -163,6 +169,17 @@ export class DashboardDriverComponent implements OnInit {
     this.ucitaj();
   }
 
+  /** Povuci-za-osvježavanje: raspored, naredni tjedan i prikazani pogled iznova. */
+  osvjezi(): void {
+    this.osvjezava = true;
+    this.osvjezenje++;
+    this.rasporedService.fetchUpcomingWeekSchedule().subscribe({
+      next: (d) => (this.naredniDostupan = !!d),
+      error: () => {},
+    });
+    this.ucitaj();
+  }
+
   ucitaj(): void {
     // Skeleton samo dok još nema ničega; pri promjeni tjedna stari tjedan
     // ostaje vidljiv dok ne stigne novi (glatka zamjena).
@@ -178,15 +195,17 @@ export class DashboardDriverComponent implements OnInit {
     zahtjev.subscribe({
       next: (data: RasporedOdgovor) => {
         // Brzo prebacivanje: zakašnjeli odgovor za drugi tjedan se ignorira.
-        if (tjedan !== this.tjedan) return;
+        if (tjedan !== this.tjedan) return void (this.osvjezava = false);
         this.podaci = data;
         this.loading = false;
+        this.osvjezava = false;
         if (this.tjedan === 'trenutni') this.postaviDanas(data);
       },
       error: () => {
         if (tjedan !== this.tjedan) return;
         this.podaci = null;
         this.loading = false;
+        this.osvjezava = false;
         this.danasLoading = false;
         this.error = 'Raspored nije moguće učitati. Provjeri vezu i pokušaj ponovno.';
       },

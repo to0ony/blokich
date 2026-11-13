@@ -30,6 +30,9 @@ export function tamnaTema(): boolean {
 }
 /** Klasa na <html>: uključuje PrimeNG tamni način i tamne --vz-* boje. */
 const KLASA = 'blokich-dark';
+/** --vz-bg svijetle i tamne teme (styles.scss), za <meta name="theme-color">. */
+const BOJA_SVIJETLA = '#f3f5f8';
+const BOJA_TAMNA = '#0b1220';
 
 /**
  * Uvijek svijetlo: admin (nema tamnu temu) i popis službi (/sluzbe), koji
@@ -86,5 +89,9 @@ export class TemaService {
     const html = document.documentElement;
     html.classList.toggle(KLASA, tamna);
     html.style.colorScheme = tamna ? 'dark' : '';
+    // Traka sustava (status bar, adresna traka) u boji pozadine aplikacije.
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', tamna ? BOJA_TAMNA : BOJA_SVIJETLA);
   }
 }

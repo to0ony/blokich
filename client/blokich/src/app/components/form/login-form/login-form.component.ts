@@ -17,6 +17,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { VozacSearchFormComponent } from '../vozac-search-form/vozac-search-form.component';
 import { PristupStorage } from '../../../services/pristup-storage';
 import { verzijaAplikacije } from '../../../services/verzija';
+import { InstalacijaComponent } from '../../pwa/instalacija.component';
 
 dayjs.extend(isoWeek);
 
@@ -31,6 +32,7 @@ dayjs.extend(isoWeek);
     ButtonModule,
     InputTextModule,
     VozacSearchFormComponent,
+    InstalacijaComponent,
   ],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.scss'],
