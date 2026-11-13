@@ -1,4 +1,4 @@
-<div class="vz-app">
+<div class="vz-app" appPovuciOsvjezi [osvjezava]="osvjezava" (povuci)="osvjezi()">
   <p-menu #userMenu [model]="menu" [popup]="true" appendTo="body" />
 
   <!-- Gornja traka -->
@@ -37,6 +37,8 @@
   </header>
 
   <main class="vz-main">
+    <!-- Ključ se mijenja pri povuci-za-osvježavanje: pogledi se ponovno stvore i dohvate podatke -->
+    @for (k of [osvjezenje]; track k) {
     <app-raspored
       *ngIf="view === 'raspored'"
       [data]="podaci"
@@ -45,6 +47,7 @@
       [tjedan]="tjedan"
       [naredniDostupan]="naredniDostupan"
       [prethodniDan]="prethodniDan"
+      [tekuciTjedan]="daniTekuci"
       (tjedanChange)="promijeniTjedan($event)"
       (retry)="ucitaj()"
       (otvoriKalendar)="promijeniView('kalendar')"
@@ -63,6 +66,7 @@
     <app-sluzbe *ngIf="view === 'sluzbe'" [naredniDostupan]="naredniDostupan" />
 
     <app-driver-stats *ngIf="view === 'statistika'" />
+    }
   </main>
 
   <!-- Donja navigacija (mobitel) -->

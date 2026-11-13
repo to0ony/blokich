@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TemaService } from './theme/tema.service';
+import { PwaObavijestiComponent } from './components/pwa/pwa-obavijesti.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, PwaObavijestiComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

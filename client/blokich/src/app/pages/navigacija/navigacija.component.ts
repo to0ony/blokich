@@ -532,7 +532,11 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   private async zakljucajEkran(): Promise<void> {
     try {
       const wl = (navigator as any).wakeLock;
-      if (wl && !this.unisten) this.wakeLock = await wl.request('screen');
+      if (!wl || this.unisten || (this.wakeLock && !(this.wakeLock as any).released)) return;
+      const lock = await wl.request('screen');
+      // Izašao s navigacije dok je zahtjev trajao – ne drži ekran upaljenim.
+      if (this.unisten) void lock.release().catch(() => {});
+      else this.wakeLock = lock;
     } catch {
       // Nije podržano ili odbijeno – ekran se može ugasiti.
     }
