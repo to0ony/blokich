@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PrimeNG } from 'primeng/config';
@@ -8,6 +8,7 @@ import { MenuItem } from 'primeng/api';
 import dayjs from 'dayjs';
 import { DriverScheduleService } from '../../services/driver-schedule.service';
 import { postaviPrimeNgTemu } from '../../theme/primeng-setup';
+import { Tema, TemaService } from '../../theme/tema.service';
 import { RasporedComponent } from '../../components/vozac/raspored/raspored.component';
 import { DanasComponent } from '../../components/vozac/danas/danas.component';
 import { KalendarComponent } from '../../components/vozac/kalendar/kalendar.component';
@@ -51,10 +52,11 @@ const VIEWS: VozacView[] = ['raspored', 'kalendar', 'danas', 'linije', 'sluzbe',
   templateUrl: './dashboard-driver.component.html',
   styleUrls: ['./dashboard-driver.component.scss'],
 })
-export class DashboardDriverComponent implements OnInit {
+export class DashboardDriverComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly rasporedService = inject(DriverScheduleService);
+  private readonly temaService = inject(TemaService);
 
   readonly imePrezime = sessionStorage.getItem('imePrezime') || 'Vozač';
   readonly sluzbeniBroj = sessionStorage.getItem('sluzbeniBroj') || '';
@@ -71,9 +73,31 @@ export class DashboardDriverComponent implements OnInit {
     { view: 'statistika', label: 'Statistika', icon: 'pi pi-chart-bar' },
   ];
 
-  readonly menu: MenuItem[] = [
-    { label: 'Odjava', icon: 'pi pi-sign-out', command: () => this.odjava() },
-  ];
+  menu: MenuItem[] = this.izgradiMenu();
+
+  /** Profil izbornik: izbor teme (kvačica uz odabranu) i odjava. */
+  private izgradiMenu(): MenuItem[] {
+    const opcija = (tema: Tema, label: string, icon: string): MenuItem => ({
+      label,
+      icon: this.temaService.tema === tema ? 'pi pi-check' : icon,
+      command: () => {
+        this.temaService.postavi(tema);
+        this.menu = this.izgradiMenu();
+      },
+    });
+    return [
+      {
+        label: 'Tema',
+        items: [
+          opcija('svijetla', 'Svijetla', 'pi pi-sun'),
+          opcija('tamna', 'Tamna', 'pi pi-moon'),
+          opcija('sustav', 'Kao na mobitelu', 'pi pi-mobile'),
+        ],
+      },
+      { separator: true },
+      { label: 'Odjava', icon: 'pi pi-sign-out', command: () => this.odjava() },
+    ];
+  }
 
   view: VozacView = 'raspored';
   tjedan: TjedanTip = 'trenutni';
@@ -103,7 +127,12 @@ export class DashboardDriverComponent implements OnInit {
     return inicijali(this.imePrezime);
   }
 
+  ngOnDestroy(): void {
+    this.temaService.iskljuci();
+  }
+
   ngOnInit(): void {
+    this.temaService.ukljuci();
     this.route.queryParamMap.subscribe((q) => {
       const v = q.get('v') as VozacView | null;
       this.view = v && VIEWS.includes(v) ? v : 'raspored';

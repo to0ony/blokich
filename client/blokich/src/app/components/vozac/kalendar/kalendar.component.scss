@@ -50,10 +50,10 @@
   color: var(--vz-muted);
 
   &.is-sat {
-    color: #13804b;
+    color: var(--vz-green);
   }
   &.is-sun {
-    color: #d93025;
+    color: var(--vz-red);
   }
 }
 
@@ -89,15 +89,15 @@
   }
 
   &.is-sat {
-    background: #e9f7ee;
+    background: var(--vz-green-bg);
   }
 
   &.is-sun {
-    background: #fdecea;
+    background: var(--vz-red-bg);
   }
 
   &.is-holiday {
-    background: #fdecea;
+    background: var(--vz-red-bg);
     opacity: 1;
     cursor: pointer;
   }
@@ -138,7 +138,7 @@
 
   &.is-res {
     font-size: 10px;
-    color: #a35400;
+    color: var(--vz-orange);
   }
 }
 
@@ -181,8 +181,8 @@
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: #fdecea;
-  color: #d93025;
+  background: var(--vz-red-bg);
+  color: var(--vz-red);
   font-size: 15px;
   font-weight: 700;
 }

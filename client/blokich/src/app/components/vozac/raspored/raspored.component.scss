@@ -124,13 +124,13 @@
     padding: 0;
     border: 0;
     border-radius: 4px;
-    background: #cbd5e1;
+    background: var(--vz-dot);
     cursor: pointer;
     transition: width 0.2s;
 
     &.is-on {
       width: 18px;
-      background: #1b3654;
+      background: var(--vz-hero);
     }
   }
 }
@@ -141,7 +141,7 @@
   padding: 18px 18px 16px;
   border-radius: 20px;
   color: #fff;
-  background: #1b3654;
+  background: var(--vz-hero);
   cursor: pointer;
 }
 
@@ -368,18 +368,18 @@
 
   /* Vikend i blagdani: blaga nijansa, danas je i dalje plav */
   &.is-sat {
-    background: color-mix(in srgb, #13804b 8%, var(--vz-surface));
+    background: color-mix(in srgb, var(--vz-green) 8%, var(--vz-surface));
 
     .rs-chip-day {
-      color: color-mix(in srgb, #13804b 70%, var(--vz-muted));
+      color: color-mix(in srgb, var(--vz-green) 70%, var(--vz-muted));
     }
   }
 
   &.is-sun {
-    background: color-mix(in srgb, #d93025 8%, var(--vz-surface));
+    background: color-mix(in srgb, var(--vz-red) 8%, var(--vz-surface));
 
     .rs-chip-day {
-      color: color-mix(in srgb, #d93025 70%, var(--vz-muted));
+      color: color-mix(in srgb, var(--vz-red) 70%, var(--vz-muted));
     }
   }
 
@@ -516,10 +516,10 @@
   color: var(--vz-text);
 
   .is-sat & {
-    color: #13804b;
+    color: var(--vz-green);
   }
   .is-sun & {
-    color: #d93025;
+    color: var(--vz-red);
   }
   .is-today & {
     color: var(--p-primary-600);
@@ -696,8 +696,8 @@
   }
 
   &.is-res {
-    border-color: #ffe0b2;
-    color: #a35400;
+    border-color: var(--vz-orange-border);
+    color: var(--vz-orange);
     font-weight: 650;
   }
 }
@@ -728,9 +728,9 @@
 }
 
 .chip-res {
-  background: #fff3e0;
-  border-color: #ffe0b2;
-  color: #a35400;
+  background: var(--vz-orange-bg);
+  border-color: var(--vz-orange-border);
+  color: var(--vz-orange);
 }
 
 .rs-day-more {
@@ -768,8 +768,8 @@
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: #fdecea;
-  color: #d93025;
+  background: var(--vz-red-bg);
+  color: var(--vz-red);
   font-size: 15px;
   font-weight: 700;
 }

@@ -18,6 +18,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Tamna tema vozačke aplikacije */
+:host-context(.blokich-dark) {
+  --blue: #0a84ff;
+  --blue-soft: rgba(10, 132, 255, 0.2);
+  --ink: #e6ebf2;
+  --ink-2: #a1a1aa;
+  --ink-3: #8e8e93;
+  --line: rgba(255, 255, 255, 0.1);
+  --track: rgba(255, 255, 255, 0.12);
+  --bg: #0b1220;
+  --surface: #121b2b;
+  --green: #30d158;
+  --warn: #ff9f0a;
+}
+
 .st-page {
   max-width: 960px;
   margin: 0 auto;
