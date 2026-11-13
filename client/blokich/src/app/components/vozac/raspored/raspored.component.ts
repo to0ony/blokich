@@ -133,6 +133,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.zaustaviUzivo();
+    this.nagovjestajPromatrac?.disconnect();
   }
 
   private zaustaviUzivo(): void {
@@ -270,17 +271,37 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   /** Kartice se jednom malo pomaknu ulijevo – vidi se da se dani listaju. */
   nagovijestiKlizanje = false;
 
+  private nagovjestajPromatrac?: IntersectionObserver;
+
+  /**
+   * Klizač je ispod kartice Danas i karte – nagovještaj se pokrene tek kad
+   * se klizač stvarno vidi na ekranu, i tad se zapamti.
+   */
   private nagovijestiJednom(): void {
     const KLJUC = 'blokich.klizacDanaNagovijesten';
-    if (this.prikazanDan >= this.dani.length - 1) return;
+    // Klizač se ponovno iscrta (npr. promjena tjedna) – promatraj novi.
+    this.nagovjestajPromatrac?.disconnect();
+    const el = this.daniKlizac?.nativeElement;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
     try {
       if (localStorage.getItem(KLJUC)) return;
-      localStorage.setItem(KLJUC, '1');
     } catch {
       return;
     }
-    setTimeout(() => (this.nagovijestiKlizanje = true), 700);
-    setTimeout(() => (this.nagovijestiKlizanje = false), 700 + 1400);
+    this.nagovjestajPromatrac = new IntersectionObserver(
+      ([unos]) => {
+        if (!unos?.isIntersecting) return;
+        this.nagovjestajPromatrac?.disconnect();
+        if (this.prikazanDan >= this.dani.length - 1) return;
+        try {
+          localStorage.setItem(KLJUC, '1');
+        } catch {}
+        setTimeout(() => (this.nagovijestiKlizanje = true), 400);
+        setTimeout(() => (this.nagovijestiKlizanje = false), 400 + 1400);
+      },
+      { threshold: 0.4 },
+    );
+    this.nagovjestajPromatrac.observe(el);
   }
 
   /** Strelica: prethodni ili sljedeći dan. */
