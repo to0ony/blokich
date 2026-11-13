@@ -410,11 +410,12 @@
   scrollbar-width: none;
   /*
    * Rubovi kartice ne smiju biti odrezani: širina 90% daje dijelove piksela,
-   * a klizač staje na cijelom pikselu. 2px zraka sa strane (margina to vraća).
+   * a klizač staje na cijelom pikselu. 4px zraka oko kartica, i za plavi
+   * okvir današnjeg dana (margina vraća poravnanje sa stranicom).
    */
-  margin: 0 -2px;
-  padding: 1px 2px;
-  scroll-padding: 0 2px;
+  margin: -4px;
+  padding: 4px;
+  scroll-padding: 0 4px;
 
   &::-webkit-scrollbar {
     display: none;
