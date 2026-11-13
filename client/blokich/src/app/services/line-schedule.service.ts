@@ -12,7 +12,7 @@ export class LineScheduleService {
   fetchLineDrivers(
     linija: string,
     dan: string,
-    tjedan: 'trenutni' | 'naredni' = 'trenutni',
+    tjedan: 'prosli' | 'trenutni' | 'naredni' = 'trenutni',
   ): Observable<any> {
     const params = new HttpParams()
       .set('linija', linija)

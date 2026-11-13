@@ -8,6 +8,7 @@ import { Bed, LucideAngularModule } from 'lucide-angular';
 import { LineScheduleService } from '../../../services/line-schedule.service';
 import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
+import dayjs from 'dayjs';
 import {
   DanRasporeda,
   Kolega,
@@ -124,9 +125,11 @@ export class DanasComponent implements OnChanges, OnDestroy {
     if (!linije.length) return;
 
     this.loading = true;
+    // Nedjeljna noćna u ponedjeljak je u prošlom tjednu.
+    const tjedan = this.dan!.datum.isBefore(dayjs().startOf('isoWeek')) ? 'prosli' : 'trenutni';
     Promise.all(
       linije.map((l) =>
-        firstValueFrom(this.lineScheduleService.fetchLineDrivers(l, this.dan!.key, 'trenutni')),
+        firstValueFrom(this.lineScheduleService.fetchLineDrivers(l, this.dan!.key, tjedan)),
       ),
     )
       .then((rez) => {

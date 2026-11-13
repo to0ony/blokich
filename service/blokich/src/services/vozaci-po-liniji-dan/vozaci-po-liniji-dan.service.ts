@@ -23,11 +23,16 @@ export class VozaciPoLinijiService {
   async dohvatiVozaceZaLiniju(
     linija: string,
     danKey: string,
-    tjedanTip: 'trenutni' | 'naredni' = 'trenutni',
+    tjedanTip: 'prosli' | 'trenutni' | 'naredni' = 'trenutni',
   ): Promise<any> {
     const danas = dayjs();
+    // 'prosli': nedjeljna noćna služba koja u ponedjeljak još traje.
     const datumZaTjedan =
-      tjedanTip === 'naredni' ? danas.add(1, 'week') : danas;
+      tjedanTip === 'naredni'
+        ? danas.add(1, 'week')
+        : tjedanTip === 'prosli'
+          ? danas.subtract(1, 'week')
+          : danas;
 
     const mondayOfWeek = datumZaTjedan.startOf('isoWeek');
     const thursdayOfWeek = mondayOfWeek.add(3, 'day');

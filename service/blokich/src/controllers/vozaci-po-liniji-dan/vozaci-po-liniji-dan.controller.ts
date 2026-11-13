@@ -9,7 +9,7 @@ export class VozaciPoLinijiDanController {
   async getVozaci(
     @Query('linija') linija: string,
     @Query('dan') dan: string,
-    @Query('tjedan') tjedan: 'trenutni' | 'naredni' = 'trenutni',
+    @Query('tjedan') tjedan: 'prosli' | 'trenutni' | 'naredni' = 'trenutni',
   ) {
     return this.service.dohvatiVozaceZaLiniju(linija, dan, tjedan);
   }

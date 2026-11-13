@@ -92,7 +92,7 @@ export class DashboardDriverComponent implements OnInit {
 
   /** Današnji dan, a nakon ponoći jučerašnji dok njegova noćna služba traje. */
   get danas(): DanRasporeda | undefined {
-    return aktivniDan(this.daniTekuci);
+    return aktivniDan(this.prethodniDan ? [this.prethodniDan, ...this.daniTekuci] : this.daniTekuci);
   }
 
   constructor() {
