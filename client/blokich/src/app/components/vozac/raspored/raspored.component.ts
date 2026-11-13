@@ -42,6 +42,7 @@ import {
   sutraNaziv,
 } from '../vozac.model';
 import dayjs from 'dayjs';
+import { praznikZa } from '../kalendar/praznici';
 
 /** Bus koji preuzimam prikazuje se tek 60 min prije mog nastupa. */
 const CEKANJE_MIN = 60;
@@ -98,6 +99,11 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   /** Ikona odmora kao na tahografu (krevet). */
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
+
+  /** Naziv blagdana / neradnog dana ili null. */
+  praznik(d: DanRasporeda): string | null {
+    return praznikZa(d.datum);
+  }
   readonly jePricuva = jePricuva;
   readonly stanje = stanjeSluzbe;
   readonly sutraNaziv = sutraNaziv;

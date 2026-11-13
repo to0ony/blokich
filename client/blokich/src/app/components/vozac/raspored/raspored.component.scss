@@ -649,6 +649,19 @@
 }
 
 /* Donji panel – okvir je u styles.scss (drawer se renderira u <body>) */
+.rs-holiday {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fdecea;
+  color: #d93025;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .sd-title {
   margin: 18px 2px 10px;
   font-size: 13px;

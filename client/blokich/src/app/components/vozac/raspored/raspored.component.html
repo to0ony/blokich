@@ -193,7 +193,7 @@
       [class.is-past]="d.prosao"
       [class.is-off]="!d.sluzbe.length"
       [class.is-sat]="d.key === 'sub'"
-      [class.is-sun]="d.key === 'ned'"
+      [class.is-sun]="d.key === 'ned' || praznik(d)"
     >
       <!-- Zaglavlje dana preko cijele širine -->
       <header class="rs-day-head">
@@ -260,6 +260,7 @@
   [header]="smjenaDan ? smjenaDan.naziv + ' · ' + smjenaDan.datum.format('D.M.YYYY.') : ''"
 >
   <ng-container *ngIf="smjenaDan">
+    <p class="rs-holiday" *ngIf="praznik(smjenaDan) as p"><i class="pi pi-star"></i> {{ p }}</p>
     <app-sluzba-detalji [sluzbe]="smjenaDan.sluzbe" />
 
     <h3 class="sd-title" *ngIf="linije(smjenaDan).length">
