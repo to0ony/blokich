@@ -14,6 +14,7 @@ import {
   Kolega,
   VoziloUzivo,
   aktivniPoBloku,
+  jeJucer,
   kolegaKljuc,
   opisOdsustva,
 } from '../vozac.model';
@@ -53,6 +54,11 @@ export class DanasComponent implements OnChanges, OnDestroy {
   /** Ikona odmora kao na tahografu (krevet). */
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
+
+  /** Nakon ponoći: jučerašnja služba koja još traje. */
+  get odJucer(): boolean {
+    return !!this.dan?.sluzbe.length && jeJucer(this.dan.datum);
+  }
 
   /** Vozilo i kašnjenje vozača koji upravo voze, po ključu vozača. Prazno = ništa se ne prikazuje. */
   uzivo: Record<string, VoziloUzivo> = {};

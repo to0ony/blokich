@@ -1,5 +1,5 @@
 <header class="vz-page-head">
-  <h1>Današnja smjena</h1>
+  <h1>{{ odJucer ? 'Noćna od jučer' : 'Današnja smjena' }}</h1>
   <p *ngIf="dan">{{ dan.naziv }}, {{ dan.datum.format("D.M.YYYY.") }}</p>
 </header>
 
