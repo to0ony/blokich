@@ -814,3 +814,23 @@
     transform: translateX(0);
   }
 }
+
+/* Promjena tjedna: traka i kartice dana glatko uđu (bez skeletona) */
+.rs-ulaz {
+  animation: rs-ulaz 0.22s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes rs-ulaz {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

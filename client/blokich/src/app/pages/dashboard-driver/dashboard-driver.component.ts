@@ -136,21 +136,27 @@ export class DashboardDriverComponent implements OnInit {
   }
 
   ucitaj(): void {
-    this.loading = true;
+    // Skeleton samo dok još nema ničega; pri promjeni tjedna stari tjedan
+    // ostaje vidljiv dok ne stigne novi (glatka zamjena).
+    this.loading = !this.podaci;
     this.error = null;
 
+    const tjedan = this.tjedan;
     const zahtjev =
-      this.tjedan === 'trenutni'
+      tjedan === 'trenutni'
         ? this.rasporedService.fetchDriverSchedule()
         : this.rasporedService.fetchUpcomingWeekSchedule();
 
     zahtjev.subscribe({
       next: (data: RasporedOdgovor) => {
+        // Brzo prebacivanje: zakašnjeli odgovor za drugi tjedan se ignorira.
+        if (tjedan !== this.tjedan) return;
         this.podaci = data;
         this.loading = false;
         if (this.tjedan === 'trenutni') this.postaviDanas(data);
       },
       error: () => {
+        if (tjedan !== this.tjedan) return;
         this.podaci = null;
         this.loading = false;
         this.danasLoading = false;

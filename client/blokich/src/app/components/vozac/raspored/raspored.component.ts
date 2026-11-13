@@ -195,13 +195,21 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
       this.dani = this.data ? slozTjedan(this.data) : [];
-      // Klizač dana odmah na aktivnom danu (naredni tjedan: ponedjeljak).
+      // Tekući tjedan (sadrži današnji dan) pamti se za karticu Danas i kartu,
+      // da ostanu i dok je prikazan sljedeći tjedan.
+      const tekuci = this.dani.some((d) => d.danas);
+      if (tekuci) this.daniTekuci = this.dani;
+      // Novi tjedan glatko uđe; klizač dana odmah na aktivnom danu.
+      this.ulaz = false;
       setTimeout(() => {
+        this.ulaz = true;
         this.pokaziDan(this.pocetniDan(), false);
         this.nagovijestiJednom();
       });
-      if (this.tjedan === 'trenutni' && this.danas) this.pokreniUzivo();
-      else this.zaustaviUzivo();
+      if (tekuci) {
+        if (this.danas) this.pokreniUzivo();
+        else this.zaustaviUzivo();
+      }
     }
     if (changes['naredniDostupan']) {
       this.tjedanOpcije = this.tjedanOpcije.map((o) =>
@@ -215,9 +223,13 @@ export class RasporedComponent implements OnChanges, OnDestroy {
    * njegova noćna služba još traje (računa se iznova pri svakom prikazu).
    */
   get danas(): DanRasporeda | undefined {
-    if (this.tjedan !== 'trenutni') return undefined;
-    return aktivniDan(this.prethodniDan ? [this.prethodniDan, ...this.dani] : this.dani);
+    return aktivniDan(this.prethodniDan ? [this.prethodniDan, ...this.daniTekuci] : this.daniTekuci);
   }
+
+  /** Dani tekućeg tjedna – ostaju i kad je prikazan sljedeći tjedan. */
+  daniTekuci: DanRasporeda[] = [];
+  /** Okida animaciju ulaska prikazanog tjedna. */
+  ulaz = true;
 
   /** Kartica Danas prikazuje jučerašnji dan (noćna služba nakon ponoći). */
   odJucer(dan: DanRasporeda): boolean {
@@ -233,7 +245,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   /** Dok se prikazuje noćna od jučer: prva današnja služba, npr. "14:00 · 109". */
   danasKasnije(dan: DanRasporeda): string | null {
     if (!jeJucer(dan.datum)) return null;
-    const danas = this.dani.find((d) => d.datum.isSame(dayjs(), 'day'));
+    const danas = this.daniTekuci.find((d) => d.datum.isSame(dayjs(), 'day'));
     const s = danas?.sluzbe[0];
     if (!s) return null;
     const linije = [...new Set(danas!.sluzbe.map((x) => x.linija).filter(Boolean))];
@@ -446,7 +458,12 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     Promise.all(
       linije.map((l) =>
         firstValueFrom(
-          this.lineScheduleService.fetchLineDrivers(l, dan.key, this.tjedan),
+          // Kartica Danas je uvijek iz tekućeg tjedna, i kad je prikazan sljedeći.
+          this.lineScheduleService.fetchLineDrivers(
+            l,
+            dan.key,
+            this.daniTekuci.includes(dan) ? 'trenutni' : this.tjedan,
+          ),
         ),
       ),
     )

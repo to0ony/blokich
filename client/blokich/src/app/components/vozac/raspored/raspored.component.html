@@ -1,14 +1,14 @@
 <!-- Sekcija "sada": kartica Danas i karta spojene u jedan blok (samo tekući tjedan) -->
-<div class="rs-grupa rs-sad" *ngIf="tjedan === 'trenutni'">
+<div class="rs-grupa rs-sad">
   <!-- Danas (samo za tekući tjedan) -->
   <p-skeleton
-    *ngIf="loading && tjedan === 'trenutni'"
+    *ngIf="loading && !daniTekuci.length"
     height="168px"
     borderRadius="22px"
   />
   <section
     class="rs-today"
-    *ngIf="!loading && danas as d"
+    *ngIf="danas as d"
     (click)="d.sluzbe.length && !izProslogTjedna(d) && otvoriSmjenu(d)"
   >
     <div class="rs-today-top">
@@ -83,7 +83,7 @@
 
   <!-- Moja linija na karti: trasa, a dok vozim ili čekam i moj bus uživo -->
   <!-- Karta linije ispod kartice Danas; više linija u danu = klizač -->
-  <ng-container *ngIf="!loading && danas as d">
+  <ng-container *ngIf="danas as d">
     <ng-container *ngIf="linijeKarte(d) as linije">
       <app-moja-karta *ngIf="linije.length === 1" [dan]="d" />
 
@@ -157,7 +157,7 @@
       <p-skeleton *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" height="62px" borderRadius="12px" />
     </div>
 
-    <nav class="rs-strip" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
+    <nav class="rs-strip" [class.rs-ulaz]="ulaz" aria-label="Dani u tjednu" *ngIf="!loading && dani.length">
       <button
         *ngFor="let d of dani; let i = index"
         type="button"
@@ -196,6 +196,7 @@
     <!-- Dani: klizač lijevo-desno, prošli dani ostaju lijevo -->
     <div
       class="rs-list"
+      [class.rs-ulaz]="ulaz"
       [class.is-hint]="nagovijestiKlizanje"
       #daniKlizac
       role="region"
