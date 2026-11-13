@@ -334,13 +334,31 @@
     opacity: 0.5;
   }
 
+  /* Vikend i blagdani: blaga nijansa, danas je i dalje plav */
+  &.is-sat {
+    background: color-mix(in srgb, #13804b 8%, var(--vz-surface-2));
+
+    .rs-chip-day {
+      color: color-mix(in srgb, #13804b 70%, var(--vz-muted));
+    }
+  }
+
+  &.is-sun {
+    background: color-mix(in srgb, #d93025 8%, var(--vz-surface-2));
+
+    .rs-chip-day {
+      color: color-mix(in srgb, #d93025 70%, var(--vz-muted));
+    }
+  }
+
   &.is-today {
     background: var(--p-primary-500);
     border-color: var(--p-primary-500);
     color: #fff;
     opacity: 1;
 
-    .rs-chip-num {
+    .rs-chip-num,
+    .rs-chip-day {
       color: #fff;
     }
   }

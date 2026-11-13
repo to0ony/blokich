@@ -160,6 +160,9 @@
       [class.is-work]="d.sluzbe.length"
       [class.is-today]="istaknut(d)"
       [class.is-past]="d.prosao"
+      [class.is-sat]="d.key === 'sub'"
+      [class.is-sun]="d.key === 'ned' || praznik(d)"
+      [attr.title]="praznik(d)"
       (click)="skrolajNa(d)"
     >
       <span class="rs-chip-day">{{ d.kratko }}</span>
