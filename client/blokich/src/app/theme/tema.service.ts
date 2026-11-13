@@ -31,12 +31,16 @@ export function tamnaTema(): boolean {
 /** Klasa na <html>: uključuje PrimeNG tamni način i tamne --vz-* boje. */
 const KLASA = 'blokich-dark';
 
-/** Admin nema tamnu temu – tamo je uvijek svijetlo. */
-const BEZ_TEME = /^\/(admin|alogin)(\/|\?|$)/;
+/**
+ * Uvijek svijetlo: admin (nema tamnu temu) i popis službi (/sluzbe), koji
+ * izgleda kao papirnati raspored.
+ */
+const BEZ_TEME = /^\/(admin|alogin|sluzbe)(\/|\?|$)/;
 
 /**
  * Tema aplikacije (prijava, vozač, pregledi, karte). Zadano prema sustavu;
- * izbor u profilu se pamti u pregledniku i vrijedi svugdje. Admin ostaje svijetao.
+ * izbor u profilu se pamti u pregledniku i vrijedi svugdje. Admin i popis službi
+ * ostaju svijetli.
  */
 @Injectable({ providedIn: 'root' })
 export class TemaService {
