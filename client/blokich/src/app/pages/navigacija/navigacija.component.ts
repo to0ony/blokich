@@ -168,6 +168,10 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
   ubrzanje = 4;
   readonly ubrzanja = [1, 4, 8];
 
+  /** Traka lijevo: prijeđeni dio trase (0–1) i položaji stajališta na njoj. */
+  napredak = 0;
+  tockeStajalista: number[] = [];
+
   /** Dvije kartice gore: sljedeće skretanje ili stajalište, i ono iza njega. */
   dogadaji: Dogadaj[] = [];
 
@@ -313,6 +317,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.trasa = trasa;
     this.stajalista = stajalista;
     this.udaljenosti = stajalistaNaTrasi(trasa, stajalista);
+    this.tockeStajalista = trasa.duljina > 0 ? this.udaljenosti.map((u) => Math.min(1, Math.max(0, u / trasa.duljina))) : [];
     this.pracenje = new Pracenje(trasa);
     this.d = this.dCilj = d;
     this.kraj = false;
@@ -601,6 +606,7 @@ export class NavigacijaComponent implements AfterViewInit, OnDestroy {
     this.doStajalista = i >= 0 ? this.udaljenosti[i] - this.d : 0;
     this.zatimStajaliste = i >= 0 ? (this.stajalista[i + 1]?.naziv ?? null) : null;
     this.kraj = (this.nacin === 'proba' || this.status === 'na-ruti') && this.d >= this.trasa.duljina - 15;
+    this.napredak = this.trasa.duljina > 0 ? Math.min(1, Math.max(0, this.d / this.trasa.duljina)) : 0;
 
     // Skretanja i stajališta ispred, po udaljenosti – prva dva idu u kartice.
     const ispred: Dogadaj[] = [];

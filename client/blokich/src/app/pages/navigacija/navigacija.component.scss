@@ -228,6 +228,59 @@
   }
 }
 
+// ---------- Lijevo: napredak po trasi ----------
+.nv-napredak {
+  position: absolute;
+  left: 14px;
+  // Između kartica gore i donje trake.
+  top: calc(max(12px, env(safe-area-inset-top)) + 210px);
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 112px);
+  z-index: 1;
+  width: 6px;
+  border-radius: 3px;
+  background: var(--nv-panel);
+  box-shadow: 0 2px 8px var(--nv-shadow);
+  pointer-events: none;
+}
+
+.nv-napredak-puna {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: var(--nv-muted);
+  opacity: 0.55;
+  transition: height 0.3s linear;
+}
+
+.nv-napredak-st {
+  position: absolute;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: 0 0 -2px -2px;
+  border-radius: 50%;
+  background: var(--nv-accent);
+
+  &.is-prodeno {
+    background: var(--nv-panel);
+  }
+}
+
+.nv-napredak-ja {
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 -7px -7px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--nv-accent);
+  box-shadow: 0 1px 4px var(--nv-shadow);
+  transition: bottom 0.3s linear;
+}
+
 // ---------- Desno, iznad donje trake ----------
 .nv-tools {
   position: absolute;

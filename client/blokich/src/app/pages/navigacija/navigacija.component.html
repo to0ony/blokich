@@ -101,6 +101,18 @@
     </div>
   </header>
 
+  <!-- Lijevo: odokativni napredak po trasi (dolje početak, gore kraj) -->
+  <div class="nv-napredak" *ngIf="ucitano" aria-hidden="true">
+    <div class="nv-napredak-puna" [style.height.%]="napredak * 100"></div>
+    <span
+      *ngFor="let t of tockeStajalista"
+      class="nv-napredak-st"
+      [class.is-prodeno]="t <= napredak"
+      [style.bottom.%]="t * 100"
+    ></span>
+    <span class="nv-napredak-ja" [style.bottom.%]="napredak * 100"></span>
+  </div>
+
   <!-- Desno: 2D/3D, glas, centriranje -->
   <div class="nv-tools">
     <div class="nv-zoom" role="group" aria-label="Zoom (privremeno)">
