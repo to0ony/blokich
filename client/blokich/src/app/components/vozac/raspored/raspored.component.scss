@@ -22,16 +22,20 @@
 .rs-grupa.rs-sad {
   gap: 0;
 
-  /* Karta je odmah ispod – donji kutovi idu karti */
-  > .rs-today:not(:last-child) {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
 
   /* Više linija: svaka karta preko cijele širine, da se spoji s karticom */
   .rs-klizac > app-moja-karta {
     flex-basis: 100%;
   }
+}
+
+/*
+ * Karta je odmah ispod – donji kutovi idu karti. Samo kad se karta stvarno
+ * prikazuje: komponenta karte postoji i kad nema što pokazati (prazna).
+ */
+:host ::ng-deep .rs-sad:has(.mk) > .rs-today {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 :host ::ng-deep .rs-sad .mk {
