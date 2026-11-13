@@ -571,13 +571,20 @@
   container-type: inline-size;
 }
 
-/* Preusko za cijelu pilulu: ostaje samo broj linije */
+/* Preusko za cijelu pilulu: samo "linija | V.R." */
 @container (max-width: 130px) {
   .rs-mid {
+    gap: 5px;
+    padding: 4px 9px;
+
     .pi,
-    .rs-mid-vr {
+    .rs-mid-vr-label {
       display: none;
     }
+  }
+
+  .rs-mid-vr {
+    padding-left: 5px;
   }
 }
 
