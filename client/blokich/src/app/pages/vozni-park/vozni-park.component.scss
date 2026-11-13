@@ -8,7 +8,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--vz-topbar);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--vz-border);
@@ -69,9 +69,9 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: #effaf3;
-  border: 1px solid #c9ecd6;
-  color: #13804b;
+  background: var(--vz-green-bg);
+  border: 1px solid var(--vz-green-border);
+  color: var(--vz-green);
   font-size: 14px;
   font-weight: 600;
 
@@ -207,7 +207,7 @@
   }
 
   &.is-live {
-    background: #fbfefc;
+    background: color-mix(in srgb, var(--vz-green) 4%, var(--vz-surface));
   }
 }
 
@@ -269,10 +269,10 @@
 .vp-delay {
   font-size: 12.5px;
   font-weight: 600;
-  color: #13804b;
+  color: var(--vz-green);
 
   &.is-late {
-    color: #b45309;
+    color: var(--vz-orange);
   }
 }
 

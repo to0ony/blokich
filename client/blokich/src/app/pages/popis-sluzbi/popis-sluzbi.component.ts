@@ -224,12 +224,12 @@ interface StavkaPovijesti {
       padding: 1px 7px;
       font-size: 11px;
       font-weight: 700;
-      color: #166534;
-      background: #dcfce7;
+      color: var(--vz-green);
+      background: var(--vz-green-bg);
       border-radius: 999px;
     }
     .pls-error {
-      color: #dc2626;
+      color: var(--vz-red);
       font-size: 14px;
     }
   `,

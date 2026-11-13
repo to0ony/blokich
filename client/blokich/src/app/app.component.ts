@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TemaService } from './theme/tema.service';
 
 @Component({
   selector: 'app-root',
@@ -8,4 +9,7 @@ import { RouterModule } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {}
+export class AppComponent {
+  // Tema se primjenjuje od prvog ekrana (prijava), ne tek u vozačkoj aplikaciji.
+  private readonly tema = inject(TemaService);
+}

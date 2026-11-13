@@ -14,7 +14,7 @@ button {
   list-style: none;
 
   &.is-err {
-    color: #b91c1c;
+    color: var(--vz-red);
   }
 }
 

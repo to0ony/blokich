@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 
 export type Tema = 'svijetla' | 'tamna' | 'sustav';
@@ -10,7 +11,8 @@ function procitaj(): Tema {
     const t = localStorage.getItem(KLJUC);
     if (t === 'tamna' || t === 'sustav' || t === 'svijetla') return t;
   } catch {}
-  return 'svijetla';
+  // Zadano: kako je postavljeno na uređaju; izbor u profilu to nadjača.
+  return 'sustav';
 }
 
 function sustavJeTamni(): boolean {
@@ -29,9 +31,12 @@ export function tamnaTema(): boolean {
 /** Klasa na <html>: uključuje PrimeNG tamni način i tamne --vz-* boje. */
 const KLASA = 'blokich-dark';
 
+/** Admin nema tamnu temu – tamo je uvijek svijetlo. */
+const BEZ_TEME = /^\/(admin|alogin)(\/|\?|$)/;
+
 /**
- * Tema vozačke aplikacije. Odabir se pamti u pregledniku; tamna klasa je na
- * <html> samo dok je otvorena vozačka aplikacija (admin i prijava ostaju svijetli).
+ * Tema aplikacije (prijava, vozač, pregledi, karte). Zadano prema sustavu;
+ * izbor u profilu se pamti u pregledniku i vrijedi svugdje. Admin ostaje svijetao.
  */
 @Injectable({ providedIn: 'root' })
 export class TemaService {
@@ -41,6 +46,16 @@ export class TemaService {
   readonly promjena$: Observable<void> = this.promjena.asObservable();
 
   constructor() {
+    // Klasa na <html> prati stranicu: svugdje osim admina.
+    const router = inject(Router);
+    // Odmah pri pokretanju, da prvi ekran ne bljesne svijetlo.
+    this.aktivna = !BEZ_TEME.test(location.pathname);
+    this.primijeni();
+    router.events.subscribe((e) => {
+      if (!(e instanceof NavigationEnd)) return;
+      this.aktivna = !BEZ_TEME.test(e.urlAfterRedirects);
+      this.primijeni();
+    });
     try {
       matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (procitaj() !== 'sustav') return;
@@ -60,18 +75,6 @@ export class TemaService {
     } catch {}
     this.primijeni();
     this.promjena.next();
-  }
-
-  /** Vozačka aplikacija otvorena: primijeni odabranu temu. */
-  ukljuci(): void {
-    this.aktivna = true;
-    this.primijeni();
-  }
-
-  /** Izlaz iz vozačke aplikacije: natrag na svijetlo. */
-  iskljuci(): void {
-    this.aktivna = false;
-    this.primijeni();
   }
 
   private primijeni(): void {

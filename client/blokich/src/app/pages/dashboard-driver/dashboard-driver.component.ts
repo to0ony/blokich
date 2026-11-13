@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PrimeNG } from 'primeng/config';
@@ -52,7 +52,7 @@ const VIEWS: VozacView[] = ['raspored', 'kalendar', 'danas', 'linije', 'sluzbe',
   templateUrl: './dashboard-driver.component.html',
   styleUrls: ['./dashboard-driver.component.scss'],
 })
-export class DashboardDriverComponent implements OnInit, OnDestroy {
+export class DashboardDriverComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly rasporedService = inject(DriverScheduleService);
@@ -131,12 +131,7 @@ export class DashboardDriverComponent implements OnInit, OnDestroy {
     return inicijali(this.imePrezime);
   }
 
-  ngOnDestroy(): void {
-    this.temaService.iskljuci();
-  }
-
   ngOnInit(): void {
-    this.temaService.ukljuci();
     this.route.queryParamMap.subscribe((q) => {
       const v = q.get('v') as VozacView | null;
       this.view = v && VIEWS.includes(v) ? v : 'raspored';
