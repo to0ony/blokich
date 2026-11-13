@@ -13,7 +13,7 @@ def extract_dates_from_title(pdf):
     first_page = pdf.pages[0]
     text = first_page.extract_text()
     
-    date_match = re.search(r'od (\d{1,2}\.\d{1,2}\.\d{4})\. do (\d{1,2}\.\d{1,2}\.\d{4})', text)
+    date_match = re.search(r'od\s+(\d{1,2}\.\d{1,2}\.\d{4})\.?\s+do\b.*?(\d{1,2}\.\d{1,2}\.\d{4})', text, re.S)
     if date_match:
         start_date = datetime.strptime(date_match.group(1), '%d.%m.%Y')
         end_date = datetime.strptime(date_match.group(2), '%d.%m.%Y')
