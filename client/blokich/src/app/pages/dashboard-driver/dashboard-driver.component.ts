@@ -119,7 +119,7 @@ export class DashboardDriverComponent implements OnInit {
   osvjezenje = 0;
 
   /** Dani tekućeg tjedna – iz njih se bira aktivni dan za pogled "Danas". */
-  private daniTekuci: DanRasporeda[] = [];
+  daniTekuci: DanRasporeda[] = [];
   danasLoading = true;
   /** Ponedjeljak nakon ponoći: nedjelja prošlog tjedna dok njena noćna služba traje. */
   prethodniDan: DanRasporeda | null = null;
@@ -177,6 +177,13 @@ export class DashboardDriverComponent implements OnInit {
       next: (d) => (this.naredniDostupan = !!d),
       error: () => {},
     });
+    // Na sljedećem tjednu i tekući iznova – za karticu Danas i pogled "Danas".
+    if (this.tjedan !== 'trenutni') {
+      this.rasporedService.fetchDriverSchedule().subscribe({
+        next: (data: RasporedOdgovor) => this.postaviDanas(data),
+        error: () => {},
+      });
+    }
     this.ucitaj();
   }
 

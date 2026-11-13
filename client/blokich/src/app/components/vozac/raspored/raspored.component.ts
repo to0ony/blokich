@@ -91,6 +91,11 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @Input() naredniDostupan = false;
   /** Ponedjeljak: nedjelja prošlog tjedna, dok njena noćna služba još traje. */
   @Input() prethodniDan: DanRasporeda | null = null;
+  /**
+   * Dani tekućeg tjedna iz dashboarda – za karticu Danas dok je prikazan
+   * sljedeći tjedan (npr. nakon povuci-za-osvježavanje, kad se pogled ponovno stvori).
+   */
+  @Input() tekuciTjedan: DanRasporeda[] = [];
   @Output() tjedanChange = new EventEmitter<TjedanTip>();
   @Output() retry = new EventEmitter<void>();
   @Output() otvoriKalendar = new EventEmitter<void>();
@@ -214,6 +219,12 @@ export class RasporedComponent implements OnChanges, OnDestroy {
         if (this.danas) this.pokreniUzivo();
         else this.zaustaviUzivo();
       }
+    }
+    // Prikazan je drugi tjedan: kartica Danas iz tekućeg tjedna koji je dohvatio dashboard.
+    if (changes['tekuciTjedan'] && !this.prikazanTekuci && this.tekuciTjedan.length) {
+      this.daniTekuci = this.tekuciTjedan;
+      if (this.danas) this.pokreniUzivo();
+      else this.zaustaviUzivo();
     }
     if (changes['naredniDostupan']) {
       this.tjedanOpcije = this.tjedanOpcije.map((o) =>
