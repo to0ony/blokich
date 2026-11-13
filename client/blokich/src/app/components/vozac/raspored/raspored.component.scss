@@ -458,6 +458,8 @@
     flex: 0 0 90%;
     min-width: 0;
     scroll-snap-align: start;
+    /* Jedno povlačenje = najviše jedan dan, i kod brzog poteza */
+    scroll-snap-stop: always;
   }
 
   /* Jednom: kartice se malo pomaknu ulijevo i vrate – "povuci me". */
