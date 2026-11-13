@@ -1,5 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
+/*
+ * Bez zooma na dvostruki dodir (često se slučajno aktivira na mobitelu);
+ * zoom s dva prsta ostaje. Usput nestaje i odgoda dodira.
+ */
+html {
+  touch-action: manipulation;
+}
+
 /* ---------- Vozačka aplikacija (redizajn) ---------- */
 .vz-app {
   --vz-bg: #f3f5f8;
