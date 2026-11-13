@@ -91,7 +91,7 @@ export class DashboardDriverComponent implements OnInit, OnDestroy {
         items: [
           opcija('svijetla', 'Svijetla', 'pi pi-sun'),
           opcija('tamna', 'Tamna', 'pi pi-moon'),
-          opcija('sustav', 'Kao na mobitelu', 'pi pi-mobile'),
+          opcija('sustav', 'Prema sustavu', 'pi pi-desktop'),
         ],
       },
       // Uz grupu "Tema" PrimeNG stavke na prvoj razini prikazuje kao naslove

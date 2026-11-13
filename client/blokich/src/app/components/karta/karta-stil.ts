@@ -105,7 +105,7 @@ export function sustavTamna(): boolean {
   }
 }
 
-/** Tema karte prati temu odabranu u profilu (Svijetla / Tamna / Kao na mobitelu). */
+/** Tema karte prati temu odabranu u profilu (Svijetla / Tamna / Prema sustavu). */
 export function temaKarte(): Tema {
   return tamnaTema() ? 'tamna' : 'svijetla';
 }

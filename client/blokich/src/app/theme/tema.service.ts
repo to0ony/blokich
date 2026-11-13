@@ -37,7 +37,7 @@ const KLASA = 'blokich-dark';
 export class TemaService {
   private aktivna = false;
   private readonly promjena = new Subject<void>();
-  /** Javlja svaku promjenu teme (izbor u profilu ili mobitel u "Kao na mobitelu"). */
+  /** Javlja svaku promjenu teme (izbor u profilu ili postavka sustava ("Prema sustavu")). */
   readonly promjena$: Observable<void> = this.promjena.asObservable();
 
   constructor() {
