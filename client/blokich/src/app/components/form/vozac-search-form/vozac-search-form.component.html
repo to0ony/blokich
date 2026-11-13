@@ -1,29 +1,39 @@
-<section class="vs">
-  <form class="vs-bar" (ngSubmit)="openSearch()">
+<p-drawer
+  [visible]="visible"
+  (visibleChange)="$event ? null : zatvori()"
+  position="bottom"
+  styleClass="rs-drawer vz-app vs-drawer"
+  [blockScroll]="true"
+  header="Pretraga vozača"
+  (onShow)="naOtvaranje()"
+  (onHide)="naZatvaranje()"
+>
+  <form class="vs-bar" (ngSubmit)="traziOdmah()">
+    <i class="pi pi-search"></i>
     <input
+      #polje
       pInputText
-      type="text"
+      type="search"
       name="q"
-      id="searchVozac"
       autocomplete="off"
-      placeholder="Prezime, ime ili broj"
+      enterkeyhint="search"
+      placeholder="Prezime, ime ili službeni broj"
       class="vs-input"
       [(ngModel)]="searchQuery"
-    />
-    <p-button
-      type="submit"
-      icon="pi pi-search"
-      ariaLabel="Traži"
-      [disabled]="!searchQuery.trim()"
+      (ngModelChange)="naUpis($event)"
     />
   </form>
 
-  <ng-container *ngIf="isModalVisible">
-    <div class="vs-head">
-      <span>Rezultati</span>
-      <button type="button" class="vs-close" (click)="closeSearch()">Zatvori</button>
-    </div>
+  <!-- Prije upisa -->
+  <p class="vs-hint" *ngIf="trazeno === null && !trazim">
+    Upiši barem dva slova ili znamenke. Dodir na vozača upiše njegov broj u prijavu.
+  </p>
 
+  <div class="vs-list" *ngIf="trazim">
+    <p-skeleton *ngFor="let i of [1, 2, 3]" height="58px" borderRadius="14px" />
+  </div>
+
+  <ng-container *ngIf="!trazim && trazeno !== null">
     <div class="vs-list" *ngIf="searchResults.length; else nema">
       <button
         type="button"
@@ -41,7 +51,7 @@
     </div>
 
     <ng-template #nema>
-      <p class="vs-empty">Nema rezultata za „{{ searchQuery }}“.</p>
+      <p class="vs-empty">Nema vozača za „{{ trazeno }}“.</p>
     </ng-template>
   </ng-container>
-</section>
+</p-drawer>
