@@ -270,10 +270,16 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     return i >= 0 ? i : 0;
   }
 
-  /** Dodir na dan u traci: klizač pređe na taj dan i bude vidljiv na ekranu. */
+  /**
+   * Dodir na dan u traci: klizač pređe na taj dan. Stranica se spusti do
+   * kartice tek nakon toga – Chrome na mobitelu prekida glatko skrolanje
+   * klizača kad istovremeno glatko skrola i stranica.
+   */
   odaberiDan(dan: DanRasporeda): void {
     this.pokaziDan(this.dani.indexOf(dan));
-    this.daniKlizac?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const el = this.daniKlizac?.nativeElement;
+    if (!el || el.getBoundingClientRect().top < window.innerHeight - 160) return;
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 400);
   }
 
   private pokaziDan(i: number, glatko = true): void {
@@ -281,20 +287,15 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     const kartica = el?.children[i] as HTMLElement | undefined;
     if (!el || !kartica) return;
     this.prikazanDan = i;
-    el.scrollTo({
-      left: kartica.offsetLeft - (el.clientWidth - kartica.offsetWidth) / 2,
-      behavior: glatko ? 'smooth' : 'auto',
-    });
+    el.scrollTo({ left: kartica.offsetLeft, behavior: glatko ? 'smooth' : 'auto' });
   }
 
-  /** Koja je kartica najbliže sredini klizača. */
+  /** Koja je kartica poravnata uz lijevi rub klizača. */
   naKlizanjuDana(el: HTMLElement): void {
-    const sredina = el.scrollLeft + el.clientWidth / 2;
     let najblizi = 0;
     let razmak = Infinity;
     Array.from(el.children).forEach((c, i) => {
-      const k = c as HTMLElement;
-      const r = Math.abs(k.offsetLeft + k.offsetWidth / 2 - sredina);
+      const r = Math.abs((c as HTMLElement).offsetLeft - el.scrollLeft);
       if (r < razmak) {
         razmak = r;
         najblizi = i;

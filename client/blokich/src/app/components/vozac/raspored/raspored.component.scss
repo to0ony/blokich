@@ -415,11 +415,17 @@
     display: none;
   }
 
-  /* Susjedna kartica malo viri – vidi se da se lista. */
+  /* Kartica uz lijevi rub, sljedeća malo viri desno – vidi se da se lista. */
   > .rs-day {
     flex: 0 0 90%;
     min-width: 0;
-    scroll-snap-align: center;
+    scroll-snap-align: start;
+  }
+
+  /* Mjesto iza nedjelje, da se i ona poravna uz lijevi rub. */
+  &::after {
+    content: '';
+    flex: 0 0 calc(10% - 10px);
   }
 }
 
