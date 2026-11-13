@@ -232,3 +232,50 @@
     background: var(--vz-surface-2);
   }
 }
+
+/* Prijedlozi vozača ispod polja za broj */
+.lg-sug {
+  display: flex;
+  flex-direction: column;
+  margin: -2px 0 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--vz-border);
+  border-radius: 14px;
+  background: var(--vz-surface);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+
+  button {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--vz-text);
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:active {
+      background: var(--vz-surface-2);
+    }
+  }
+}
+
+.lg-sug-num {
+  min-width: 4.5ch;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-sug-ime {
+  overflow: hidden;
+  font-size: 14px;
+  color: var(--vz-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

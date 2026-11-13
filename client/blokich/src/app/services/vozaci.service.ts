@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
-interface VozacInfo {
+export interface VozacInfo {
   sluz_broj: string;
   ime_prezime: string;
 }
@@ -12,9 +12,10 @@ interface VozacInfo {
 export class VozaciService {
   constructor(private api: ApiService) {}
 
-  searchVozaci(query: string) {
+  searchVozaci(query: string, limit?: number) {
+    const lim = limit ? `&limit=${limit}` : '';
     return this.api.get<VozacInfo[]>(
-      `vozaci/search?q=${encodeURIComponent(query)}`,
+      `vozaci/search?q=${encodeURIComponent(query)}${lim}`,
     );
   }
 }
