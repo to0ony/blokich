@@ -213,6 +213,8 @@
         <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
           d.odsustvo
         }}</span>
+        <!-- Služba pripada danu: jedna pilula u zaglavlju -->
+        <span class="chip rs-day-sl" *ngIf="d.sluzbe.length">Služba {{ d.sluzbe[0].br_sl }}</span>
       </header>
 
       <!-- Slobodan dan: tekst uvijek centriran, neovisno o oznaci -->
@@ -225,8 +227,6 @@
         <div class="rs-duty" *ngFor="let s of d.sluzbe; let last = last" [class.has-sep]="!last">
           <!-- Vremenska crta: nastup lijevo, završetak desno, služba i linija u sredini -->
           <div class="rs-line">
-            <span class="chip rs-sl">Služba {{ s.br_sl }}</span>
-
             <span class="rs-time">{{ s.od }}</span>
             <div class="rs-track">
               <span class="rs-track-line"></span>

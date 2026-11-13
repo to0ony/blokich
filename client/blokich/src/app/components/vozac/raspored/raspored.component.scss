@@ -515,17 +515,14 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    ".     sl    ."
     "od    track do"
     "pod   .     pdo";
   column-gap: 12px;
   align-items: center;
 }
 
-.chip.rs-sl {
-  grid-area: sl;
-  justify-self: center;
-  margin-bottom: 4px;
+.chip.rs-day-sl {
+  margin-left: auto;
   padding: 2px 9px;
   font-size: 12px;
   color: var(--vz-muted);
@@ -570,6 +567,18 @@
   justify-content: center;
   height: 29px;
   align-items: center;
+  /* Pilula linije se prilagođava širini crte, ne ekrana */
+  container-type: inline-size;
+}
+
+/* Preusko za cijelu pilulu: ostaje samo broj linije */
+@container (max-width: 130px) {
+  .rs-mid {
+    .pi,
+    .rs-mid-vr {
+      display: none;
+    }
+  }
 }
 
 .rs-track-line {
