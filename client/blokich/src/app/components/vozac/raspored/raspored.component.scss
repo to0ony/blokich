@@ -142,6 +142,7 @@
 /* Danas */
 .rs-today {
   position: relative;
+  container-type: inline-size;
   padding: 18px 18px 16px;
   border-radius: 20px;
   color: #fff;
@@ -170,8 +171,12 @@
 
 .rs-today-time {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+
+  & + & {
+    margin-top: 6px;
+  }
 
   .t {
     font-size: 30px;
@@ -181,9 +186,30 @@
     line-height: 1.15;
   }
 
-  .pi {
+  // Strelica i pilula poravnate s redom vremena, ne s mjestima ispod.
+  > .pi {
+    margin-top: 10px;
     font-size: 16px;
     opacity: 0.7;
+  }
+
+  > .rs-today-line {
+    margin-top: 3px;
+  }
+}
+
+// Vrijeme s mjestom ispod (nastup lijevo, završno mjesto desno).
+.rs-today-pt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  .p {
+    margin-top: 1px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.85;
+    white-space: nowrap;
   }
 }
 
@@ -238,12 +264,6 @@
   color: #fff;
 }
 
-.rs-today-place {
-  margin-top: 4px;
-  font-size: 14px;
-  opacity: 0.88;
-}
-
 /* Moj bus uživo na kartici Danas */
 .rs-today-live {
   display: inline-flex;
@@ -269,6 +289,22 @@
   font-size: 14px;
   font-weight: 600;
   opacity: 0.85;
+}
+
+// Uska kartica: pilula sažeta na "{linija}|{V.R.}" da vremena i mjesta stanu u red.
+@container (max-width: 330px) {
+  .rs-today-line {
+    gap: 5px;
+    padding: 3px 8px;
+  }
+
+  .rs-today-vr {
+    padding-left: 5px;
+
+    .lbl {
+      display: none;
+    }
+  }
 }
 
 .rs-live-sub {

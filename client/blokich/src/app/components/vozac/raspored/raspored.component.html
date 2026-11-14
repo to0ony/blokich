@@ -32,19 +32,23 @@
           [class.is-gotovo]="stanje(d, s).gotovo"
           [class.is-sad]="stanje(d, s).uTijeku"
         >
-          <span class="t">{{ s.od }}</span>
+          <!-- Mjesto nastupa ispod vremena početka, završno mjesto ispod vremena kraja -->
+          <span class="rs-today-pt">
+            <span class="t">{{ s.od }}</span>
+            <span class="p" *ngIf="s.nastup_sluzbe">{{ s.nastup_sluzbe }}</span>
+          </span>
           <i class="pi pi-arrow-right"></i>
-          <span class="t">{{ s.do }}</span>
+          <span class="rs-today-pt">
+            <span class="t">{{ s.do }}</span>
+            <span class="p" *ngIf="s.zavrsna_sluzba">{{ s.zavrsna_sluzba }}</span>
+          </span>
           <!-- Pilula za svaku vožnju, i kad su linija i V.R. isti kao u prethodnoj -->
           <span class="rs-today-line" *ngIf="s.linija"
             >{{ s.linija
-            }}<span class="rs-today-vr" *ngIf="s.varijanta">V.R. {{ s.varijanta }}</span></span
+            }}<span class="rs-today-vr" *ngIf="s.varijanta"><span class="lbl">V.R. </span>{{ s.varijanta }}</span></span
           >
         </div>
       </ng-container>
-      <div class="rs-today-place">
-        {{ d.sluzbe[0].nastup_sluzbe }} → {{ d.sluzbe[d.sluzbe.length - 1].zavrsna_sluzba }}
-      </div>
       <!-- Noćna od jučer: današnja služba da se vidi bez čekanja kraja noći -->
       <div class="rs-today-kasnije" *ngIf="danasKasnije(d) as t">
         <i class="pi pi-calendar"></i> Danas kasnije: {{ t }}
