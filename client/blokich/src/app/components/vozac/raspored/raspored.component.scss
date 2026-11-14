@@ -889,3 +889,51 @@
     transform: none;
   }
 }
+
+/* Pilula službe / oznake je gumb za zamjenu */
+button.chip.is-swap {
+  font-family: inherit;
+  cursor: pointer;
+
+  .pi {
+    font-size: 10px;
+    color: var(--p-primary-600);
+  }
+
+  &:active {
+    background: var(--vz-surface-2);
+  }
+}
+
+/* Aktivna zamjena ispod zaglavlja dana */
+.rs-day-zamjena {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: -4px 0 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--p-primary-200);
+  border-radius: 10px;
+  background: var(--p-primary-50);
+  color: var(--p-primary-700);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pi {
+    font-size: 11px;
+  }
+
+  .is-off & {
+    margin: 10px 0 0;
+  }
+}

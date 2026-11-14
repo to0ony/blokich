@@ -1,0 +1,94 @@
+<section class="zpr">
+  <div class="zpr-head">
+    <h2>Zamjene službi</h2>
+    <p-button
+      icon="pi pi-refresh"
+      label="Osvježi"
+      [text]="true"
+      size="small"
+      severity="secondary"
+      (onClick)="ucitaj()"
+    />
+  </div>
+
+  <div class="zpr-card">
+    <div class="zpr-filter">
+      <p-select
+        [options]="vozaci"
+        [(ngModel)]="radnik"
+        (onChange)="ucitaj()"
+        [filter]="true"
+        filterBy="label"
+        [showClear]="true"
+        placeholder="Svi vozači"
+        emptyMessage="Nema vozača sa zamjenama"
+        emptyFilterMessage="Nema takvog vozača"
+        styleClass="zpr-vozac"
+        appendTo="body"
+      />
+      <label class="zpr-datum">
+        <span>Od</span>
+        <input type="date" [(ngModel)]="od" (change)="ucitaj()" />
+      </label>
+      <label class="zpr-datum">
+        <span>Do</span>
+        <input type="date" [(ngModel)]="do" (change)="ucitaj()" />
+      </label>
+      <p-button
+        *ngIf="filtrirano"
+        label="Očisti"
+        [text]="true"
+        size="small"
+        severity="secondary"
+        (onClick)="ocisti()"
+      />
+    </div>
+
+    <div class="zpr-list" *ngIf="ucitava">
+      <p-skeleton *ngFor="let i of [1, 2, 3]" height="56px" borderRadius="12px" />
+    </div>
+
+    <p class="zpr-greska" *ngIf="greska && !ucitava">{{ greska }}</p>
+
+    <p class="zpr-prazno" *ngIf="!ucitava && !greska && !zamjene.length">
+      {{ filtrirano ? 'Nema zamjena za odabrani filter.' : 'Vozači još nisu napravili nijednu zamjenu.' }}
+    </p>
+
+    <div class="zpr-list" *ngIf="!ucitava && zamjene.length">
+      <article *ngFor="let z of zamjene" class="zpr-row" [class.is-ponistena]="z.stanje === 'ponistena'">
+        <div class="zpr-kada">
+          <strong>{{ datum(z) }}</strong>
+          <span>tj. {{ z.brojTjedna }}</span>
+        </div>
+
+        <div class="zpr-sto">
+          <ng-container *ngIf="z.tip === 'zamjena' && z.b as b; else ukidanje">
+            <span class="zpr-osoba">
+              <strong>{{ ime(z.a) }}</strong> <small>{{ z.a.sluz_broj }}</small>
+              <span class="zpr-oz">{{ oznaka(z.a.oznaka) }} → {{ oznaka(b.oznaka) }}</span>
+            </span>
+            <i class="pi pi-arrow-right-arrow-left"></i>
+            <span class="zpr-osoba">
+              <strong>{{ ime(b) }}</strong> <small>{{ b.sluz_broj }}</small>
+              <span class="zpr-oz">{{ oznaka(b.oznaka) }} → {{ oznaka(z.a.oznaka) }}</span>
+            </span>
+          </ng-container>
+          <ng-template #ukidanje>
+            <span class="zpr-osoba">
+              <strong>{{ ime(z.a) }}</strong> <small>{{ z.a.sluz_broj }}</small>
+              <span class="zpr-oz">ukinuo {{ oznaka(z.a.oznaka) }} → slobodan</span>
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="zpr-stanje">
+          <p-tag [value]="stanja[z.stanje].tekst" [severity]="stanja[z.stanje].severity" />
+          <span class="zpr-vrijeme">
+            {{ z.kreirano | date: "d.M. 'u' HH:mm" }}
+            <ng-container *ngIf="z.ponistena"> · poništeno {{ z.ponistena | date: "d.M. HH:mm" }}</ng-container>
+          </span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

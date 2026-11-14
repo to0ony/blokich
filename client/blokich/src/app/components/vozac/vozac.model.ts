@@ -86,6 +86,58 @@ export interface RasporedOdgovor {
   godina: number;
   tjedan: number;
   raspored: Record<DanKey, (Sluzba | Odsustvo)[]>;
+  /** Aktivne zamjene tog tjedna u kojima sudjelujem (već primijenjene u rasporedu). */
+  zamjene?: ZamjenaInfo[];
+}
+
+/** Zamjena službe kako je vidi jedan od dvojice vozača. */
+export interface ZamjenaInfo {
+  id: string;
+  dan: DanKey;
+  datum?: string;
+  tip: 'zamjena' | 'ukidanje';
+  /** Ja sam je napravio – samo tada je mogu poništiti. */
+  moja: boolean;
+  /** Moja oznaka prije zamjene (broj službe ili O). */
+  prije: string;
+  kolega: { sluz_broj: string; ime_prezime: string | null; oznaka: string } | null;
+  kreirano: string;
+}
+
+/** Dan (moj ili kolegin) u panelu za zamjenu. */
+export type FilterKandidata = 'slobodni' | 'jutarnja' | 'popodnevna' | 'nocna' | 'linija';
+
+export interface DanZaZamjenu {
+  oznaka: string;
+  vrsta: 'sluzba' | 'slobodan' | 'odsustvo';
+  smjena: 'jutarnja' | 'popodnevna' | 'nocna' | null;
+  od: string | null;
+  do: string | null;
+  linije: string[];
+  dijelovi: { br_sl: string; linija?: string; varijanta?: string; od: string; do: string }[];
+}
+
+export interface KandidatZamjene extends DanZaZamjenu {
+  sluz_broj: string;
+  ime_prezime: string | null;
+  kontakt_broj: string | null;
+  /** Već ima zamjenu taj dan. */
+  zauzet: boolean;
+  upozorenja: string[];
+}
+
+export interface KandidatiOdgovor {
+  godina: number;
+  brojTjedna: number;
+  tjedan: TjedanTip;
+  dan: DanKey;
+  datum: string;
+  moj: DanZaZamjenu;
+  aktivna: ZamjenaInfo | null;
+  mozeUkinuti: boolean;
+  kandidati: KandidatZamjene[];
+  /** Koliko ih odgovara (prikazano ih je možda manje). */
+  ukupno: number;
 }
 
 /** Dan u kalendaru; službe su iz verzije koju ima disponent tog tjedna. */
@@ -130,6 +182,8 @@ export interface DanRasporeda {
   odsustvo: string | null;
   danas: boolean;
   prosao: boolean;
+  /** Aktivna zamjena tog dana. */
+  zamjena?: ZamjenaInfo | null;
 }
 
 export function jeOdsustvo(x: Sluzba | Odsustvo): x is Odsustvo {
@@ -160,6 +214,7 @@ export function slozTjedan(odg: RasporedOdgovor): DanRasporeda[] {
       odsustvo: sluzbe.length ? null : odsustvo,
       danas: datum.isSame(danas, 'day'),
       prosao: datum.isBefore(danas, 'day'),
+      zamjena: odg.zamjene?.find((z) => z.dan === d.key) ?? null,
     };
   });
 }
