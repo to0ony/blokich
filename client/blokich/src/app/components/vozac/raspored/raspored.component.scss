@@ -33,7 +33,9 @@
  * Karta je odmah ispod – donji kutovi idu karti. Samo kad se karta stvarno
  * prikazuje: komponenta karte postoji i kad nema što pokazati (prazna).
  */
-:host ::ng-deep .rs-sad:has(.mk) > .rs-today {
+:host ::ng-deep .rs-sad:has(.mk) > .rs-today,
+:host ::ng-deep .rs-sad:has(.mk) > .rs-today-live,
+.rs-sad:has(> .rs-today-live) > .rs-today {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -265,15 +267,21 @@
 }
 
 /* Moj bus uživo na kartici Danas */
+/*
+ * Moj bus uživo: traka preko cijele širine, kao međusekcija između
+ * kartice Danas i karte (iste boje kao kartica, malo tamnija).
+ */
 .rs-today-live {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 8px;
-  margin-top: 12px;
-  padding: 7px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0 0 20px 20px;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)),
+    var(--vz-hero);
   font-size: 14px;
   font-weight: 650;
   color: #fff;
