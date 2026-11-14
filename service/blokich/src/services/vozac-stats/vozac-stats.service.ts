@@ -5,6 +5,7 @@ import { Disponent } from '../../schemas/disponent.schema';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
 import { VozacStats } from '../../schemas/vozac-stats.schema';
+import { ZamjenePrimjenaService } from '../zamjene/zamjene-primjena.service';
 import {
   DisponentUlaz,
   SluzbaRed,
@@ -27,6 +28,7 @@ export class VozacStatsService {
     private readonly godisnjiModel: Model<Godisnji>,
     @InjectModel(VozacStats.name)
     private readonly statsModel: Model<VozacStats>,
+    private readonly zamjene: ZamjenePrimjenaService,
   ) {}
 
   // Poziva se nakon uploada disponenta – preračunava taj tjedan i mjesece koje dotiče
@@ -41,6 +43,7 @@ export class VozacStatsService {
         })),
       })
       .lean()) as unknown as DisponentUlaz[];
+    await this.zamjene.primijeniSve(disponenti);
 
     const verzije = [
       ...new Set(disponenti.map((d) => d.verzija_sluzbe).filter(Boolean)),

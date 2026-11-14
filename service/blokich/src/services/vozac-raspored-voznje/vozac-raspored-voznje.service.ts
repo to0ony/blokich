@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Disponent } from '../../schemas/disponent.schema';
 import { Sluzba } from '../../schemas/sluzba.schema';
+import { ZamjenePrimjenaService } from '../zamjene/zamjene-primjena.service';
+import { istiRadnik } from '../../zamjene/primijeni-zamjene';
 import * as dayjs from 'dayjs';
 import * as isoWeek from 'dayjs/plugin/isoWeek';
 
@@ -29,6 +31,7 @@ export class VozacRasporedVoznjeService {
     private readonly disponentModel: Model<Disponent>,
     @InjectModel(Sluzba.name)
     private readonly sluzbaModel: Model<Sluzba>,
+    private readonly zamjene: ZamjenePrimjenaService,
   ) {}
 
   private izracunajBrojTjedna(datum: Date): number {
@@ -63,6 +66,8 @@ export class VozacRasporedVoznjeService {
 
     if (!disponent) return null;
 
+    const zamjene = await this.zamjene.primijeni(disponent);
+
     const radnik = disponent.radnici.find((r) => r.radnik === sluzBroj);
     if (!radnik) return null;
 
@@ -77,6 +82,33 @@ export class VozacRasporedVoznjeService {
       godina,
       verzija,
       raspored,
+      zamjene: zamjene
+        .filter(
+          ({ zamjena: z, stanje }) =>
+            stanje === 'primijenjena' &&
+            (istiRadnik(z.a.radnik, sluzBroj) ||
+              istiRadnik(z.b?.radnik, sluzBroj)),
+        )
+        .map(({ zamjena: z }) => {
+          const ja = istiRadnik(z.a.radnik, sluzBroj);
+          const kolega = ja ? z.b : z.a;
+          return {
+            id: String(z._id),
+            dan: z.dan,
+            tip: z.tip,
+            /** Smije li ovaj vozač poništiti (samo onaj koji ju je napravio). */
+            moja: ja,
+            prije: ja ? z.a.oznaka : z.b.oznaka,
+            kolega: kolega
+              ? {
+                  sluz_broj: kolega.radnik,
+                  ime_prezime: kolega.ime ?? null,
+                  oznaka: kolega.oznaka,
+                }
+              : null,
+            kreirano: z.kreirano,
+          };
+        }),
     };
 
     return rezultat;
@@ -130,14 +162,11 @@ export class VozacRasporedVoznjeService {
     const disponenti: any[] = await this.disponentModel
       .find(
         { $or: [...tjedni.values()] },
-        {
-          godina: 1,
-          brojTjedna: 1,
-          verzija_sluzbe: 1,
-          radnici: { $elemMatch: { radnik: sluzBroj } },
-        },
+        // svi radnici: zamjena treba i kolegu
+        { godina: 1, brojTjedna: 1, verzija_sluzbe: 1, radnici: 1 },
       )
       .lean();
+    await this.zamjene.primijeniSve(disponenti);
     const poTjednu = new Map(
       disponenti.map((d) => [kljuc(d.godina, d.brojTjedna), d]),
     );
@@ -160,7 +189,9 @@ export class VozacRasporedVoznjeService {
     const dani: any[] = [];
     for (const d of datumi) {
       const disponent = poTjednu.get(kljuc(d.isoWeekYear(), d.isoWeek()));
-      const radnik = disponent?.radnici?.[0];
+      const radnik = disponent?.radnici?.find(
+        (r: any) => r.radnik === sluzBroj,
+      );
       const oznaka = (radnik?.[DANI[d.isoWeekday() - 1]] ?? '').trim();
       if (!oznaka) continue;
 

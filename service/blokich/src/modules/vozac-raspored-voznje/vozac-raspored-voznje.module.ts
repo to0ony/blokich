@@ -4,9 +4,11 @@ import { VozacRasporedVoznjeService } from '../../services/vozac-raspored-voznje
 import { MongooseModule } from '@nestjs/mongoose';
 import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { Sluzba, SluzbaSchema } from '../../schemas/sluzba.schema';
+import { ZamjenePrimjenaModule } from '../zamjene/zamjene-primjena.module';
 
 @Module({
   imports: [
+    ZamjenePrimjenaModule,
     MongooseModule.forFeature([
       {
         name: Disponent.name,

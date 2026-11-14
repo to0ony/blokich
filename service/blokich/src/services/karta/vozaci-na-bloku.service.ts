@@ -7,6 +7,7 @@ import { toZonedTime } from 'date-fns-tz';
 import { Disponent } from '../../schemas/disponent.schema';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
+import { ZamjenePrimjenaService } from '../zamjene/zamjene-primjena.service';
 
 dayjs.extend(isoWeek);
 
@@ -110,7 +111,10 @@ export function aktivniNaBlokovima(
 /** Vozači AP Podsused po blokovima, iz disponenta i službi. */
 @Injectable()
 export class VozaciNaBlokuService {
-  private cache = new Map<string, { do: number; smjene: Promise<SmjenaNaBloku[]> }>();
+  private cache = new Map<
+    string,
+    { od: number; do: number; smjene: Promise<SmjenaNaBloku[]> }
+  >();
 
   constructor(
     @InjectModel(Disponent.name)
@@ -119,6 +123,7 @@ export class VozaciNaBlokuService {
     private readonly sluzbaModel: Model<Sluzba>,
     @InjectModel(Godisnji.name)
     private readonly godisnjiModel: Model<Godisnji>,
+    private readonly zamjene: ZamjenePrimjenaService,
   ) {}
 
   /** Blok -> vozač koji ga sad vozi (vrijeme po Zagrebu). */
@@ -135,11 +140,12 @@ export class VozaciNaBlokuService {
     const kljuc = dan.format('YYYY-MM-DD');
     const sad = Date.now();
     const c = this.cache.get(kljuc);
-    if (c && c.do > sad) return c.smjene;
+    // Nova zamjena odmah vrijedi i na karti uživo.
+    if (c && c.do > sad && c.od >= this.zamjene.zadnjaPromjena) return c.smjene;
 
     for (const [k, v] of this.cache) if (v.do <= sad) this.cache.delete(k);
     const smjene = this.ucitajDan(dan).catch(() => [] as SmjenaNaBloku[]);
-    this.cache.set(kljuc, { do: sad + CACHE_MS, smjene });
+    this.cache.set(kljuc, { od: sad, do: sad + CACHE_MS, smjene });
     return smjene;
   }
 
@@ -151,6 +157,7 @@ export class VozaciNaBlokuService {
 
     const disponent = await this.disponentModel.findOne({ godina, brojTjedna }).lean();
     if (!disponent) return [];
+    await this.zamjene.primijeni(disponent);
 
     const radnici = (disponent.radnici ?? [])
       .map((r) => ({ sluz_broj: Number(r.radnik), br_sl: (r[danKey] ?? '').trim() }))

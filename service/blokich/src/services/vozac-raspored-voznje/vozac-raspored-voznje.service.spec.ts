@@ -3,6 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { VozacRasporedVoznjeService } from './vozac-raspored-voznje.service';
 import { Disponent } from '../../schemas/disponent.schema';
 import { Sluzba } from '../../schemas/sluzba.schema';
+import { ZamjenePrimjenaService } from '../zamjene/zamjene-primjena.service';
 
 const lean = (v: any) => ({ lean: () => Promise.resolve(v) });
 
@@ -70,8 +71,7 @@ describe('VozacRasporedVoznjeService', () => {
         ),
       ),
       findOne: jest.fn(() => ({
-        sort: (s: any) =>
-          lean(s.godina === 1 ? disponenti[0] : disponenti[4]),
+        sort: (s: any) => lean(s.godina === 1 ? disponenti[0] : disponenti[4]),
       })),
     };
     sluzbaModel = {
@@ -85,6 +85,13 @@ describe('VozacRasporedVoznjeService', () => {
         VozacRasporedVoznjeService,
         { provide: getModelToken(Disponent.name), useValue: disponentModel },
         { provide: getModelToken(Sluzba.name), useValue: sluzbaModel },
+        {
+          provide: ZamjenePrimjenaService,
+          useValue: {
+            primijeni: async () => [],
+            primijeniSve: async () => new Map(),
+          },
+        },
       ],
     }).compile();
 

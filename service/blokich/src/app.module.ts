@@ -22,6 +22,7 @@ import { ZetSyncModule } from './modules/zet-sync/zet-sync.module';
 import { RucniUvozModule } from './modules/rucni-uvoz/rucni-uvoz.module';
 import { ZetUzivoModule } from './modules/zet-uzivo/zet-uzivo.module';
 import { KartaModule } from './modules/karta/karta.module';
+import { ZamjeneModule } from './modules/zamjene/zamjene.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { KartaModule } from './modules/karta/karta.module';
     ZetSyncModule,
     ZetUzivoModule,
     KartaModule,
+    ZamjeneModule,
   ],
   providers: [AdminService],
 })

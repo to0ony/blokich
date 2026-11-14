@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Disponent } from '../../schemas/disponent.schema';
 import { Sluzba } from '../../schemas/sluzba.schema';
 import { Godisnji } from '../../schemas/godisnji.schema';
+import { ZamjenePrimjenaService } from '../zamjene/zamjene-primjena.service';
 import * as dayjs from 'dayjs';
 import * as isoWeek from 'dayjs/plugin/isoWeek';
 
@@ -18,6 +19,7 @@ export class VozaciPoSluzbiDanService {
     private readonly sluzbaModel: Model<Sluzba>,
     @InjectModel(Godisnji.name)
     private readonly godisnjiModel: Model<Godisnji>,
+    private readonly zamjene: ZamjenePrimjenaService,
   ) {}
 
   async dohvatiVozaceZaSluzbu(
@@ -34,10 +36,13 @@ export class VozaciPoSluzbiDanService {
     const godina = thursdayOfWeek.year();
     const brojTjedna = datumZaTjedan.isoWeek();
 
-    const disponent = await this.disponentModel.findOne({ godina, brojTjedna });
+    const disponent = await this.disponentModel
+      .findOne({ godina, brojTjedna })
+      .lean();
     if (!disponent) {
       throw new NotFoundException('Disponent za traženi tjedan nije pronađen.');
     }
+    await this.zamjene.primijeni(disponent);
 
     const verzijaSluzbe = disponent.verzija_sluzbe;
 
@@ -169,10 +174,13 @@ export class VozaciPoSluzbiDanService {
     const godina = thursdayOfWeek.year();
     const brojTjedna = datumZaTjedan.isoWeek();
 
-    const disponent = await this.disponentModel.findOne({ godina, brojTjedna });
+    const disponent = await this.disponentModel
+      .findOne({ godina, brojTjedna })
+      .lean();
     if (!disponent) {
       throw new NotFoundException('Disponent za traženi tjedan nije pronađen.');
     }
+    await this.zamjene.primijeni(disponent);
 
     const verzijaSluzbe = disponent.verzija_sluzbe;
 

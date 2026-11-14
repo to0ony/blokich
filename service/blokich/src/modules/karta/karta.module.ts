@@ -10,9 +10,11 @@ import { ZetUzivoModule } from '../zet-uzivo/zet-uzivo.module';
 import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { Sluzba, SluzbaSchema } from '../../schemas/sluzba.schema';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
+import { ZamjenePrimjenaModule } from '../zamjene/zamjene-primjena.module';
 
 @Module({
   imports: [
+    ZamjenePrimjenaModule,
     HttpModule,
     ZetUzivoModule,
     MongooseModule.forFeature([

@@ -6,9 +6,11 @@ import { Disponent, DisponentSchema } from '../../schemas/disponent.schema';
 import { Sluzba, SluzbaSchema } from '../../schemas/sluzba.schema';
 import { Godisnji, GodisnjiSchema } from '../../schemas/godisnji.schema';
 import { VozacStats, VozacStatsSchema } from '../../schemas/vozac-stats.schema';
+import { ZamjenePrimjenaModule } from '../zamjene/zamjene-primjena.module';
 
 @Module({
   imports: [
+    ZamjenePrimjenaModule,
     MongooseModule.forFeature([
       {
         name: Disponent.name,
