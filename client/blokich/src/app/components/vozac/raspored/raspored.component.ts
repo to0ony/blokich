@@ -105,6 +105,35 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @Output() zamjenaPromijenjena = new EventEmitter<void>();
 
   dani: DanRasporeda[] = [];
+  /** Dijeljenje tjedna (WhatsApp) – privremeno skriveno. */
+  readonly DIJELJENJE = false;
+  /** Ikona kalendara jednom kratko zatitra (prvi put kad je na ekranu). */
+  nagovijestiKalendar = false;
+  private kalendarPromatrac?: IntersectionObserver;
+
+  @ViewChild('kalendarGumb') set kalendarGumb(el: ElementRef<HTMLElement> | undefined) {
+    this.kalendarPromatrac?.disconnect();
+    const KLJUC = 'blokich.kalendarNagovijesten';
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    try {
+      if (localStorage.getItem(KLJUC)) return;
+    } catch {
+      return;
+    }
+    this.kalendarPromatrac = new IntersectionObserver(
+      ([unos]) => {
+        if (!unos?.isIntersecting) return;
+        this.kalendarPromatrac?.disconnect();
+        try {
+          localStorage.setItem(KLJUC, '1');
+        } catch {}
+        setTimeout(() => (this.nagovijestiKalendar = true), 600);
+        setTimeout(() => (this.nagovijestiKalendar = false), 600 + 1600);
+      },
+      { threshold: 1 },
+    );
+    this.kalendarPromatrac.observe(el.nativeElement);
+  }
   /** Ikona odmora kao na tahografu (krevet). */
   readonly OdmorIcon = Bed;
   readonly opisOdsustva = opisOdsustva;
@@ -173,6 +202,7 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.zaustaviUzivo();
     this.nagovjestajPromatrac?.disconnect();
+    this.kalendarPromatrac?.disconnect();
   }
 
   private zaustaviUzivo(): void {

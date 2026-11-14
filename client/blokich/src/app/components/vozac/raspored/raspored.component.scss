@@ -81,6 +81,61 @@
   flex-shrink: 0;
 }
 
+/* Kalendar: jednokratni nagovještaj – mali poskok i val oko ikone */
+.rs-kal {
+  position: relative;
+  display: inline-flex;
+  border-radius: 50%;
+
+  &.is-nagovjestaj {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      border: 2px solid var(--p-primary-500);
+      pointer-events: none;
+      animation: rs-kal-val 0.8s ease-out 2;
+    }
+
+    ::ng-deep .p-button {
+      color: var(--p-primary-600);
+      animation: rs-kal-poskok 0.8s ease-in-out 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.is-nagovjestaj::after,
+    &.is-nagovjestaj ::ng-deep .p-button {
+      animation: none;
+    }
+  }
+}
+
+@keyframes rs-kal-val {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes rs-kal-poskok {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  30% {
+    transform: translateY(-3px) rotate(-8deg);
+  }
+  60% {
+    transform: translateY(0) rotate(6deg);
+  }
+}
+
 .rs-week-sub {
   font-size: 13.5px;
   color: var(--vz-muted);

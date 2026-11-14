@@ -122,15 +122,20 @@
         </span>
       </div>
       <div class="rs-week-actions">
+        <!-- Jednom po uređaju kratko zatitra kad se pojavi – da se vidi da se stišće -->
+        <span #kalendarGumb class="rs-kal" [class.is-nagovjestaj]="nagovijestiKalendar">
+          <p-button
+            icon="pi pi-calendar"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            ariaLabel="Kalendar"
+            (onClick)="otvoriKalendar.emit()"
+          />
+        </span>
+        <!-- Dijeljenje tjedna privremeno skriveno -->
         <p-button
-          icon="pi pi-calendar"
-          [rounded]="true"
-          [text]="true"
-          severity="secondary"
-          ariaLabel="Kalendar"
-          (onClick)="otvoriKalendar.emit()"
-        />
-        <p-button
+          *ngIf="DIJELJENJE"
           icon="pi pi-share-alt"
           [rounded]="true"
           [text]="true"
