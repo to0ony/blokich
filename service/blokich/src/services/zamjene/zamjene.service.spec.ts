@@ -31,6 +31,7 @@ describe('ZamjeneService', () => {
           { radnik: '5678', uto: 'O', sri: '112' },
           { radnik: '0999', sri: 'O' },
           { radnik: '4444', sri: 'I-GO' },
+          { radnik: '7777', sri: '300' },
         ],
       },
       {
@@ -48,6 +49,7 @@ describe('ZamjeneService', () => {
           { br_sl: '45', linija: '109', od: '14:00', do: '22:00' },
           { br_sl: '112', linija: '172', od: '05:00', do: '13:00' },
           { br_sl: '200', linija: '124', od: '15:00', do: '23:00' },
+          { br_sl: '300', linija: '109', od: '21:00', do: '02:00' },
         ],
       },
     ];
@@ -179,6 +181,73 @@ describe('ZamjeneService', () => {
       expect(
         (await service.kandidati('1234', 'trenutni', 'sri', '4444')).kandidati,
       ).toEqual([]);
+    });
+
+    it('filtar bez upisa: slobodni, smjena i moja linija', async () => {
+      const ime = (r: any) => r.kandidati.map((k: any) => k.sluz_broj);
+
+      const slobodni = await service.kandidati(
+        '1234',
+        'trenutni',
+        'sri',
+        '',
+        'slobodni',
+      );
+      expect(ime(slobodni)).toEqual(['0999']);
+      expect(slobodni.ukupno).toBe(1);
+
+      expect(
+        ime(await service.kandidati('1234', 'trenutni', 'sri', '', 'jutarnja')),
+      ).toEqual(['5678']);
+      // 21:00–02:00 prelazi ponoć
+      const nocna = await service.kandidati(
+        '1234',
+        'trenutni',
+        'sri',
+        '',
+        'nocna',
+      );
+      expect(ime(nocna)).toEqual(['7777']);
+      expect(nocna.kandidati[0].smjena).toBe('nocna');
+      // moja služba 45 je na liniji 109
+      expect(
+        ime(await service.kandidati('1234', 'trenutni', 'sri', '', 'linija')),
+      ).toEqual(['7777']);
+      expect(
+        ime(
+          await service.kandidati('1234', 'trenutni', 'sri', '', 'popodnevna'),
+        ),
+      ).toEqual([]);
+    });
+
+    it('filtar i upit zajedno', async () => {
+      const r = await service.kandidati(
+        '1234',
+        'trenutni',
+        'sri',
+        'simic',
+        'slobodni',
+      );
+      expect(r.kandidati).toEqual([]);
+      const s = await service.kandidati(
+        '1234',
+        'trenutni',
+        'sri',
+        'simic',
+        'jutarnja',
+      );
+      expect(s.kandidati.map((k: any) => k.sluz_broj)).toEqual(['5678']);
+    });
+
+    it('slobodan vozač ne vidi slobodne', async () => {
+      const r = await service.kandidati(
+        '0999',
+        'trenutni',
+        'sri',
+        '',
+        'slobodni',
+      );
+      expect(r.kandidati).toEqual([]);
     });
 
     it('bez disponenta za naredni tjedan', async () => {

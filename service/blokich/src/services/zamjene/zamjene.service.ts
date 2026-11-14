@@ -35,9 +35,20 @@ import {
 dayjs.extend(isoWeek);
 
 export type TjedanTip = 'trenutni' | 'naredni';
+export type Smjena = 'jutarnja' | 'popodnevna' | 'nocna';
+export type FilterKandidata = 'slobodni' | Smjena | 'linija';
+export const FILTERI: FilterKandidata[] = [
+  'slobodni',
+  'jutarnja',
+  'popodnevna',
+  'nocna',
+  'linija',
+];
 export type TipZamjene = 'zamjena' | 'ukidanje';
 
 const MAX_KANDIDATA = 30;
+/** Bez upisa (samo filtar) popis je duži – npr. svi slobodni taj dan. */
+const MAX_KANDIDATA_FILTAR = 80;
 const MIN_ODMOR_SATI = 12;
 const NAZIVI_DANA: Record<string, string> = {
   pon: 'pon',
@@ -79,6 +90,34 @@ function dijeloviSluzbe(sveSluzbe: any[], oznaka: string): any[] {
       );
     })
     .sort((a, b) => a.br_sl.length - b.br_sl.length);
+}
+
+const minute = (v?: string | null) => {
+  const m = /^(\d{1,2})[:.](\d{2})/.exec((v ?? '').trim());
+  return m ? +m[1] * 60 + +m[2] : null;
+};
+
+/** Kao u statistici: nastup od 20 h ili kraj iza ponoći = noćna, prije podne = jutarnja. */
+function smjenaIz(dijelovi: { od?: string; do?: string }[]): Smjena | null {
+  let zadnje: number | null = null;
+  let pocetak: number | null = null;
+  let kraj: number | null = null;
+  for (const d of dijelovi) {
+    for (const [polje, v] of [
+      ['od', d.od],
+      ['do', d.do],
+    ] as const) {
+      let min = minute(v);
+      if (min === null) continue;
+      while (zadnje !== null && min < zadnje) min += 1440;
+      zadnje = min;
+      if (polje === 'od' && pocetak === null) pocetak = min;
+      if (polje === 'do') kraj = min;
+    }
+  }
+  if (pocetak === null) return null;
+  if (pocetak >= 20 * 60 || (kraj ?? 0) > 24 * 60) return 'nocna';
+  return pocetak < 12 * 60 ? 'jutarnja' : 'popodnevna';
 }
 
 function vrstaOznake(oznaka: string): 'sluzba' | 'slobodan' | 'odsustvo' {
@@ -191,6 +230,7 @@ export class ZamjeneService {
     return {
       oznaka: (oznaka ?? '').trim(),
       vrsta: vrstaOznake(oznaka),
+      smjena: smjenaIz(dijelovi),
       od: dijelovi[0]?.od ?? null,
       do: dijelovi[dijelovi.length - 1]?.do ?? null,
       linije: [...new Set(dijelovi.map((d) => d.linija).filter(Boolean))],
@@ -265,7 +305,13 @@ export class ZamjeneService {
   // ---------- vozač ----------
 
   /** Moj dan i kolege s kojima se mogu zamijeniti, filtrirano po `q`. */
-  async kandidati(radnik: string, tip: TjedanTip, dan: string, q = '') {
+  async kandidati(
+    radnik: string,
+    tip: TjedanTip,
+    dan: string,
+    q = '',
+    filter: FilterKandidata | null = null,
+  ) {
     this.provjeriDan(dan);
     const t = this.tjedan(tip);
     const susjedi = [
@@ -317,8 +363,8 @@ export class ZamjeneService {
     };
 
     const upit = zaPretragu(q.trim());
-    if (aktivna || moj.vrsta === 'odsustvo' || !upit) {
-      return { ...osnova, kandidati: [] };
+    if (aktivna || moj.vrsta === 'odsustvo' || (!upit && !filter)) {
+      return { ...osnova, kandidati: [], ukupno: 0 };
     }
 
     const brojcani = /^\d+$/.test(upit);
@@ -329,16 +375,36 @@ export class ZamjeneService {
       .map((r: any) => {
         const oznaka = (r[dan] ?? '').trim();
         const osoba = osobe.get(Number(r.radnik));
-        return { r, oznaka, osoba, vrsta: vrstaOznake(oznaka) };
+        return {
+          r,
+          oznaka,
+          osoba,
+          vrsta: vrstaOznake(oznaka),
+          opis: this.opisDana(sveSluzbe, oznaka),
+        };
       })
-      .filter(({ oznaka, vrsta }) => {
+      .filter(({ oznaka, vrsta, opis }) => {
         if (!oznaka || vrsta === 'odsustvo') return false;
         // dva slobodna dana nemaju što zamijeniti
-        return moj.vrsta === 'sluzba' || vrsta === 'sluzba';
+        if (moj.vrsta !== 'sluzba' && vrsta !== 'sluzba') return false;
+        switch (filter) {
+          case 'slobodni':
+            return vrsta === 'slobodan';
+          case 'jutarnja':
+          case 'popodnevna':
+          case 'nocna':
+            return opis.smjena === filter;
+          case 'linija':
+            return opis.linije.some((l) => moj.linije.includes(l));
+          default:
+            return true;
+        }
       })
       .map((k) => {
         let rang = -1;
-        if (brojcani) {
+        if (!upit) {
+          rang = 0;
+        } else if (brojcani) {
           const broj = String(Number(k.r.radnik));
           const trazeni = String(Number(upit));
           if (normOznaka(k.oznaka) === upit) rang = 0;
@@ -355,17 +421,23 @@ export class ZamjeneService {
       .sort(
         (a, b) =>
           a.rang - b.rang ||
+          // službe po vremenu nastupa, slobodni na kraju
+          (a.opis.od ?? '99').localeCompare(b.opis.od ?? '99') ||
           (a.osoba?.ime ?? '').localeCompare(b.osoba?.ime ?? '', 'hr'),
-      )
-      .slice(0, MAX_KANDIDATA);
+      );
+    const ukupno = pogodci.length;
+    const prikazani = pogodci.slice(
+      0,
+      upit ? MAX_KANDIDATA : MAX_KANDIDATA_FILTAR,
+    );
 
-    const kandidati = pogodci.map(({ r, oznaka, osoba }) => {
+    const kandidati = prikazani.map(({ r, oznaka, osoba, opis }) => {
       const zauzet = !!this.aktivnaZa(zamjene, dan, r.radnik);
       return {
         sluz_broj: r.radnik,
         ime_prezime: osoba?.ime ?? null,
         kontakt_broj: osoba?.kontakt ?? null,
-        ...this.opisDana(sveSluzbe, oznaka),
+        ...opis,
         zauzet,
         upozorenja: zauzet
           ? []
@@ -380,7 +452,7 @@ export class ZamjeneService {
       };
     });
 
-    return { ...osnova, kandidati };
+    return { ...osnova, kandidati, ukupno };
   }
 
   /** Zamjena kako je vidi jedan od sudionika. */
