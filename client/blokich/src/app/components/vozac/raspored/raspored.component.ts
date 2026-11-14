@@ -315,6 +315,11 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     return jeJucer(dan.datum);
   }
 
+  /** Prošli dan je zatamnjen tek kad mu završi i noćna služba (kao kartica Danas). */
+  prosao(dan: DanRasporeda): boolean {
+    return dan.prosao && !this.istaknut(dan);
+  }
+
   /** Istaknuti dan u tjednu: aktivni dan (i noćna od jučer), inače kalendarski danas. */
   istaknut(dan: DanRasporeda): boolean {
     const a = this.danas;
