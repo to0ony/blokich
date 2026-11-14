@@ -53,19 +53,6 @@
       <div class="rs-today-kasnije" *ngIf="danasKasnije(d) as t">
         <i class="pi pi-calendar"></i> Danas kasnije: {{ t }}
       </div>
-      <!-- Moj bus uživo (ZET) – samo kad postoje podaci -->
-      <div class="rs-today-live" *ngIf="mojBus as b" [class.is-late]="kasniZnatno(b.kasnjenje)">
-        <span class="rs-live-dot"></span>
-        <ng-container *ngIf="b.vrsta === 'vozim'">
-          {{ opisKasnjenja(b.kasnjenje, true) }} · bus {{ b.vozilo }}
-          <span class="rs-live-sub" *ngIf="b.model">· {{ b.model }}</span>
-        </ng-container>
-        <ng-container *ngIf="b.vrsta === 'cekam'">
-          Tvoj bus {{ b.vozilo }} stiže ~{{ b.stize }}
-          <span class="rs-live-sub">({{ opisKasnjenja(b.kasnjenje) }})</span>
-          <span class="rs-live-sub rs-live-model" *ngIf="b.model">{{ b.model }}</span>
-        </ng-container>
-      </div>
     </ng-container>
     <ng-template #danasSlobodno>
       <div class="rs-today-free">
@@ -74,6 +61,24 @@
       </div>
     </ng-template>
   </section>
+
+  <!-- Moj bus uživo (ZET): traka preko cijele širine između kartice Danas i karte -->
+  <div
+    class="rs-today-live"
+    *ngIf="danas && mojBus as b"
+    [class.is-late]="kasniZnatno(b.kasnjenje)"
+  >
+    <span class="rs-live-dot"></span>
+    <ng-container *ngIf="b.vrsta === 'vozim'">
+      {{ opisKasnjenja(b.kasnjenje, true) }} · bus {{ b.vozilo }}
+      <span class="rs-live-sub" *ngIf="b.model">· {{ b.model }}</span>
+    </ng-container>
+    <ng-container *ngIf="b.vrsta === 'cekam'">
+      Tvoj bus {{ b.vozilo }} stiže ~{{ b.stize }}
+      <span class="rs-live-sub">({{ opisKasnjenja(b.kasnjenje) }})</span>
+      <span class="rs-live-sub rs-live-model" *ngIf="b.model">{{ b.model }}</span>
+    </ng-container>
+  </div>
 
   <!-- Moja linija na karti: trasa, a dok vozim ili čekam i moj bus uživo -->
   <!-- Karta linije ispod kartice Danas; više linija u danu = klizač -->
