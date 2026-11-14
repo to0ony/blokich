@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import {
   DanKey,
+  FilterKandidata,
   KandidatiOdgovor,
   TjedanTip,
   ZamjenaInfo,
@@ -49,12 +50,18 @@ export class ZamjeneService {
     return broj;
   }
 
-  kandidati(tjedan: TjedanTip, dan: DanKey, q = ''): Observable<KandidatiOdgovor> {
-    const params = new HttpParams()
+  kandidati(
+    tjedan: TjedanTip,
+    dan: DanKey,
+    q = '',
+    filter: FilterKandidata | null = null,
+  ): Observable<KandidatiOdgovor> {
+    let params = new HttpParams()
       .set('radnik', this.radnik)
       .set('tjedan', tjedan)
       .set('dan', dan)
       .set('q', q);
+    if (filter) params = params.set('filter', filter);
     return this.api.get<KandidatiOdgovor>('zamjene/kandidati', params);
   }
 

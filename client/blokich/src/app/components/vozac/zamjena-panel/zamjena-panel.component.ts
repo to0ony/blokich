@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject, Subscription, debounceTime, switchMap, catchError, of, tap } from 'rxjs';
+import { Subject, Subscription, switchMap, catchError, of, tap, timer } from 'rxjs';
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -19,6 +19,7 @@ import { ZamjeneService } from '../../../services/zamjene.service';
 import {
   DanRasporeda,
   DanZaZamjenu,
+  FilterKandidata,
   KandidatZamjene,
   KandidatiOdgovor,
   TjedanTip,
@@ -27,6 +28,21 @@ import {
 } from '../vozac.model';
 
 type Korak = 'trazi' | 'potvrda';
+
+const FILTERI: { value: FilterKandidata; label: string; naslov: string }[] = [
+  { value: 'slobodni', label: 'Slobodni', naslov: 'Slobodni taj dan' },
+  { value: 'jutarnja', label: 'Jutarnja', naslov: 'Jutarnje smjene' },
+  { value: 'popodnevna', label: 'Popodnevna', naslov: 'Popodnevne smjene' },
+  { value: 'nocna', label: 'Noćna', naslov: 'Noćne smjene' },
+  { value: 'linija', label: 'Moja linija', naslov: 'Na tvojoj liniji' },
+];
+
+interface Pretraga {
+  q: string;
+  filter: FilterKandidata | null;
+  /** Filtar se primijeni odmah, tipkanje čeka da vozač stane. */
+  odmah: boolean;
+}
 
 /** Donji panel: zamjena službe s kolegom ili ukidanje službe za jedan dan. */
 @Component({
@@ -51,8 +67,10 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
   greska: string | null = null;
 
   upit = '';
+  filter: FilterKandidata | null = null;
   trazim = false;
   kandidati: KandidatZamjene[] = [];
+  ukupno = 0;
 
   korak: Korak = 'trazi';
   /** Odabrani kolega; null u koraku potvrde = ukidanje službe. */
@@ -61,28 +79,32 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
   ponistavam = false;
   spremam = false;
 
-  private upiti = new Subject<string>();
+  private upiti = new Subject<Pretraga>();
   private pretraga: Subscription;
 
   constructor(private zamjene: ZamjeneService) {
     this.pretraga = this.upiti
       .pipe(
-        debounceTime(250),
-        tap(() => (this.trazim = true)),
-        switchMap((q) =>
-          q.trim() && this.dan
-            ? this.zamjene.kandidati(this.tjedan, this.dan.key, q).pipe(
-                catchError((e) => {
-                  this.greska = poruka(e);
-                  return of(null);
-                }),
-              )
-            : of(null),
+        switchMap((p) =>
+          timer(p.odmah ? 0 : 250).pipe(
+            tap(() => (this.trazim = true)),
+            switchMap(() =>
+              (p.q.trim() || p.filter) && this.dan
+                ? this.zamjene.kandidati(this.tjedan, this.dan.key, p.q, p.filter).pipe(
+                    catchError((e) => {
+                      this.greska = poruka(e);
+                      return of(null);
+                    }),
+                  )
+                : of(null),
+            ),
+          ),
         ),
       )
       .subscribe((odg) => {
         this.trazim = false;
         this.kandidati = odg?.kandidati ?? [];
+        this.ukupno = odg?.ukupno ?? 0;
       });
   }
 
@@ -104,7 +126,9 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
     this.podaci = null;
     this.greska = null;
     this.upit = '';
+    this.filter = null;
     this.kandidati = [];
+    this.ukupno = 0;
     this.korak = 'trazi';
     this.odabran = null;
     this.ponistavam = false;
@@ -113,6 +137,8 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
       next: (odg) => {
         this.podaci = odg;
         this.loading = false;
+        // Prijedlog odmah: tko je slobodan taj dan (može ti preuzeti službu).
+        if (!odg.aktivna && odg.moj.vrsta === 'sluzba') this.postaviFilter('slobodni');
       },
       error: (e) => {
         this.greska = poruka(e);
@@ -121,11 +147,42 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
     });
   }
 
+  /** Filtri koji imaju smisla za moj dan. */
+  get filteri() {
+    const moj = this.podaci?.moj;
+    return FILTERI.filter((f) => {
+      if (f.value === 'slobodni') return moj?.vrsta === 'sluzba';
+      if (f.value === 'linija') return !!moj?.linije.length;
+      return true;
+    });
+  }
+
+  /** Naslov iznad rezultata: "Slobodni taj dan" / "Rezultati". */
+  get naslovRezultata(): string {
+    const f = FILTERI.find((x) => x.value === this.filter);
+    if (this.upit.trim()) return f ? `Rezultati · ${f.label.toLowerCase()}` : 'Rezultati';
+    return f?.naslov ?? '';
+  }
+
   naUpit(q: string): void {
     this.upit = q;
     this.greska = null;
-    if (!q.trim()) this.kandidati = [];
-    this.upiti.next(q);
+    this.trazi(false);
+  }
+
+  /** Dodir na aktivni filtar ga isključuje. */
+  postaviFilter(f: FilterKandidata): void {
+    this.filter = this.filter === f ? null : f;
+    this.greska = null;
+    this.trazi(true);
+  }
+
+  private trazi(odmah: boolean): void {
+    if (!this.upit.trim() && !this.filter) {
+      this.kandidati = [];
+      this.ukupno = 0;
+    }
+    this.upiti.next({ q: this.upit, filter: this.filter, odmah });
   }
 
   odaberi(k: KandidatZamjene): void {

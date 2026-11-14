@@ -82,6 +82,25 @@
               />
             </span>
 
+            <!-- Filtri: dodir uključi, ponovni dodir isključi -->
+            <div class="zp-filteri" role="group" aria-label="Filtri">
+              <button
+                *ngFor="let f of filteri"
+                type="button"
+                class="zp-filter"
+                [class.is-on]="filter === f.value"
+                [attr.aria-pressed]="filter === f.value"
+                (click)="postaviFilter(f.value)"
+              >
+                {{ f.label }}
+              </button>
+            </div>
+
+            <div class="zp-rez-head" *ngIf="naslovRezultata && !(trazim && !kandidati.length)">
+              <span>{{ naslovRezultata }}</span>
+              <span class="zp-rez-broj" *ngIf="ukupno">{{ ukupno }}</span>
+            </div>
+
             <div class="zp-list" *ngIf="trazim && !kandidati.length">
               <p-skeleton *ngFor="let i of [1, 2]" height="64px" borderRadius="16px" />
             </div>
@@ -113,8 +132,16 @@
               </button>
             </div>
 
-            <p class="zp-hint" *ngIf="upit.trim() && !trazim && !kandidati.length && !greska">
-              Nitko ne odgovara upitu.
+            <p class="zp-hint" *ngIf="ukupno > kandidati.length && !trazim">
+              Prikazano {{ kandidati.length }} od {{ ukupno }} – upiši ime ili broj za užu pretragu.
+            </p>
+
+            <p class="zp-hint" *ngIf="(upit.trim() || filter) && !trazim && !kandidati.length && !greska">
+              {{ upit.trim() ? 'Nitko ne odgovara upitu.' : 'Nitko taj dan.' }}
+            </p>
+
+            <p class="zp-hint" *ngIf="!upit.trim() && !filter">
+              Upiši ime, službeni broj ili broj službe, ili odaberi filtar.
             </p>
 
             <button type="button" class="zp-ukini" *ngIf="p.mozeUkinuti" (click)="ukiniKorak()">

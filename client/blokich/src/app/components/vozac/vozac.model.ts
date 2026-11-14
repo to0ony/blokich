@@ -105,9 +105,12 @@ export interface ZamjenaInfo {
 }
 
 /** Dan (moj ili kolegin) u panelu za zamjenu. */
+export type FilterKandidata = 'slobodni' | 'jutarnja' | 'popodnevna' | 'nocna' | 'linija';
+
 export interface DanZaZamjenu {
   oznaka: string;
   vrsta: 'sluzba' | 'slobodan' | 'odsustvo';
+  smjena: 'jutarnja' | 'popodnevna' | 'nocna' | null;
   od: string | null;
   do: string | null;
   linije: string[];
@@ -133,6 +136,8 @@ export interface KandidatiOdgovor {
   aktivna: ZamjenaInfo | null;
   mozeUkinuti: boolean;
   kandidati: KandidatZamjene[];
+  /** Koliko ih odgovara (prikazano ih je možda manje). */
+  ukupno: number;
 }
 
 /** Dan u kalendaru; službe su iz verzije koju ima disponent tog tjedna. */
