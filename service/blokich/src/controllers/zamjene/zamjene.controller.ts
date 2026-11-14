@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { AdminOnly } from 'src/authentication/decorators/admin-only.decorator';
 import {
+  FILTERI,
+  FilterKandidata,
   TjedanTip,
   TipZamjene,
   ZamjeneService,
@@ -27,16 +29,26 @@ function tjedanIz(v: unknown): TjedanTip {
 export class ZamjeneController {
   constructor(private readonly zamjene: ZamjeneService) {}
 
-  /** Moj dan i kolege za zamjenu: ?radnik=&tjedan=trenutni|naredni&dan=sri&q= */
+  /** Moj dan i kolege za zamjenu: ?radnik=&tjedan=trenutni|naredni&dan=sri&q=&filter=slobodni|jutarnja|popodnevna|nocna|linija */
   @Get('kandidati')
   kandidati(
     @Query('radnik') radnik: string,
     @Query('tjedan') tjedan: string,
     @Query('dan') dan: string,
     @Query('q') q?: string,
+    @Query('filter') filter?: string,
   ) {
     if (!radnik) throw new BadRequestException('Nedostaje službeni broj.');
-    return this.zamjene.kandidati(radnik, tjedanIz(tjedan), dan, q ?? '');
+    if (filter && !FILTERI.includes(filter as FilterKandidata)) {
+      throw new BadRequestException('Neispravan filtar.');
+    }
+    return this.zamjene.kandidati(
+      radnik,
+      tjedanIz(tjedan),
+      dan,
+      q ?? '',
+      (filter as FilterKandidata) || null,
+    );
   }
 
   @Post()
