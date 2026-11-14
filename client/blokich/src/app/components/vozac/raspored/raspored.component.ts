@@ -24,6 +24,7 @@ import { UzivoService } from '../../../services/uzivo.service';
 import { KolegeListaComponent } from '../kolege-lista/kolege-lista.component';
 import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
 import { MojaKartaComponent } from '../moja-karta/moja-karta.component';
+import { ZamjenaPanelComponent } from '../zamjena-panel/zamjena-panel.component';
 import {
   DanRasporeda,
   Kolega,
@@ -78,6 +79,7 @@ const MJESECI_GEN = [
     KolegeListaComponent,
     SluzbaDetaljiComponent,
     MojaKartaComponent,
+    ZamjenaPanelComponent,
     RouterLink,
   ],
   templateUrl: './raspored.component.html',
@@ -99,6 +101,8 @@ export class RasporedComponent implements OnChanges, OnDestroy {
   @Output() tjedanChange = new EventEmitter<TjedanTip>();
   @Output() retry = new EventEmitter<void>();
   @Output() otvoriKalendar = new EventEmitter<void>();
+  /** Zamjena službe napravljena ili poništena – raspored treba iznova. */
+  @Output() zamjenaPromijenjena = new EventEmitter<void>();
 
   dani: DanRasporeda[] = [];
   /** Ikona odmora kao na tahografu (krevet). */
@@ -117,6 +121,36 @@ export class RasporedComponent implements OnChanges, OnDestroy {
     { label: 'Ovaj tjedan', value: 'trenutni' as TjedanTip, disabled: false },
     { label: 'Sljedeći', value: 'naredni' as TjedanTip, disabled: true },
   ];
+
+  // Donji panel za zamjenu službe
+  zamjenaOtvorena = false;
+  zamjenaDan: DanRasporeda | null = null;
+
+  /** Služba ili slobodan dan se mogu mijenjati; odsustvo (GO, bolovanje…) ne. */
+  mozeZamjenu(d: DanRasporeda): boolean {
+    return !!d.sluzbe.length || !!d.zamjena || /^[O0][A-Z0-9]?$/i.test(d.odsustvo ?? '');
+  }
+
+  /** Tjedan prikazanih kartica dana (prekidač se promijeni prije podataka). */
+  get tjedanKartica(): TjedanTip {
+    return this.prikazanTekuci ? 'trenutni' : 'naredni';
+  }
+
+  otvoriZamjenu(d: DanRasporeda, e?: Event): void {
+    e?.stopPropagation();
+    if (!this.mozeZamjenu(d)) return;
+    this.zamjenaDan = d;
+    this.zamjenaOtvorena = true;
+  }
+
+  /** Kratki opis aktivne zamjene za karticu dana. */
+  opisZamjene(d: DanRasporeda): string {
+    const z = d.zamjena;
+    if (!z) return '';
+    if (z.tip === 'ukidanje') return `Služba ${z.prije} ukinuta`;
+    const tko = z.kolega?.ime_prezime || z.kolega?.sluz_broj || 'kolegom';
+    return `Zamjena s ${tko}`;
+  }
 
   // Donji panel sa smjenom
   smjenaOtvorena = false;

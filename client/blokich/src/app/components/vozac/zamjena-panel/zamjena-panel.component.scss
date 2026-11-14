@@ -1,0 +1,277 @@
+.zp {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.zp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zp-card {
+  padding: 12px 14px;
+  border: 1px solid var(--vz-border);
+  border-radius: 16px;
+  background: var(--vz-surface);
+
+  &.zp-aktivna {
+    border-color: var(--p-primary-300);
+    background: var(--p-primary-50);
+  }
+}
+
+.zp-card-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--vz-muted);
+
+  .zp-aktivna & {
+    color: var(--p-primary-600);
+  }
+}
+
+.zp-dan {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--vz-text);
+}
+
+.zp-linije,
+.zp-sad {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--vz-muted);
+}
+
+.zp-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--vz-text);
+}
+
+.zp-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--vz-muted);
+}
+
+.zp-label {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--vz-text);
+}
+
+.zp-search {
+  position: relative;
+  display: block;
+
+  .pi {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--vz-muted);
+    font-size: 14px;
+  }
+
+  input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px 0 38px;
+    border: 1px solid var(--vz-border);
+    border-radius: 12px;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    font-size: 16px; // bez zumiranja na iOS-u
+    outline: none;
+
+    &:focus {
+      border-color: var(--p-primary-500);
+    }
+  }
+}
+
+.zp-kandidat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--vz-border);
+  border-radius: 16px;
+  background: var(--vz-surface);
+  color: var(--vz-text);
+  text-align: left;
+  cursor: pointer;
+
+  &:active:not(:disabled) {
+    background: var(--vz-surface-2);
+  }
+
+  &.is-zauzet {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  > .pi {
+    color: var(--vz-muted);
+  }
+}
+
+.zp-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--vz-surface-2);
+  color: var(--vz-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.zp-k-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.zp-k-name {
+  display: flex;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.zp-k-ime {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zp-k-num {
+  flex-shrink: 0;
+  color: var(--vz-muted);
+  font-weight: 600;
+}
+
+.zp-k-dan {
+  font-size: 13px;
+  color: var(--vz-muted);
+}
+
+.zp-k-warn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vz-orange);
+
+  .pi {
+    font-size: 11px;
+  }
+}
+
+.zp-ukini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1px dashed var(--vz-border);
+  border-radius: 16px;
+  background: none;
+  color: var(--vz-text);
+  text-align: left;
+  cursor: pointer;
+
+  > .pi:first-child {
+    color: var(--vz-red);
+  }
+
+  > .pi:last-child {
+    margin-left: auto;
+    color: var(--vz-muted);
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+  }
+
+  small {
+    font-size: 12px;
+    color: var(--vz-muted);
+  }
+}
+
+.zp-promjena {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 15px;
+
+  .staro {
+    color: var(--vz-muted);
+    text-decoration: line-through;
+  }
+
+  .pi {
+    font-size: 11px;
+    color: var(--vz-muted);
+  }
+
+  .novo {
+    font-weight: 700;
+    color: var(--vz-text);
+  }
+}
+
+.zp-upozorenja {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--vz-orange-border);
+  border-radius: 12px;
+  background: var(--vz-orange-bg);
+  color: var(--vz-orange);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.zp-confirm p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--vz-text);
+}
+
+.zp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.zp-full ::ng-deep {
+  .p-button,
+  .p-message {
+    width: 100%;
+  }
+}

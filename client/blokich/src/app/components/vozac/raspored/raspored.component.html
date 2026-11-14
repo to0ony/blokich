@@ -221,12 +221,43 @@
         <header class="rs-day-head">
           <span class="rs-day-name">{{ d.naziv }}</span>
           <span class="rs-day-date">{{ d.datum.format("D.M.") }}</span>
-          <span class="chip rs-day-code" *ngIf="!d.sluzbe.length && d.odsustvo">{{
-            d.odsustvo
-          }}</span>
+          <!-- Oznaka i služba su gumbi: dodir otvara zamjenu -->
+          <ng-container *ngIf="!d.sluzbe.length && d.odsustvo">
+            <button
+              *ngIf="mozeZamjenu(d); else oznakaBezZamjene"
+              type="button"
+              class="chip rs-day-code is-swap"
+              [attr.aria-label]="'Zamjena za ' + d.naziv"
+              (click)="otvoriZamjenu(d, $event)"
+            >
+              {{ d.odsustvo }} <i class="pi pi-arrow-right-arrow-left"></i>
+            </button>
+            <ng-template #oznakaBezZamjene>
+              <span class="chip rs-day-code">{{ d.odsustvo }}</span>
+            </ng-template>
+          </ng-container>
           <!-- Služba pripada danu: jedna pilula u zaglavlju -->
-          <span class="chip rs-day-sl" *ngIf="d.sluzbe.length">Služba {{ d.sluzbe[0].br_sl }}</span>
+          <button
+            *ngIf="d.sluzbe.length"
+            type="button"
+            class="chip rs-day-sl is-swap"
+            [attr.aria-label]="'Zamjena službe ' + d.sluzbe[0].br_sl"
+            (click)="otvoriZamjenu(d, $event)"
+          >
+            Služba {{ d.sluzbe[0].br_sl }} <i class="pi pi-arrow-right-arrow-left"></i>
+          </button>
         </header>
+
+        <!-- Aktivna zamjena tog dana -->
+        <button
+          *ngIf="d.zamjena"
+          type="button"
+          class="rs-day-zamjena"
+          (click)="otvoriZamjenu(d, $event)"
+        >
+          <i class="pi pi-arrow-right-arrow-left"></i>
+          <span>{{ opisZamjene(d) }}</span>
+        </button>
 
         <!-- Slobodan dan: tekst uvijek centriran, neovisno o oznaci -->
         <div class="rs-day-free" *ngIf="!d.sluzbe.length">
@@ -283,6 +314,14 @@
     </div>
   </ng-container>
 </div>
+
+<!-- Zamjena službe (donji panel) -->
+<app-zamjena-panel
+  [(visible)]="zamjenaOtvorena"
+  [dan]="zamjenaDan"
+  [tjedan]="tjedanKartica"
+  (promijenjeno)="zamjenaPromijenjena.emit()"
+/>
 
 <!-- Smjena (donji panel) -->
 <p-drawer

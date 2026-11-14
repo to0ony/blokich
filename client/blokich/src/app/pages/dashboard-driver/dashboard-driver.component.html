@@ -51,6 +51,7 @@
       (tjedanChange)="promijeniTjedan($event)"
       (retry)="ucitaj()"
       (otvoriKalendar)="promijeniView('kalendar')"
+      (zamjenaPromijenjena)="osvjezi()"
     />
 
     <app-kalendar *ngIf="view === 'kalendar'" (natrag)="promijeniView('raspored')" />

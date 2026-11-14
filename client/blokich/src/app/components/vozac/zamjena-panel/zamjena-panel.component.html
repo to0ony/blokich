@@ -1,0 +1,183 @@
+<p-drawer
+  [visible]="visible"
+  (visibleChange)="$event ? null : zatvori()"
+  position="bottom"
+  styleClass="rs-drawer vz-app"
+  [blockScroll]="true"
+  [header]="naslov"
+>
+  <div class="zp">
+    <div class="zp-list" *ngIf="loading">
+      <p-skeleton height="64px" borderRadius="16px" />
+      <p-skeleton height="44px" borderRadius="12px" />
+    </div>
+
+    <ng-container *ngIf="!loading && podaci as p">
+      <!-- Već postoji zamjena za taj dan -->
+      <ng-container *ngIf="p.aktivna as a; else bezZamjene">
+        <div class="zp-card zp-aktivna">
+          <div class="zp-card-label">
+            <i class="pi pi-arrow-right-arrow-left"></i>
+            {{ a.tip === 'ukidanje' ? 'Služba ukinuta' : 'Zamjena napravljena' }}
+          </div>
+          <p class="zp-text" *ngIf="a.tip === 'ukidanje'">
+            Umjesto službe {{ a.prije }} ovaj dan je slobodan.
+          </p>
+          <p class="zp-text" *ngIf="a.tip === 'zamjena' && a.kolega as k">
+            {{ a.moja ? 'Zamijenio si se s' : 'S tobom se zamijenio' }}
+            <strong>{{ k.ime_prezime || k.sluz_broj }}</strong>.
+            Prije: {{ oznakaTekst(a.prije) }}, sad: {{ oznakaTekst(k.oznaka) }}.
+          </p>
+          <p class="zp-sad">Sad: {{ opis(p.moj) }}</p>
+        </div>
+
+        <ng-container *ngIf="a.moja; else tudja">
+          <div class="zp-full" *ngIf="!ponistavam">
+            <p-button
+              label="Poništi zamjenu"
+              icon="pi pi-undo"
+              severity="secondary"
+              [outlined]="true"
+              (onClick)="ponistavam = true"
+            />
+          </div>
+          <div class="zp-confirm" *ngIf="ponistavam">
+            <p>Vratiti dan kako piše u disponentu?</p>
+            <div class="zp-actions">
+              <p-button label="Odustani" severity="secondary" [text]="true" (onClick)="ponistavam = false" />
+              <p-button label="Poništi" severity="danger" [loading]="spremam" (onClick)="ponisti()" />
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #tudja>
+          <p class="zp-hint">Zamjenu je napravio kolega, pa je samo on može poništiti.</p>
+        </ng-template>
+      </ng-container>
+
+      <ng-template #bezZamjene>
+        <!-- Korak 1: moj dan, pretraga kolega, ukidanje -->
+        <ng-container *ngIf="korak === 'trazi'">
+          <div class="zp-card">
+            <div class="zp-card-label">Tvoj dan</div>
+            <div class="zp-dan">{{ opis(p.moj) }}</div>
+            <div class="zp-linije" *ngIf="p.moj.linije.length">Linija {{ p.moj.linije.join(', ') }}</div>
+          </div>
+
+          <p class="zp-hint" *ngIf="p.moj.vrsta === 'odsustvo'">
+            {{ opis(p.moj) }} se ne može mijenjati.
+          </p>
+
+          <ng-container *ngIf="p.moj.vrsta !== 'odsustvo'">
+            <label class="zp-label" for="zp-upit">S kim se mijenjaš?</label>
+            <span class="zp-search">
+              <i class="pi pi-search"></i>
+              <input
+                id="zp-upit"
+                type="search"
+                inputmode="search"
+                autocomplete="off"
+                placeholder="Ime, službeni broj ili broj službe"
+                [ngModel]="upit"
+                (ngModelChange)="naUpit($event)"
+              />
+            </span>
+
+            <div class="zp-list" *ngIf="trazim && !kandidati.length">
+              <p-skeleton *ngFor="let i of [1, 2]" height="64px" borderRadius="16px" />
+            </div>
+
+            <div class="zp-list" *ngIf="kandidati.length">
+              <button
+                *ngFor="let k of kandidati"
+                type="button"
+                class="zp-kandidat"
+                [class.is-zauzet]="k.zauzet"
+                [disabled]="k.zauzet"
+                (click)="odaberi(k)"
+              >
+                <span class="zp-avatar">{{ inicijali(k.ime_prezime) }}</span>
+                <span class="zp-k-main">
+                  <span class="zp-k-name">
+                    <span class="zp-k-ime">{{ k.ime_prezime || 'Nepoznat vozač' }}</span>
+                    <span class="zp-k-num">{{ k.sluz_broj }}</span>
+                  </span>
+                  <span class="zp-k-dan">
+                    {{ opis(k) }}<ng-container *ngIf="k.linije.length"> · {{ k.linije.join(', ') }}</ng-container>
+                  </span>
+                  <span class="zp-k-warn" *ngIf="k.zauzet">Već ima zamjenu taj dan</span>
+                  <span class="zp-k-warn" *ngIf="k.upozorenja.length">
+                    <i class="pi pi-exclamation-triangle"></i> Kratak odmor
+                  </span>
+                </span>
+                <i class="pi pi-angle-right" *ngIf="!k.zauzet"></i>
+              </button>
+            </div>
+
+            <p class="zp-hint" *ngIf="upit.trim() && !trazim && !kandidati.length && !greska">
+              Nitko ne odgovara upitu.
+            </p>
+
+            <button type="button" class="zp-ukini" *ngIf="p.mozeUkinuti" (click)="ukiniKorak()">
+              <i class="pi pi-ban"></i>
+              <span>
+                <strong>Ukini službu</strong>
+                <small>Dan postaje slobodan</small>
+              </span>
+              <i class="pi pi-angle-right"></i>
+            </button>
+          </ng-container>
+        </ng-container>
+
+        <!-- Korak 2: potvrda -->
+        <ng-container *ngIf="korak === 'potvrda'">
+          <ng-container *ngIf="odabran as k; else potvrdaUkidanja">
+            <div class="zp-card">
+              <div class="zp-card-label">Ti</div>
+              <div class="zp-promjena">
+                <span class="staro">{{ opis(p.moj) }}</span>
+                <i class="pi pi-arrow-down"></i>
+                <span class="novo">{{ opis(k) }}</span>
+              </div>
+            </div>
+            <div class="zp-card">
+              <div class="zp-card-label">{{ k.ime_prezime || k.sluz_broj }}</div>
+              <div class="zp-promjena">
+                <span class="staro">{{ opis(k) }}</span>
+                <i class="pi pi-arrow-down"></i>
+                <span class="novo">{{ opis(p.moj) }}</span>
+              </div>
+            </div>
+            <div class="zp-upozorenja" *ngIf="k.upozorenja.length">
+              <div *ngFor="let u of k.upozorenja"><i class="pi pi-exclamation-triangle"></i> {{ u }}</div>
+            </div>
+            <p class="zp-hint">Zamjenu možeš poništiti samo ti, i samo dok traje ovaj ili sljedeći tjedan.</p>
+          </ng-container>
+          <ng-template #potvrdaUkidanja>
+            <div class="zp-card">
+              <div class="zp-card-label">Ukidanje službe</div>
+              <div class="zp-promjena">
+                <span class="staro">{{ opis(p.moj) }}</span>
+                <i class="pi pi-arrow-down"></i>
+                <span class="novo">Slobodan dan</span>
+              </div>
+            </div>
+          </ng-template>
+
+          <div class="zp-actions">
+            <p-button label="Natrag" severity="secondary" [text]="true" (onClick)="natrag()" />
+            <p-button
+              [label]="odabran ? 'Potvrdi zamjenu' : 'Ukini službu'"
+              icon="pi pi-check"
+              [loading]="spremam"
+              (onClick)="potvrdi()"
+            />
+          </div>
+        </ng-container>
+      </ng-template>
+    </ng-container>
+
+    <div class="zp-full" *ngIf="greska">
+      <p-message severity="error" [text]="greska" />
+    </div>
+  </div>
+</p-drawer>
