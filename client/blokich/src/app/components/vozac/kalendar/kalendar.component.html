@@ -34,6 +34,7 @@
   </div>
 
   <div class="kl-grid kl-weekdays">
+    <span class="kl-wk-head" title="Tjedan i ukupni sati">Tj.</span>
     <span
       *ngFor="let d of daniUTjednu"
       [class.is-sat]="d.key === 'sub'"
@@ -45,10 +46,20 @@
   <p-skeleton *ngIf="loading" height="340px" borderRadius="12px" />
 
   <div class="kl-grid" *ngIf="!loading && !greska">
-    <span *ngFor="let p of praznine"></span>
-
+    <ng-container *ngFor="let t of tjedni">
+    <!-- Sa strane: tjedan po redu i ukupni sati tog tjedna -->
+    <div
+      class="kl-wk"
+      [class.is-traje]="t.traje"
+      [attr.title]="t.traje ? 'Tjedan još traje – sati po rasporedu' : null"
+    >
+      <span class="kl-wk-num">{{ t.broj }}.</span>
+      <span class="kl-wk-h" *ngIf="t.sati !== null">{{ hhmm(t.sati) }}</span>
+    </div>
+    <ng-container *ngFor="let c of t.dani">
+    <span *ngIf="!c"></span>
     <button
-      *ngFor="let c of celije"
+      *ngIf="c"
       type="button"
       class="kl-day"
       [class.is-today]="c.danas"
@@ -72,6 +83,18 @@
         <span class="kl-off" *ngIf="c.dan">{{ c.dan.oznaka }}</span>
       </ng-template>
     </button>
+    </ng-container>
+    </ng-container>
+  </div>
+
+  <!-- Zbroj sati u mjesecu -->
+  <div class="kl-sum" *ngIf="!loading && !greska && (satiMjeseca !== null || odvozenoDoDanas !== null)">
+    <span *ngIf="satiMjeseca !== null">
+      Ukupno u mjesecu <strong>{{ hhmm(satiMjeseca) }} h</strong>
+    </span>
+    <span *ngIf="odvozenoDoDanas !== null">
+      Odvoženo do danas <strong>{{ hhmm(odvozenoDoDanas) }} h</strong>
+    </span>
   </div>
 </section>
 

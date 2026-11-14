@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError, forkJoin, of } from 'rxjs';
 import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ButtonModule } from 'primeng/button';
@@ -8,8 +8,9 @@ import { DrawerModule } from 'primeng/drawer';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DriverScheduleService } from '../../../services/driver-schedule.service';
+import { DriverStatsService } from '../../../services/driver-stats.service';
 import { SluzbaDetaljiComponent } from '../sluzba-detalji/sluzba-detalji.component';
-import { DANI, DanKalendara, KalendarOdgovor, opisOdsustva } from '../vozac.model';
+import { DANI, DanKalendara, KalendarOdgovor, opisOdsustva, satiSluzbe } from '../vozac.model';
 import { praznikZa } from './praznici';
 
 dayjs.extend(isoWeek);
@@ -35,6 +36,39 @@ interface Celija {
   praznik: string | null;
 }
 
+/** Red kalendara: ISO tjedan sa 7 mjesta (null = dan drugog mjeseca). */
+interface Tjedan {
+  broj: number;
+  /** Ukupni sati cijelog tjedna iz statistike (i dani susjednog mjeseca). */
+  sati: number | null;
+  /** Tjedan još traje – sati su po rasporedu, ne odvoženi. */
+  traje: boolean;
+  dani: (Celija | null)[];
+}
+
+interface PeriodStatistike {
+  godina: number;
+  period: number;
+  ukupniSati: number;
+  potpun: boolean;
+}
+
+/** "7:45" ili "7,5" -> sati. */
+function sati(v?: string | null): number {
+  const s = (v ?? '').trim();
+  const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (hm) return +hm[1] + +hm[2] / 60;
+  const n = Number(s.replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** 40.5 -> "40:30" */
+export function hhmm(h: number | null | undefined): string {
+  if (h === null || h === undefined) return '–';
+  const min = Math.round(h * 60);
+  return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-kalendar',
   standalone: true,
@@ -51,7 +85,19 @@ interface Celija {
 })
 export class KalendarComponent implements OnInit, OnDestroy {
   private readonly rasporedService = inject(DriverScheduleService);
+  private readonly statsService = inject(DriverStatsService);
   private zahtjev?: Subscription;
+  private statsZahtjev?: Subscription;
+
+  /** Statistika po tjednima i mjesecima ("godina-period"), učita se jednom. */
+  private tjedniStats = new Map<string, PeriodStatistike>();
+  private mjeseciStats = new Map<string, PeriodStatistike>();
+
+  readonly hhmm = hhmm;
+  tjedni: Tjedan[] = [];
+  /** Ukupno sati u mjesecu (statistika) i odvoženo do danas (iz dana). */
+  satiMjeseca: number | null = null;
+  odvozenoDoDanas: number | null = null;
 
   @Output() natrag = new EventEmitter<void>();
 
@@ -72,10 +118,29 @@ export class KalendarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.ucitaj();
+    this.ucitajStatistiku();
   }
 
   ngOnDestroy(): void {
     this.zahtjev?.unsubscribe();
+    this.statsZahtjev?.unsubscribe();
+  }
+
+  /** Sati su dodatak – kalendar radi i kad statistika ne stigne. */
+  private ucitajStatistiku(): void {
+    const dohvati = (tip: 'tjedan' | 'mjesec') =>
+      this.statsService.fetchDriverStats(tip).pipe(catchError(() => of(null)));
+    this.statsZahtjev = forkJoin([dohvati('tjedan'), dohvati('mjesec')]).subscribe(
+      ([t, m]) => {
+        const mapa = (odg: any) =>
+          new Map<string, PeriodStatistike>(
+            (odg?.periodi ?? []).map((p: PeriodStatistike) => [`${p.godina}-${p.period}`, p]),
+          );
+        this.tjedniStats = mapa(t);
+        this.mjeseciStats = mapa(m);
+        if (this.podaci) this.slozi(this.podaci);
+      },
+    );
   }
 
   get naslov(): string {
@@ -153,5 +218,30 @@ export class KalendarComponent implements OnInit, OnDestroy {
         praznik: praznikZa(datum),
       };
     });
+
+    // Redovi po ISO tjednima, s brojem tjedna i satima sa strane.
+    this.tjedni = [];
+    const mjesta: (Celija | null)[] = [...this.praznine.map(() => null), ...this.celije];
+    while (mjesta.length % 7) mjesta.push(null);
+    for (let i = 0; i < mjesta.length; i += 7) {
+      const dani = mjesta.slice(i, i + 7);
+      const prvi = dani.find((c): c is Celija => !!c)!.datum;
+      const s = this.tjedniStats.get(`${prvi.isoWeekYear()}-${prvi.isoWeek()}`);
+      this.tjedni.push({
+        broj: prvi.isoWeek(),
+        sati: s ? s.ukupniSati : null,
+        traje: s ? !s.potpun : false,
+        dani,
+      });
+    }
+
+    const m = this.mjeseciStats.get(`${this.mjesec.year()}-${this.mjesec.month() + 1}`);
+    this.satiMjeseca = m ? m.ukupniSati : null;
+    // Do danas: samo dani koji su prošli (današnja služba još traje).
+    const prosli = this.celije.filter((c) => c.datum.isBefore(danas, 'day'));
+    this.odvozenoDoDanas =
+      this.mjesec.isSame(danas, 'month') && prosli.length
+        ? prosli.reduce((zbroj, c) => zbroj + sati(satiSluzbe(c.dan?.sluzbe ?? []).ukupni_sati), 0)
+        : null;
   }
 }
