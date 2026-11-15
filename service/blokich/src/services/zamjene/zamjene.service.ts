@@ -65,7 +65,7 @@ export function uRasponu(nastup: number, r: RasponNastupa): boolean {
 
 const MAX_KANDIDATA = 30;
 /** Bez upisa (samo filtar) popis je duži – npr. svi slobodni taj dan. */
-const MAX_KANDIDATA_FILTAR = 80;
+const MAX_KANDIDATA_FILTAR = 200;
 const MIN_ODMOR_SATI = 12;
 const NAZIVI_DANA: Record<string, string> = {
   pon: 'pon',

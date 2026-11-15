@@ -35,12 +35,14 @@ const FILTERI: { value: FilterKandidata; label: string; naslov: string }[] = [
   { value: 'linija', label: 'Moja linija', naslov: 'Na tvojoj liniji' },
 ];
 
-/** Brzi rasponi nastupa; vozač ih može doraditi u poljima. Noć ide preko ponoći. */
+/**
+ * Brzi rasponi nastupa; pokrivaju cijeli dan bez preklapanja (granice su
+ * uključive, zato :59). Noć ide preko ponoći. Vozač ih može doraditi u poljima.
+ */
 const PRESETI: { label: string; od: string; do: string }[] = [
-  { label: 'Rano', od: '04:00', do: '07:59' },
-  { label: 'Jutro', od: '08:00', do: '11:59' },
-  { label: 'Popodne', od: '12:00', do: '19:59' },
-  { label: 'Noć', od: '20:00', do: '03:59' },
+  { label: 'Jutro', od: '04:00', do: '11:59' },
+  { label: 'Popodne', od: '12:00', do: '18:59' },
+  { label: 'Noć', od: '19:00', do: '03:59' },
 ];
 
 /** Koliko minuta oko mog nastupa gleda "Oko HH:MM". */
