@@ -314,17 +314,24 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
     this.visibleChange.emit(false);
   }
 
-  /** "Služba 45 · 14:00–22:00" ili "Slobodan dan". */
+  /** "Služba 45 · 14:00–22:00" ili "Slobodan dan (O2)". */
   opis(d: Pick<DanZaZamjenu, 'oznaka' | 'vrsta' | 'od' | 'do'> | null): string {
     if (!d) return '';
-    if (d.vrsta !== 'sluzba') return opisOdsustva(d.oznaka);
+    if (d.vrsta !== 'sluzba') return saKraticom(opisOdsustva(d.oznaka), d.oznaka);
     return d.od ? `Služba ${d.oznaka} · ${d.od}–${d.do}` : `Služba ${d.oznaka}`;
   }
 
-  /** Oznaka iz disponenta kao tekst: "služba 45" / "slobodan dan". */
+  /** Oznaka iz disponenta kao tekst: "služba 45" / "slobodan dan (O2)". */
   oznakaTekst(oznaka: string | null | undefined): string {
-    return /^\d/.test(oznaka ?? '') ? `služba ${oznaka}` : opisOdsustva(oznaka ?? null).toLowerCase();
+    if (/^\d/.test(oznaka ?? '')) return `služba ${oznaka}`;
+    return saKraticom(opisOdsustva(oznaka ?? null).toLowerCase(), oznaka);
   }
+}
+
+/** "Slobodan dan" + "O2" -> "Slobodan dan (O2)"; bez oznake ostaje samo opis. */
+function saKraticom(opis: string, oznaka: string | null | undefined): string {
+  const k = (oznaka ?? '').trim();
+  return k ? `${opis} (${k})` : opis;
 }
 
 /** "06:15" -> 375; ostalo null. */
