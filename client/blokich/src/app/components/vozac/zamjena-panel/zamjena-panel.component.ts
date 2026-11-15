@@ -22,6 +22,7 @@ import {
   FilterKandidata,
   KandidatZamjene,
   KandidatiOdgovor,
+  RasponNastupa,
   TjedanTip,
   inicijali,
   opisOdsustva,
@@ -31,15 +32,24 @@ type Korak = 'trazi' | 'potvrda';
 
 const FILTERI: { value: FilterKandidata; label: string; naslov: string }[] = [
   { value: 'slobodni', label: 'Slobodni', naslov: 'Slobodni taj dan' },
-  { value: 'jutarnja', label: 'Jutarnja', naslov: 'Jutarnje smjene' },
-  { value: 'popodnevna', label: 'Popodnevna', naslov: 'Popodnevne smjene' },
-  { value: 'nocna', label: 'Noćna', naslov: 'Noćne smjene' },
   { value: 'linija', label: 'Moja linija', naslov: 'Na tvojoj liniji' },
 ];
+
+/** Brzi rasponi nastupa; vozač ih može doraditi u poljima. Noć ide preko ponoći. */
+const PRESETI: { label: string; od: string; do: string }[] = [
+  { label: 'Rano', od: '04:00', do: '07:59' },
+  { label: 'Jutro', od: '08:00', do: '11:59' },
+  { label: 'Popodne', od: '12:00', do: '19:59' },
+  { label: 'Noć', od: '20:00', do: '03:59' },
+];
+
+/** Koliko minuta oko mog nastupa gleda "Oko HH:MM". */
+const OKO_MOJE_MIN = 60;
 
 interface Pretraga {
   q: string;
   filter: FilterKandidata | null;
+  raspon: RasponNastupa | null;
   /** Filtar se primijeni odmah, tipkanje čeka da vozač stane. */
   odmah: boolean;
 }
@@ -68,6 +78,9 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
 
   upit = '';
   filter: FilterKandidata | null = null;
+  /** Raspon nastupa "HH:MM"; prazno = bez granice. */
+  nastupOd = '';
+  nastupDo = '';
   trazim = false;
   kandidati: KandidatZamjene[] = [];
   ukupno = 0;
@@ -89,8 +102,8 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
           timer(p.odmah ? 0 : 250).pipe(
             tap(() => (this.trazim = true)),
             switchMap(() =>
-              (p.q.trim() || p.filter) && this.dan
-                ? this.zamjene.kandidati(this.tjedan, this.dan.key, p.q, p.filter).pipe(
+              (p.q.trim() || p.filter || p.raspon) && this.dan
+                ? this.zamjene.kandidati(this.tjedan, this.dan.key, p.q, p.filter, p.raspon).pipe(
                     catchError((e) => {
                       this.greska = poruka(e);
                       return of(null);
@@ -127,6 +140,8 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
     this.greska = null;
     this.upit = '';
     this.filter = null;
+    this.nastupOd = '';
+    this.nastupDo = '';
     this.kandidati = [];
     this.ukupno = 0;
     this.korak = 'trazi';
@@ -157,11 +172,61 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
     });
   }
 
-  /** Naslov iznad rezultata: "Slobodni taj dan" / "Rezultati". */
+  /** Brzi rasponi; "Oko HH:MM" samo kad imam službu s poznatim nastupom. */
+  get preseti() {
+    const moj = this.podaci?.moj;
+    const nastup = moj?.vrsta === 'sluzba' ? uMinute(moj.od) : null;
+    if (nastup === null) return PRESETI;
+    return [
+      {
+        label: `Oko ${moj!.od}`,
+        od: izMinuta(nastup - OKO_MOJE_MIN),
+        do: izMinuta(nastup + OKO_MOJE_MIN),
+      },
+      ...PRESETI,
+    ];
+  }
+
+  get raspon(): RasponNastupa | null {
+    return this.nastupOd || this.nastupDo ? { od: this.nastupOd, do: this.nastupDo } : null;
+  }
+
+  /** Ima li išta osim upisa po čemu se traži (filtar ili raspon). */
+  get imaKriterij(): boolean {
+    return !!this.filter || !!this.raspon;
+  }
+
+  /** Naslov iznad rezultata: "Slobodni taj dan" / "Nastup 08:00–11:59" / "Rezultati". */
   get naslovRezultata(): string {
     const f = FILTERI.find((x) => x.value === this.filter);
-    if (this.upit.trim()) return f ? `Rezultati · ${f.label.toLowerCase()}` : 'Rezultati';
-    return f?.naslov ?? '';
+    const upit = !!this.upit.trim();
+    const dijelovi: string[] = [];
+    if (upit) dijelovi.push('Rezultati');
+    if (f) dijelovi.push(upit ? f.label.toLowerCase() : f.naslov);
+    if (this.raspon) {
+      const t = `nastup ${this.nastupOd || '…'}–${this.nastupDo || '…'}`;
+      dijelovi.push(dijelovi.length ? t : t[0].toUpperCase() + t.slice(1));
+    }
+    return dijelovi.join(' · ');
+  }
+
+  presetUkljucen(p: { od: string; do: string }): boolean {
+    return this.nastupOd === p.od && this.nastupDo === p.do;
+  }
+
+  /** Dodir na uključeni preset ga isključuje. */
+  postaviPreset(p: { od: string; do: string }): void {
+    if (this.presetUkljucen(p)) this.postaviRaspon('', '', true);
+    else this.postaviRaspon(p.od, p.do, true);
+  }
+
+  /** Slobodni nemaju nastup, pa raspon i "Slobodni" ne idu zajedno. */
+  postaviRaspon(od: string, doV: string, odmah: boolean): void {
+    this.nastupOd = od ?? '';
+    this.nastupDo = doV ?? '';
+    if (this.raspon && this.filter === 'slobodni') this.filter = null;
+    this.greska = null;
+    this.trazi(odmah);
   }
 
   naUpit(q: string): void {
@@ -173,16 +238,20 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
   /** Dodir na aktivni filtar ga isključuje. */
   postaviFilter(f: FilterKandidata): void {
     this.filter = this.filter === f ? null : f;
+    if (this.filter === 'slobodni') {
+      this.nastupOd = '';
+      this.nastupDo = '';
+    }
     this.greska = null;
     this.trazi(true);
   }
 
   private trazi(odmah: boolean): void {
-    if (!this.upit.trim() && !this.filter) {
+    if (!this.upit.trim() && !this.imaKriterij) {
       this.kandidati = [];
       this.ukupno = 0;
     }
-    this.upiti.next({ q: this.upit, filter: this.filter, odmah });
+    this.upiti.next({ q: this.upit, filter: this.filter, raspon: this.raspon, odmah });
   }
 
   odaberi(k: KandidatZamjene): void {
@@ -254,6 +323,18 @@ export class ZamjenaPanelComponent implements OnChanges, OnDestroy {
   oznakaTekst(oznaka: string | null | undefined): string {
     return /^\d/.test(oznaka ?? '') ? `služba ${oznaka}` : opisOdsustva(oznaka ?? null).toLowerCase();
   }
+}
+
+/** "06:15" -> 375; ostalo null. */
+function uMinute(v: string | null | undefined): number | null {
+  const m = /^(\d{1,2})[:.](\d{2})/.exec((v ?? '').trim());
+  return m ? +m[1] * 60 + +m[2] : null;
+}
+
+/** Minute (i preko ponoći ili prije nje) -> "HH:MM". */
+function izMinuta(min: number): string {
+  const m = ((min % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
 function poruka(e: unknown): string {

@@ -5,6 +5,7 @@ import { ApiService } from './api.service';
 import {
   DanKey,
   FilterKandidata,
+  RasponNastupa,
   KandidatiOdgovor,
   TjedanTip,
   ZamjenaInfo,
@@ -55,6 +56,7 @@ export class ZamjeneService {
     dan: DanKey,
     q = '',
     filter: FilterKandidata | null = null,
+    raspon: RasponNastupa | null = null,
   ): Observable<KandidatiOdgovor> {
     let params = new HttpParams()
       .set('radnik', this.radnik)
@@ -62,6 +64,8 @@ export class ZamjeneService {
       .set('dan', dan)
       .set('q', q);
     if (filter) params = params.set('filter', filter);
+    if (raspon?.od) params = params.set('nastupOd', raspon.od);
+    if (raspon?.do) params = params.set('nastupDo', raspon.do);
     return this.api.get<KandidatiOdgovor>('zamjene/kandidati', params);
   }
 

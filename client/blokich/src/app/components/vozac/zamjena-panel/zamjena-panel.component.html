@@ -96,6 +96,45 @@
               </button>
             </div>
 
+            <!-- Raspon nastupa: ručno ili preset; od > do ide preko ponoći -->
+            <div class="zp-raspon" role="group" aria-label="Nastup službe">
+              <span class="zp-raspon-label">Nastup</span>
+              <input
+                type="time"
+                aria-label="Nastup od"
+                [ngModel]="nastupOd"
+                (ngModelChange)="postaviRaspon($event, nastupDo, false)"
+              />
+              <span class="zp-raspon-crta">–</span>
+              <input
+                type="time"
+                aria-label="Nastup do"
+                [ngModel]="nastupDo"
+                (ngModelChange)="postaviRaspon(nastupOd, $event, false)"
+              />
+              <button
+                type="button"
+                class="zp-raspon-x"
+                *ngIf="raspon"
+                aria-label="Očisti raspon nastupa"
+                (click)="postaviRaspon('', '', true)"
+              >
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+            <div class="zp-filteri" role="group" aria-label="Brzi rasponi nastupa">
+              <button
+                *ngFor="let r of preseti"
+                type="button"
+                class="zp-filter"
+                [class.is-on]="presetUkljucen(r)"
+                [attr.aria-pressed]="presetUkljucen(r)"
+                (click)="postaviPreset(r)"
+              >
+                {{ r.label }}
+              </button>
+            </div>
+
             <div class="zp-rez-head" *ngIf="naslovRezultata && !(trazim && !kandidati.length)">
               <span>{{ naslovRezultata }}</span>
               <span class="zp-rez-broj" *ngIf="ukupno">{{ ukupno }}</span>
@@ -133,15 +172,15 @@
             </div>
 
             <p class="zp-hint" *ngIf="ukupno > kandidati.length && !trazim">
-              Prikazano {{ kandidati.length }} od {{ ukupno }} – upiši ime ili broj za užu pretragu.
+              Prikazano {{ kandidati.length }} od {{ ukupno }} – suzi raspon nastupa ili upiši ime ili broj.
             </p>
 
-            <p class="zp-hint" *ngIf="(upit.trim() || filter) && !trazim && !kandidati.length && !greska">
+            <p class="zp-hint" *ngIf="(upit.trim() || imaKriterij) && !trazim && !kandidati.length && !greska">
               {{ upit.trim() ? 'Nitko ne odgovara upitu.' : 'Nitko taj dan.' }}
             </p>
 
-            <p class="zp-hint" *ngIf="!upit.trim() && !filter">
-              Upiši ime, službeni broj ili broj službe, ili odaberi filtar.
+            <p class="zp-hint" *ngIf="!upit.trim() && !imaKriterij">
+              Upiši ime, službeni broj ili broj službe, ili odaberi filtar ili nastup.
             </p>
 
             <button type="button" class="zp-ukini" *ngIf="p.mozeUkinuti" (click)="ukiniKorak()">

@@ -107,6 +107,12 @@ export interface ZamjenaInfo {
 /** Dan (moj ili kolegin) u panelu za zamjenu. */
 export type FilterKandidata = 'slobodni' | 'jutarnja' | 'popodnevna' | 'nocna' | 'linija';
 
+/** Raspon nastupa "HH:MM"; prazan kraj = bez granice, od > do = preko ponoći. */
+export interface RasponNastupa {
+  od: string;
+  do: string;
+}
+
 export interface DanZaZamjenu {
   oznaka: string;
   vrsta: 'sluzba' | 'slobodan' | 'odsustvo';

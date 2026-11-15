@@ -239,6 +239,27 @@ describe('ZamjeneService', () => {
       expect(s.kandidati.map((k: any) => k.sluz_broj)).toEqual(['5678']);
     });
 
+    it('raspon nastupa: obje granice, jedna granica i preko ponoći', async () => {
+      const brojevi = async (od: string | null, doV: string | null, q = '') =>
+        (
+          await service.kandidati('1234', 'trenutni', 'sri', q, null, {
+            od,
+            do: doV,
+          })
+        ).kandidati.map((k: any) => k.sluz_broj);
+
+      // 5678: 05:00, 7777: 21:00, 0999 slobodan – nikad u rasponu
+      expect(await brojevi('04:00', '07:59')).toEqual(['5678']);
+      expect(await brojevi('05:00', '05:00')).toEqual(['5678']);
+      expect(await brojevi('10:00', null)).toEqual(['7777']);
+      expect(await brojevi(null, '12:00')).toEqual(['5678']);
+      expect(await brojevi('20:00', '03:59')).toEqual(['7777']);
+      expect(await brojevi('06:00', '20:00')).toEqual([]);
+      expect(await brojevi('04:00', '07:59', 'kovac')).toEqual([]);
+      // prazan raspon = kao da ga nema
+      expect(await brojevi(null, null)).toEqual([]);
+    });
+
     it('slobodan vozač ne vidi slobodne', async () => {
       const r = await service.kandidati(
         '0999',

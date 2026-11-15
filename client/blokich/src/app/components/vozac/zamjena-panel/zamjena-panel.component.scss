@@ -302,6 +302,51 @@
   }
 }
 
+.zp-raspon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--vz-border);
+    border-radius: 12px;
+    background: var(--vz-surface);
+    color: var(--vz-text);
+    font-family: inherit;
+    font-size: 16px; // bez zumiranja na iOS-u
+    outline: none;
+
+    &:focus {
+      border-color: var(--p-primary-500);
+    }
+  }
+}
+
+.zp-raspon-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vz-muted);
+}
+
+.zp-raspon-crta {
+  color: var(--vz-muted);
+}
+
+.zp-raspon-x {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vz-surface-2);
+  color: var(--vz-muted);
+  cursor: pointer;
+}
+
 .zp-rez-head {
   display: flex;
   align-items: center;

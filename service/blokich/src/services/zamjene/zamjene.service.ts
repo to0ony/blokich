@@ -46,6 +46,23 @@ export const FILTERI: FilterKandidata[] = [
 ];
 export type TipZamjene = 'zamjena' | 'ukidanje';
 
+/** Raspon nastupa "HH:MM"; prazan kraj = bez granice, od > do = preko ponoći. */
+export interface RasponNastupa {
+  od: string | null;
+  do: string | null;
+}
+
+export const VRIJEME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
+
+/** Je li nastup (minute) u rasponu, s granicama uključivo. */
+export function uRasponu(nastup: number, r: RasponNastupa): boolean {
+  const od = r.od ? minute(r.od)! : 0;
+  const doM = r.do ? minute(r.do)! : 24 * 60 - 1;
+  return od <= doM
+    ? nastup >= od && nastup <= doM
+    : nastup >= od || nastup <= doM;
+}
+
 const MAX_KANDIDATA = 30;
 /** Bez upisa (samo filtar) popis je duži – npr. svi slobodni taj dan. */
 const MAX_KANDIDATA_FILTAR = 80;
@@ -311,8 +328,10 @@ export class ZamjeneService {
     dan: string,
     q = '',
     filter: FilterKandidata | null = null,
+    raspon: RasponNastupa | null = null,
   ) {
     this.provjeriDan(dan);
+    if (raspon && !raspon.od && !raspon.do) raspon = null;
     const t = this.tjedan(tip);
     const susjedi = [
       t.ponedjeljak.subtract(1, 'week'),
@@ -363,7 +382,7 @@ export class ZamjeneService {
     };
 
     const upit = zaPretragu(q.trim());
-    if (aktivna || moj.vrsta === 'odsustvo' || (!upit && !filter)) {
+    if (aktivna || moj.vrsta === 'odsustvo' || (!upit && !filter && !raspon)) {
       return { ...osnova, kandidati: [], ukupno: 0 };
     }
 
@@ -387,6 +406,11 @@ export class ZamjeneService {
         if (!oznaka || vrsta === 'odsustvo') return false;
         // dva slobodna dana nemaju što zamijeniti
         if (moj.vrsta !== 'sluzba' && vrsta !== 'sluzba') return false;
+        if (raspon) {
+          const nastup = minute(opis.od);
+          if (vrsta !== 'sluzba' || nastup === null) return false;
+          if (!uRasponu(nastup, raspon)) return false;
+        }
         switch (filter) {
           case 'slobodni':
             return vrsta === 'slobodan';

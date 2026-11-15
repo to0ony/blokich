@@ -10,6 +10,7 @@ import {
 import { AdminOnly } from 'src/authentication/decorators/admin-only.decorator';
 import {
   FILTERI,
+  VRIJEME_RE,
   FilterKandidata,
   TjedanTip,
   TipZamjene,
@@ -29,7 +30,7 @@ function tjedanIz(v: unknown): TjedanTip {
 export class ZamjeneController {
   constructor(private readonly zamjene: ZamjeneService) {}
 
-  /** Moj dan i kolege za zamjenu: ?radnik=&tjedan=trenutni|naredni&dan=sri&q=&filter=slobodni|jutarnja|popodnevna|nocna|linija */
+  /** Moj dan i kolege za zamjenu: ?radnik=&tjedan=trenutni|naredni&dan=sri&q=&filter=slobodni|jutarnja|popodnevna|nocna|linija&nastupOd=HH:MM&nastupDo=HH:MM */
   @Get('kandidati')
   kandidati(
     @Query('radnik') radnik: string,
@@ -37,10 +38,17 @@ export class ZamjeneController {
     @Query('dan') dan: string,
     @Query('q') q?: string,
     @Query('filter') filter?: string,
+    @Query('nastupOd') nastupOd?: string,
+    @Query('nastupDo') nastupDo?: string,
   ) {
     if (!radnik) throw new BadRequestException('Nedostaje službeni broj.');
     if (filter && !FILTERI.includes(filter as FilterKandidata)) {
       throw new BadRequestException('Neispravan filtar.');
+    }
+    for (const v of [nastupOd, nastupDo]) {
+      if (v && !VRIJEME_RE.test(v)) {
+        throw new BadRequestException('Neispravno vrijeme nastupa.');
+      }
     }
     return this.zamjene.kandidati(
       radnik,
@@ -48,6 +56,9 @@ export class ZamjeneController {
       dan,
       q ?? '',
       (filter as FilterKandidata) || null,
+      nastupOd || nastupDo
+        ? { od: nastupOd || null, do: nastupDo || null }
+        : null,
     );
   }
 
